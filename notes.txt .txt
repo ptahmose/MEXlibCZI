@@ -1,0 +1,6 @@
+https://www.mathworks.com/support/search.html/answers/377799-compiling-mex-files-without-the-mex-command.html?q=&fq=asset_type_name:answer%20category:matlab/call-mex-files-1&page=1
+
+
+cd 'D:\Dev\GitHub\MEXlibCZI\out\build\x64-Debug (default)\MEXlibCZI'
+
+MEXlibCZI

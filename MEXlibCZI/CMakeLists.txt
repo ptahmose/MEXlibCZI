@@ -1,0 +1,16 @@
+
+
+add_library (MEXlibCZI SHARED
+						mexFunction.cpp)
+
+set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
+
+target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS})
+
+set (CMAKE_LINK_DEF_FILE_FLAG "/DEF:${CMAKE_CURRENT_SOURCE_DIR}/MEXlibCZI.def")
+
+# target_compile_definitions(MEXlibCZI PRIVATE MEXlibCZI_EXPORTS MATLAB_MEX_FILE)
+
+set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mexw64")
+
+SET_TARGET_PROPERTIES(MEXlibCZI PROPERTIES LINK_FLAGS "/export:mexFunction")
