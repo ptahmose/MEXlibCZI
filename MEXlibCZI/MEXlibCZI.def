@@ -1,3 +1,0 @@
-LIBRARY "MEXlibCZI.mexw64”
-
-EXPORTS mexFunction  

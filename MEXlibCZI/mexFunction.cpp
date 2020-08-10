@@ -1,10 +1,31 @@
-#include <mex.h>
+#include "include_matlabheaders.h"
 #include "exportedFunctions.h"
+#include "mexFunctions.h"
 #include <Windows.h>
+#include <memory>
 
-void
-mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+using namespace std;
+
+static bool gIsInitialized = false;
+
+static void OnShutdown()
 {
+
+}
+
+static void Initialize()
+{
+    mexAtExit(OnShutdown);
+}
+
+void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+    if (!gIsInitialized)
+    {
+        Initialize();
+        gIsInitialized = true;
+    }
+
     if (nrhs < 1)
     {
         mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:invalidNumInputs", "One input required.");
@@ -23,12 +44,17 @@ mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     }
 
     /* copy the string data from prhs[0] into a C string input_ buf.    */
-    char* input_buf = mxArrayToUTF8String(prhs[0]);
+
+    unique_ptr<char,void(*)(void*)> upArgStr(mxArrayToUTF8String(prhs[0]), mxFree);
+
+    auto func = CMexFunctions::GetInstance().FindFunc(upArgStr.get());
+
+
 
     //plhs[0] = 
     OutputDebugStringA("HELLO WORLD!");
 
-    mxFree(input_buf);
+
 
     plhs[0] = mxCreateString("THIS IS A STRING");
     return;
