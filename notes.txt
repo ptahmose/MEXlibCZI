@@ -13,4 +13,13 @@ whos
 
 h = MEXlibCZI('Open','G:/Data/TestData/DCV_2.czi')
 
+h = MEXlibCZI('Open','G:/Data/TestData/Koala_w_splines.czi')
+
+
 b = MEXlibCZI('GetSubBlockBitmap',h,0)
+
+image(b)
+
+imagesc(b,[0 4096]);colormap(gray)
+
+b = MEXlibCZI('GetSubBlockBitmap',h,0); image(b)

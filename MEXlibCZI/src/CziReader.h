@@ -61,4 +61,5 @@ private:
       //MImage GetMultiChannelScalingTileCompositeAllChannelsDisabled(WolframLibraryData libData, const libCZI::IntRect& roi, float zoom);
     static mxArray* ConvertToMxArray(libCZI::IBitmapData* bitmapData);
     static void CopyStrided(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);
+    static void CopyTansposeInterleavedToPlanarBgr24(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineStride, size_t planeStride);
 };

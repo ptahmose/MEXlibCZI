@@ -61,22 +61,32 @@ mxArray* CziReader::GetSubBlockImage(int sbBlkNo)
 
 /*static*/mxArray* CziReader::ConvertToMxArray(libCZI::IBitmapData* bitmapData)
 {
-    switch (bitmapData->GetPixelType()) 
+    switch (bitmapData->GetPixelType())
     {
     case PixelType::Gray8:
     {
         auto arr = mxCreateNumericMatrix(bitmapData->GetWidth(), bitmapData->GetHeight(), mxUINT8_CLASS, mxREAL);
-        CziReader::CopyStrided(bitmapData, mxGetData(arr), 1 * (size_t)bitmapData->GetWidth());
+        CziReader::CopyStrided(bitmapData, mxGetData(arr), 1 * static_cast<size_t>(bitmapData->GetWidth()));
         return arr;
     }
-    break;
     case PixelType::Gray16:
     {
         auto arr = mxCreateNumericMatrix(bitmapData->GetWidth(), bitmapData->GetHeight(), mxUINT16_CLASS, mxREAL);
-        CziReader::CopyStrided(bitmapData, mxGetData(arr), 2 * (size_t)bitmapData->GetWidth());
+        CziReader::CopyStrided(bitmapData, mxGetData(arr), 2 * static_cast<size_t>(bitmapData->GetWidth()));
         return arr;
     }
-    break;
+    case PixelType::Bgr24:
+    {
+        mwSize dims[3] = { bitmapData->GetHeight(), bitmapData->GetWidth() ,3 };
+        auto arr = mxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
+        //CziReader::CopyStrided(bitmapData, mxGetData(arr), 3 * static_cast<size_t>(bitmapData->GetWidth()));
+        CziReader::CopyTansposeInterleavedToPlanarBgr24(
+            bitmapData, 
+            mxGetData(arr), 
+            static_cast<size_t>(bitmapData->GetHeight()), 
+            static_cast<size_t>(bitmapData->GetWidth()) * static_cast<size_t>(bitmapData->GetHeight()));
+        return arr;
+    }
     default:
         throw std::invalid_argument("unsupported pixeltype");
     }
@@ -93,5 +103,29 @@ mxArray* CziReader::GetSubBlockImage(int sbBlkNo)
             ((char*)pDst) + y * lineLength,
             ((const char*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride,
             lineLength);
+    }
+}
+
+/*static*/void CziReader::CopyTansposeInterleavedToPlanarBgr24(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineStride, size_t planeStride)
+{
+    auto height = bitmapData->GetHeight();
+    auto width = bitmapData->GetWidth();
+    ScopedBitmapLocker<IBitmapData*> lckBm{ bitmapData };
+    for (decltype(height) y = 0; y < height; ++y)
+    {
+        const uint8_t* ptrSrc = ((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride;
+        uint8_t* ptrDst = ((uint8_t*)pDst) + y;
+//        uint8_t* ptrDst = ((uint8_t*)pDst) + y * lineStride;
+        for (decltype(width) x = 0; x < width; ++x)
+        {
+            uint8_t b = *ptrSrc++;
+            uint8_t g = *ptrSrc++;
+            uint8_t r = *ptrSrc++;
+
+            *ptrDst = r;
+            *(ptrDst + planeStride) = g;
+            *(ptrDst + 2 * planeStride) = b;
+            ptrDst+= lineStride;
+        }
     }
 }
