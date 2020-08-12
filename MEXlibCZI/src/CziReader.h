@@ -4,6 +4,7 @@
 #include <mutex>
 #include <memory>
 #include <array>
+#include "../include_matlabheaders.h"
 //#include "finally.h"
 //#include <WolframLibrary.h>
 //#include <WolframImageLibrary.h>
@@ -29,6 +30,7 @@ public:
     std::string GetInfo();
     std::string GetMetadataXml();
 
+    mxArray* GetSubBlockImage(int sbBlkNo);
     /* MImage GetSubBlockImage(WolframLibraryData libData, int no);
      MImage GetSingleChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom);
      MImage GetSingleChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor);
@@ -57,4 +59,6 @@ private:
 
       //MImage GetMultiChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings);
       //MImage GetMultiChannelScalingTileCompositeAllChannelsDisabled(WolframLibraryData libData, const libCZI::IntRect& roi, float zoom);
+    static mxArray* ConvertToMxArray(libCZI::IBitmapData* bitmapData);
+    static void CopyStrided(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);
 };

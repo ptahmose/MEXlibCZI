@@ -28,7 +28,13 @@ add_library (MEXlibCZI SHARED
 						"src/func_getversion.cpp" 
 						"src/func_open.cpp" 
 						"src/func_getsubblockbitmap.h" 
-						"src/func_getsubblockbitmap.cpp" "src/CziInstanceManager.h" "src/CziInstanceManager.cpp" "src/CziReader.h" "src/CziReader.cpp")
+						"src/func_getsubblockbitmap.cpp"
+						"src/CziInstanceManager.h" 
+						"src/CziInstanceManager.cpp" 
+						"src/CziReader.h" 
+						"src/CziReader.cpp"
+						"src/argsutils.h"
+						"src/argutils.cpp")
 
 set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
 

@@ -8,3 +8,9 @@ MEXlibCZI
 version=MEXlibCZI('GetVersion')
 
 disp(struct2table(version))
+
+whos
+
+h = MEXlibCZI('Open','G:/Data/TestData/DCV_2.czi')
+
+b = MEXlibCZI('GetSubBlockBitmap',h,0)

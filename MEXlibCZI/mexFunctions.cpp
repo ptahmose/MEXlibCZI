@@ -2,12 +2,13 @@
 #include <string.h>
 #include "src/func_getversion.h"
 #include "src/func_open.h"
-
+#include "src/func_getsubblockbitmap.h"
 
 /*static*/const CMexFunctions::MexFuncItem CMexFunctions::funcItems[] =
 {
     {"GetVersion", {MexFunction_GetVersion_CheckArguments,MexFunction_GetVersion_Execute}},
-    {"Open", {MexFunction_Open_CheckArguments,MexFunction_Open_Execute}}
+    {"Open", {MexFunction_Open_CheckArguments,MexFunction_Open_Execute}},
+    {"GetSubBlockBitmap", {MexFunction_GetSubBlockBitmap_CheckArguments,MexFunction_GetSubBlockBitmap_Execute}}
 };
 
 /*static*/CMexFunctions CMexFunctions::instance;
