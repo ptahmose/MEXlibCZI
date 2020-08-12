@@ -34,7 +34,9 @@ add_library (MEXlibCZI SHARED
 						"src/CziReader.h" 
 						"src/CziReader.cpp"
 						"src/argsutils.h"
-						"src/argutils.cpp")
+						"src/argutils.cpp" 
+						"src/func_getmultichannelscalingtilecomposite.h" 
+						"src/func_getmultichannelscalingtilecomposite.cpp")
 
 set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
 
