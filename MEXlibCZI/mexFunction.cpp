@@ -45,17 +45,22 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
     /* copy the string data from prhs[0] into a C string input_ buf.    */
 
-    unique_ptr<char,void(*)(void*)> upArgStr(mxArrayToUTF8String(prhs[0]), mxFree);
+    unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String(prhs[0]), mxFree);
 
     auto func = CMexFunctions::GetInstance().FindFunc(upArgStr.get());
 
-
+    if (func != nullptr)
+    {
+        MatlabArgs args = { nlhs,plhs,nrhs,prhs };
+        func->pfnExecute(&args);
+    }
+    else
+    {
+        plhs[0] = mxCreateString("THIS IS A STRING");
+    }
 
     //plhs[0] = 
     OutputDebugStringA("HELLO WORLD!");
 
-
-
-    plhs[0] = mxCreateString("THIS IS A STRING");
     return;
 }

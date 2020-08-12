@@ -1,4 +1,20 @@
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+ set(mexlibczi_ENABLE_LOGGING 1)
+else()
+ set(mexlibczi_ENABLE_LOGGING 0)
+endif()
 
+set(mexlibczi_LOGLEVEL 1)
+
+set(mexlibczi_VERSION_MAJOR	${MEXCZI_MAJOR})
+set(mexlibczi_VERSION_MINOR	${MEXCZI_MINOR})
+set(mexlibczi_VERSION_PATCH	${MEXCZI_PATCH})
+set(mexlibczi_VERSION_EXT    ${MEXCZI_EXT})
+
+configure_file (
+  "${CMAKE_CURRENT_SOURCE_DIR}/mexlibczi_Config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/mexlibczi_Config.h"
+	ESCAPE_QUOTES @ONLY)
 
 add_library (MEXlibCZI SHARED
 						mexFunction.cpp 
@@ -7,11 +23,18 @@ add_library (MEXlibCZI SHARED
 						"mexFunctions.cpp" 
 						"src/libraryInfo.h" 
 						"src/libraryInfo.cpp" 
-						"src/inc_libczi.h")
+						"src/inc_libczi.h"
+						"src/func_getversion.h" 
+						"src/func_getversion.cpp" 
+						"src/func_open.cpp" 
+						"src/func_getsubblockbitmap.h" 
+						"src/func_getsubblockbitmap.cpp" "src/CziInstanceManager.h" "src/CziInstanceManager.cpp" "src/CziReader.h" "src/CziReader.cpp")
 
 set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
 
 target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS})
+
+target_include_directories(MEXlibCZI PRIVATE  ${CMAKE_CURRENT_BINARY_DIR})  # this is necessary so that we can find "wllczi_Config.h" which we created above
 
 #target_link_directories(MEXlibCZI PRIVATE mx mex mat)
 #target_link_libraries(MEXlibCZI PRIVATE mx mex mat)

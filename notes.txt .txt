@@ -4,3 +4,7 @@ https://www.mathworks.com/support/search.html/answers/377799-compiling-mex-files
 cd 'D:\Dev\GitHub\MEXlibCZI\out\build\x64-Debug (default)\MEXlibCZI'
 
 MEXlibCZI
+
+version=MEXlibCZI('GetVersion')
+
+disp(struct2table(version))

@@ -1,7 +1,7 @@
 #include <sstream>
 #include "libraryinfo.h"
 #include "inc_libCzi.h"
-//#include "wllczi_Config.h"
+#include <mexlibczi_Config.h>
 
 using namespace std;
 
@@ -41,18 +41,18 @@ using namespace libCZI;
 
 /*static*/bool CLibraryInfo::GetValue(const std::string& key, std::string& value)
 {
-    //if (key == CLibraryInfo::KeyVersionString)
-    //{
-    //    stringstream ss;
-    //    ss << WLLCZI_VERSION_MAJOR << "." << WLLCZI_VERSION_MINOR << "." << WLLCZI_VERSION_PATCH;
-    //    if (strlen(WLLCZI_VERSION_EXT) > 0)
-    //    {
-    //        ss << "-" << WLLCZI_VERSION_EXT;
-    //    }
+    if (key == CLibraryInfo::KeyVersionString)
+    {
+        stringstream ss;
+        ss << MEXLIBCZI_VERSION_MAJOR << "." << MEXLIBCZI_VERSION_MINOR << "." << MEXLIBCZI_VERSION_PATCH;
+        if (strlen(MEXLIBCZI_VERSION_EXT) > 0)
+        {
+            ss << "-" << MEXLIBCZI_VERSION_EXT;
+        }
 
-    //    value = ss.str();
-    //    return true;
-    //}
+        value = ss.str();
+        return true;
+    }
 
     if (key == CLibraryInfo::KeyLibraryName)
     {

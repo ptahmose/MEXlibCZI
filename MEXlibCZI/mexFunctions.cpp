@@ -1,20 +1,13 @@
 #include "mexFunctions.h"
 #include <string.h>
-#include "src/libraryInfo.h"
+#include "src/func_getversion.h"
+#include "src/func_open.h"
 
-static void MexFunction_GetVersion_CheckArguments(MatlabArgs* args)
-{
-
-}
-
-static void MexFunction_GetVersion_Execute(MatlabArgs* args)
-{
-
-}
 
 /*static*/const CMexFunctions::MexFuncItem CMexFunctions::funcItems[] =
 {
-    {"GetVersion", {MexFunction_GetVersion_CheckArguments,MexFunction_GetVersion_Execute}}
+    {"GetVersion", {MexFunction_GetVersion_CheckArguments,MexFunction_GetVersion_Execute}},
+    {"Open", {MexFunction_Open_CheckArguments,MexFunction_Open_Execute}}
 };
 
 /*static*/CMexFunctions CMexFunctions::instance;
