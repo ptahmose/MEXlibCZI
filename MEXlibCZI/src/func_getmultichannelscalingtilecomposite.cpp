@@ -5,6 +5,7 @@
 #include "argsutils.h"
 
 using namespace std;
+using namespace libCZI;
 
 void MexFunction_GetMultiChannelScalingTileComposite_CheckArguments(MatlabArgs* args)
 {
@@ -14,21 +15,62 @@ void MexFunction_GetMultiChannelScalingTileComposite_CheckArguments(MatlabArgs* 
     // (3)  plane-coordinate
     // (4)  zoom (number)
     // (5)  (optional) display-settings
-    if (args->nrhs<4)
+    if (args->nrhs < 5)
     {
         throw invalid_argument("not enough arguments");
     }
 
-    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[1],4))
+    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[1], 1))
     {
         throw invalid_argument("2nd argument must be a ROI");
     }
 
+    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[2], 4))
+    {
+        throw invalid_argument("2nd argument must be a ROI");
+    }
 
+    if (!CArgsUtils::TryGetDimCoordinate(args->prhs[3], nullptr))
+    {
+        throw invalid_argument("3nd argument must be a string (specifying a coordinate)");
+    }
+
+    if (!CArgsUtils::TryGetSingle(args->prhs[4], nullptr))
+    {
+        throw invalid_argument("4th argument must be a number");
+    }
 }
 
 void MexFunction_GetMultiChannelScalingTileComposite_Execute(MatlabArgs* args)
 {
+    std::shared_ptr<CziReader> reader;
 
+    int id;
+    bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
+    try
+    {
+        reader = CziReaderManager::Instance.GetInstance(id);
+    }
+    catch (out_of_range&)
+    {
+        /*ErrHelper::ReportError_CziReaderInstanceNotExisting(libData, id);
+        return LIBRARY_FUNCTION_ERROR;*/
+    }
 
+    IntRect rect;
+    b = CArgsUtils::TryGetIntRect(args->prhs[2], &rect);
+
+    CDimCoordinate coord;
+    b = CArgsUtils::TryGetDimCoordinate(args->prhs[3], &coord);
+
+    float zoom;
+    b = CArgsUtils::TryGetSingle(args->prhs[4], &zoom);
+
+    auto out = reader->GetMultiChannelScalingTileComposite(
+        rect,
+        &coord,
+        (float)zoom,
+        (const char*)nullptr/*displaySettingsString*/);
+
+    args->plhs[0] = out;
 }

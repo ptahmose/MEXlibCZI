@@ -22,7 +22,7 @@ set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules" ${CMAKE_MODULE_PATH})
 project ("MEXCZI")
 
 # include RapidJSON -> https://www.jibbow.com/posts/rapidjson-cmake/
-#include("${CMAKE_SOURCE_DIR}/modules/rapidJSON.cmake")
+include("${CMAKE_SOURCE_DIR}/modules/rapidJSON.cmake")
 
 #message(STATUS ${CMAKE_MODULE_PATH} )
 

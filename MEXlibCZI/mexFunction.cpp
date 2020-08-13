@@ -52,6 +52,17 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     if (func != nullptr)
     {
         MatlabArgs args = { nlhs,plhs,nrhs,prhs };
+
+        try
+        {
+            func->pfnCheckArguments(&args);
+        }
+        catch (exception& excp)
+        {
+            mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:invalidArguments", excp.what());
+            return;
+        }
+
         func->pfnExecute(&args);
     }
     else

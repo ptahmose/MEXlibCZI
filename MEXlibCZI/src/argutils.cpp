@@ -222,6 +222,114 @@ using namespace libCZI;
     return true;
 }
 
+/*static*/bool CArgsUtils::TryGetSingle(const mxArray* pArr, float* ptr)
+{
+    return CArgsUtils::TryGetSingle(pArr, 0, ptr);
+}
+
+/*static*/bool CArgsUtils::TryGetSingle(const mxArray* pArr, size_t index, float* ptr)
+{
+    size_t numOfElements = mxGetNumberOfElements(pArr);
+    if (numOfElements <= index)
+    {
+        return false;
+    }
+
+    const mxClassID id = mxGetClassID(pArr);
+    float rv;
+    switch (id)
+    {
+    case mxDOUBLE_CLASS:
+    {
+        auto* const pDbl = mxGetDoubles(pArr);
+        const double v = *(pDbl + index);
+        rv = static_cast<float>(v);
+    }
+    break;
+    case mxSINGLE_CLASS:
+    {
+        auto* const pFlt = mxGetSingles(pArr);
+        const float v = *(pFlt + index);
+        rv = v;
+    }
+    break;
+    case mxINT8_CLASS:
+    {
+        auto* const pi8 = mxGetInt8s(pArr);
+        rv = *(pi8 + index);  // NOLINT(bugprone-signed-char-misuse)
+    }
+    break;
+    case mxUINT8_CLASS:
+    {
+        auto* const pui8 = mxGetUint8s(pArr);
+        rv = *(pui8 + index);
+    }
+    break;
+    case mxINT16_CLASS:
+    {
+        auto* const pi16 = mxGetInt16s(pArr);
+        rv = *(pi16 + index);
+    }
+    break;
+    case mxUINT16_CLASS:
+    {
+        auto* const pui16 = mxGetUint16s(pArr);
+        rv = *(pui16 + index);
+    }
+    break;
+    case mxINT32_CLASS:
+    {
+        const auto pi32 = mxGetInt32s(pArr);
+        rv = *(pi32 + index);
+    }
+    break;
+    case mxUINT32_CLASS:
+    {
+        const auto pui32 = mxGetUint32s(pArr);
+        if (*pui32 > static_cast<mxUint32>(numeric_limits<int>::max()))
+        {
+            return false;
+        }
+
+        rv = *pui32;
+    }
+    break;
+    case mxINT64_CLASS:
+    {
+        auto* pi64 = mxGetInt64s(pArr);
+        mxInt64 v = *(pi64 + index);
+        if (v > static_cast<mxInt64>(numeric_limits<int>::max()) || v < static_cast<mxInt64>(numeric_limits<int>::min()))
+        {
+            return false;
+        }
+
+        rv = static_cast<float>(v);
+    }
+    break;
+    case mxUINT64_CLASS:
+    {
+        const auto pui64 = mxGetUint64s(pArr);
+        mxUint64 v = *(pui64 + index);
+        if (v > (mxUint64)(numeric_limits<int>::max()))
+        {
+            return false;
+        }
+
+        rv = static_cast<float>(v);
+    }
+    break;
+    default:
+        return false;
+    }
+
+    if (ptr != nullptr)
+    {
+        *ptr = rv;
+    }
+
+    return true;
+}
+
 /*static*/bool CArgsUtils::IsNumericArrayOfMinSize(const mxArray* pArr, size_t minElementCount)
 {
     const mxClassID id = mxGetClassID(pArr);
@@ -263,6 +371,37 @@ using namespace libCZI;
     if (rect != nullptr)
     {
         *rect = r;
+    }
+
+    return true;
+}
+
+/*static*/bool CArgsUtils::TryGetDimCoordinate(const mxArray* pArr, libCZI::CDimCoordinate* coord)
+{
+    if (!mxIsChar(pArr))
+    {
+        return false;
+    }
+
+    unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String(pArr), mxFree);
+
+    CDimCoordinate planeCoordinate;
+    try
+    {
+        planeCoordinate = CDimCoordinate::Parse(upArgStr.get());
+    }
+    catch (libCZI::LibCZIStringParseException& libExcp)
+    {
+        return false;
+    }
+    catch (exception& excp)
+    {
+        return false;
+    }
+
+    if (coord != nullptr)
+    {
+        *coord = planeCoordinate;
     }
 
     return true;

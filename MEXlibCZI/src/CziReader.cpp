@@ -3,6 +3,8 @@
 #include <locale>
 #include <codecvt>
 
+#include "CziUtilities.h"
+
 using namespace std;
 using namespace libCZI;
 
@@ -57,6 +59,130 @@ mxArray* CziReader::GetSubBlockImage(int sbBlkNo)
 
     auto bm = sbBlk->CreateBitmap();
     return ConvertToMxArray(bm.get());
+}
+
+mxArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson)
+{
+    if (displaySettingsJson == nullptr || *displaySettingsJson == '\0')
+    {
+        return CziReader::GetMultiChannelScalingTileComposite(roi, planeCoordinate, zoom, this->GetDisplaySettingsFromCzi().get());
+    }
+
+    ChannelDisplaySettingsInfo dsinfo = CziUtilities::ParseDisplaySettings(displaySettingsJson);
+
+    if (dsinfo.isToBeMerged == true)
+    {
+        const auto displaySettingsFromCzi = this->GetDisplaySettingsFromCzi();
+        const auto combinedDisplaySettings = CziUtilities::CombineDisplaySettings(displaySettingsFromCzi.get(), dsinfo.displaySettings);
+
+        return CziReader::GetMultiChannelScalingTileComposite(roi, planeCoordinate, zoom, combinedDisplaySettings.get());
+    }
+    else
+    {
+        const auto resultingDisplaySettings = CziUtilities::ConvertToDisplaySettings(dsinfo.displaySettings);
+
+        return CziReader::GetMultiChannelScalingTileComposite(roi, planeCoordinate, zoom, resultingDisplaySettings.get());
+    }
+}
+
+mxArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings)
+{
+    std::vector<int> activeChannels = libCZI::CDisplaySettingsHelper::GetActiveChannels(displaySettings);
+
+    // we need to deal with the pathological case that all channels are disabled
+    if (activeChannels.empty())
+    {
+        return CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(roi, zoom);
+    }
+
+    std::vector<shared_ptr<IBitmapData>> channelBitmaps;
+    IntSize sizeResult;
+    try
+    {
+        channelBitmaps = CziUtilities::GetBitmapsFromSpecifiedChannels(
+            this->reader.get(),
+            planeCoordinate,
+            roi,
+            zoom,
+            [&](int idx, int& chNo)->bool
+            {
+                if (idx < (int)activeChannels.size())
+                {
+                    chNo = activeChannels.at(idx);
+                    return true;
+                }
+
+                return false;
+            },
+            &sizeResult);
+    }
+    catch (LibCZIInvalidPlaneCoordinateException& /*invalidCoordExcp*/)
+    {
+        return nullptr;
+    }
+
+    libCZI::CDisplaySettingsHelper dsplHlp;
+    dsplHlp.Initialize(displaySettings, [&](int chIndx)->libCZI::PixelType
+        {
+            const auto idx = std::distance(activeChannels.cbegin(), std::find(activeChannels.cbegin(), activeChannels.cend(), chIndx));
+            return channelBitmaps[idx]->GetPixelType();
+        });
+
+    std::vector<IBitmapData*> vecBm; vecBm.reserve(channelBitmaps.size());
+    for (int i = 0; i < channelBitmaps.size(); ++i)
+    {
+        vecBm.emplace_back(channelBitmaps[i].get());
+    }
+
+    auto bitmap = Compositors::ComposeMultiChannel_Bgr24(
+        (int)channelBitmaps.size(),
+        &vecBm[0],
+        dsplHlp.GetChannelInfosArray());
+
+    mwSize dims[3] = { bitmap->GetHeight(), bitmap->GetWidth(), 3 };
+    auto* arr = mxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
+    CziReader::CopyTransposeInterleavedToPlanarBgr24(
+        bitmap.get(),
+        mxGetData(arr),
+        static_cast<size_t>(bitmap->GetHeight()),
+        static_cast<size_t>(bitmap->GetWidth()) * static_cast<size_t>(bitmap->GetHeight()));
+    return arr;
+
+    //auto mimagedeleter = std::bind(
+    //    [](WolframImageLibrary_Functions imgLibFuncs, MImage mimg)->void {imgLibFuncs->MImage_free(mimg); },
+    //    libData->imageLibraryFunctions, std::placeholders::_1);
+    //std::unique_ptr<IMAGEOBJ_ENTRY, decltype(mimagedeleter)> spMimg(
+    //    MImageHelper::CreateMImage(libData->imageLibraryFunctions, sizeResult, libCZI::PixelType::Bgr24),
+    //    mimagedeleter);
+
+    //CMImageWrapper mimgWrapper(libData->imageLibraryFunctions, spMimg.get());
+    //libCZI::Compositors::ComposeMultiChannel_Bgr24(
+    //    &mimgWrapper,
+    //    (int)channelBitmaps.size(),
+    //    &vecBm[0],
+    //    dsplHlp.GetChannelInfosArray());
+
+    //MImageHelper::SwapRgb(&mimgWrapper);
+
+    //return spMimg.release();
+}
+
+mxArray* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom)
+{
+    auto accessor = reader->CreateSingleChannelScalingTileAccessor();
+    const auto sizeResult = accessor->CalcSize(roi, zoom);
+    RgbFloatColor color{ 0,0,0 };
+
+    mwSize dims[3] = { sizeResult.h, sizeResult.w, 3 };
+    auto* arr = mxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
+
+    return arr;
+}
+
+std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
+{
+    this->InitializeInfoFromCzi();
+    return this->displaySettingsFromCzi;
 }
 
 /*static*/mxArray* CziReader::ConvertToMxArray(libCZI::IBitmapData* bitmapData)

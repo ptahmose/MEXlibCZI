@@ -36,11 +36,15 @@ add_library (MEXlibCZI SHARED
 						"src/argsutils.h"
 						"src/argutils.cpp" 
 						"src/func_getmultichannelscalingtilecomposite.h" 
-						"src/func_getmultichannelscalingtilecomposite.cpp")
+						"src/func_getmultichannelscalingtilecomposite.cpp"
+						"src/CziUtilities.h" 
+						"src/CziUtilities.cpp"
+						"src/utils.h"
+						"src/utils.cpp")
 
 set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
 
-target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS})
+target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
 
 target_include_directories(MEXlibCZI PRIVATE  ${CMAKE_CURRENT_BINARY_DIR})  # this is necessary so that we can find "wllczi_Config.h" which we created above
 
