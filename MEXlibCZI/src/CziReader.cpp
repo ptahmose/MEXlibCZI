@@ -114,6 +114,24 @@ mxArray* CziReader::GetInfo()
     return s;
 }
 
+std::string CziReader::GetMetadataXml()
+{
+    auto mds = this->reader->ReadMetadataSegment();
+    auto m = mds->CreateMetaFromMetadataSegment();
+    if (!m->IsXmlValid())
+    {
+        throw runtime_error("Metadata-XML found to be invalid.");
+    }
+
+    return m->GetXml();
+}
+
+mxArray* CziReader::GetMetadataXmlAsMxArray()
+{
+    auto s = mxCreateString(this->GetMetadataXml().c_str());
+    return s;
+}
+
 mxArray* CziReader::GetSubBlockImage(int sbBlkNo)
 {
     auto sbBlk = this->reader->ReadSubBlock(sbBlkNo);
@@ -246,6 +264,54 @@ mxArray* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(const
     return arr;
 }
 
+mxArray* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom)
+{
+    const RgbFloatColor backgndCol{ 0,0,0 };
+    return this->GetSingleChannelScalingTileComposite(roi, planeCoordinate, zoom, backgndCol);
+}
+
+mxArray* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor)
+{
+    auto scsta = this->reader->CreateSingleChannelScalingTileAccessor();
+    libCZI::IntSize size = scsta->CalcSize(roi, zoom);
+
+    int c = (numeric_limits<int>::min)();
+    planeCoordinate->TryGetPosition(libCZI::DimensionIndex::C, &c);
+
+    // the idea is: for the cornerstone-case where we do not have a C-index, the call to "TryGetSubBlockInfoOfArbitrarySubBlockInChannel"
+    // will ignore the specified index _if_ there are no C-indices at all
+    libCZI::PixelType pixeltype = libCZI::Utils::TryDeterminePixelTypeForChannel(this->reader.get(), c);
+
+    // however - if we get here with an invalid pixeltype, then we need to give up
+    if (pixeltype == PixelType::Invalid)
+    {
+        throw invalid_argument("Unable to determine pixeltype.");
+    }
+
+    ISingleChannelScalingTileAccessor::Options accessorGetOptions;
+    accessorGetOptions.Clear();
+    accessorGetOptions.backGroundColor = backgroundColor;
+    auto bitmap = scsta->Get(pixeltype, roi, planeCoordinate, zoom, &accessorGetOptions);
+
+    auto mxarray = ConvertToMxArray(bitmap.get());
+    return mxarray;
+    //auto mimagedeleter = std::bind(
+    //    [](WolframImageLibrary_Functions imgLibFuncs, MImage mimg)->void {imgLibFuncs->MImage_free(mimg); },
+    //    libData->imageLibraryFunctions, std::placeholders::_1);
+    //std::unique_ptr<IMAGEOBJ_ENTRY, decltype(mimagedeleter)> spMimg(
+    //    MImageHelper::CreateMImage(libData->imageLibraryFunctions, size, pixeltype),
+    //    mimagedeleter);
+
+    //CMImageWrapper mimgWrapper(libData->imageLibraryFunctions, spMimg.get());
+    //ISingleChannelScalingTileAccessor::Options accessorGetOptions;
+    //accessorGetOptions.Clear();
+    //accessorGetOptions.backGroundColor = backgroundColor;
+    //scsta->Get(&mimgWrapper, roi, planeCoordinate, zoom, &accessorGetOptions);
+    //MImageHelper::SwapRgb(&mimgWrapper);
+
+    //return spMimg.release();
+}
+
 std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 {
     this->InitializeInfoFromCzi();
@@ -265,7 +331,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     case PixelType::Gray16:
     {
         auto* arr = mxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxUINT16_CLASS, mxREAL);
-        CziReader::CopyTransposeGray8(bitmapData, mxGetData(arr), 2 * static_cast<size_t>(bitmapData->GetHeight()));
+        CziReader::CopyTransposeGray16(bitmapData, mxGetData(arr), 2 * static_cast<size_t>(bitmapData->GetHeight()));
         return arr;
     }
     case PixelType::Bgr24:
@@ -326,11 +392,11 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     for (decltype(height) y = 0; y < height; ++y)
     {
         const uint16_t* ptrSrc = (const uint16_t*)(((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride);
-        uint16_t* ptrDst = (uint16_t*)(((uint8_t*)pDst) + y);
+        uint16_t* ptrDst = (uint16_t*)(((uint8_t*)pDst) + y * 2);
         for (decltype(width) x = 0; x < width; ++x)
         {
             *ptrDst = *ptrSrc++;
-            ptrDst += lineLength;
+            ptrDst = (uint16_t*)(((uint8_t*)ptrDst) + lineLength);
         }
     }
 }
@@ -343,11 +409,11 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     for (decltype(height) y = 0; y < height; ++y)
     {
         const float* ptrSrc = (const float*)(((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride);
-        float* ptrDst = (float*)(((uint8_t*)pDst) + y);
+        float* ptrDst = (float*)(((uint8_t*)pDst) + y*4);
         for (decltype(width) x = 0; x < width; ++x)
         {
             *ptrDst = *ptrSrc++;
-            ptrDst += lineLength;
+            ptrDst = (float*)(((uint8_t*)ptrDst) + lineLength);;
         }
     }
 }
@@ -383,7 +449,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     for (decltype(height) y = 0; y < height; ++y)
     {
         const uint16_t* ptrSrc = (const uint16_t*)(((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride);
-        uint16_t* ptrDst = (uint16_t*)(((uint8_t*)pDst) + y);
+        uint16_t* ptrDst = (uint16_t*)(((uint8_t*)pDst) + y*2);
         for (decltype(width) x = 0; x < width; ++x)
         {
             const uint16_t b = *ptrSrc++;
@@ -391,9 +457,9 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
             const uint16_t r = *ptrSrc++;
 
             *ptrDst = r;
-            *(ptrDst + planeStride) = g;
-            *(ptrDst + 2 * planeStride) = b;
-            ptrDst += lineStride;
+            *((uint16_t*)(((uint8_t*)ptrDst) + planeStride)) = g;
+            *((uint16_t*)(((uint8_t*)ptrDst) + 2 * planeStride)) = b;
+            ptrDst = (uint16_t*)(((uint8_t*)ptrDst) + lineStride);
         }
     }
 }

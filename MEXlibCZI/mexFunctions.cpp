@@ -5,7 +5,9 @@
 #include "src/func_getsubblockbitmap.h"
 #include "src/func_getmultichannelscalingtilecomposite.h"
 #include "src/func_getinfo.h"
+#include "src/func_getmetadataxml.h"
 #include "src/func_getscaling.h"
+#include "src/func_getsinglechannelscalingtilecomposite.h"
 
 /*static*/const CMexFunctions::MexFuncItem CMexFunctions::funcItems[] =
 {
@@ -14,7 +16,9 @@
     {"GetSubBlockBitmap", {MexFunction_GetSubBlockBitmap_CheckArguments,MexFunction_GetSubBlockBitmap_Execute}},
     {"GetMultiChannelScalingTileComposite",{MexFunction_GetMultiChannelScalingTileComposite_CheckArguments,MexFunction_GetMultiChannelScalingTileComposite_Execute}},
     {"GetInfo",{MexFunction_GetInfo_CheckArguments,MexFunction_GetInfo_Execute}},
-    {"GetScaling",{MexFunction_GetScaling_CheckArguments,MexFunction_GetScaling_Execute}}
+    {"GetScaling",{MexFunction_GetScaling_CheckArguments,MexFunction_GetScaling_Execute}},
+    {"GetMetadataXml",{MexFunction_GetMetadataXml_CheckArguments,MexFunction_GetMetadataXml_Execute}},
+    {"GetSingleChannelScalingTileComposite",{MexFunction_GetSingleChannelScalingTileComposite_CheckArguments,MexFunction_GetSingleChannelScalingTileComposite_Execute}}
 };
 
 /*static*/CMexFunctions CMexFunctions::instance;
@@ -26,11 +30,11 @@
 
 const CMexFunc* CMexFunctions::FindFunc(const char* functionName) const
 {
-    for (int i = 0; i < sizeof(funcItems) / sizeof(funcItems[0]); ++i)
+    for (const auto& funcItem : CMexFunctions::funcItems)
     {
-        if (strcmp(functionName, CMexFunctions::funcItems[i].funcname) == 0)
+        if (strcmp(functionName, funcItem.funcname) == 0)
         {
-            return &CMexFunctions::funcItems[i].func;
+            return &funcItem.func;
         }
     }
 

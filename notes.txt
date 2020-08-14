@@ -33,3 +33,5 @@ h = MEXlibCZI('Open','G:/Data/TestData/Example_TMA1_Zeb1_SPRR2_Ck19_S100-1-1-1-1
 b1=MEXlibCZI('GetMultiChannelScalingTileComposite',h,[0 0 139758 103021],'',0.005);
 
 info=MEXlibCZI('GetInfo',h)
+
+b2=MEXlibCZI('GetSingleChannelScalingTileComposite',h,[0 0 139758 103021],'C1',0.01);

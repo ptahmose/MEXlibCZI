@@ -17,7 +17,7 @@ configure_file (
 	ESCAPE_QUOTES @ONLY)
 
 add_library (MEXlibCZI SHARED
-						mexFunction.cpp 
+						"mexFunction.cpp"
 						"mexFunctions.h" 
 						"include_matlabheaders.h" 
 						"mexFunctions.cpp" 
@@ -40,7 +40,15 @@ add_library (MEXlibCZI SHARED
 						"src/CziUtilities.h" 
 						"src/CziUtilities.cpp"
 						"src/utils.h"
-						"src/utils.cpp" "src/func_getinfo.h" "src/func_getinfo.cpp" "src/func_getscaling.h" "src/func_getscaling.cpp")
+						"src/utils.cpp" 
+						"src/func_getinfo.h" 
+						"src/func_getinfo.cpp"
+						"src/func_getscaling.h" 
+						"src/func_getscaling.cpp" 
+						"src/func_getmetadataxml.cpp"
+						"src/func_getmetadataxml.h" 
+						"src/func_getsinglechannelscalingtilecomposite.cpp" 
+						"src/func_getsinglechannelscalingtilecomposite.h")
 
 set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
 
