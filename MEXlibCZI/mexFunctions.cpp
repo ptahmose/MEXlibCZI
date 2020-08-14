@@ -1,5 +1,5 @@
 #include "mexFunctions.h"
-#include <string.h>
+#include <string>
 #include "src/func_getversion.h"
 #include "src/func_open.h"
 #include "src/func_getsubblockbitmap.h"
