@@ -1,6 +1,13 @@
 #include "func_getversion.h"
+
+#include <stdexcept>
+
 #include "libraryInfo.h"
 #include <vector>
+
+
+#include "argsutils.h"
+#include "CziInstanceManager.h"
 
 using namespace std;
 
@@ -11,21 +18,30 @@ void MexFunction_GetVersion_CheckArguments(MatlabArgs* args)
 
 void MexFunction_GetVersion_Execute(MatlabArgs* args)
 {
-    static const char* fieldNames[] = { "Type", "Version" };
+    std::shared_ptr<CziReader> reader;
 
-    vector<string> keys;
-    CLibraryInfo::EnumKeys([&](const char* keyName)->bool {keys.push_back(keyName); return true; });
-    mwSize dims[2] = { 1, keys.size() };
-    auto s = mxCreateStructArray(2, dims, 2, fieldNames);
-
-    for (int i = 0; i < keys.size(); ++i)
+    int id;
+    bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
+    try
     {
-        mxSetFieldByNumber(s, i, 0, mxCreateString(keys[i].c_str()));
-
-        string value;
-        CLibraryInfo::GetValue(keys[i], value);
-        mxSetFieldByNumber(s, i, 1, mxCreateString(value.c_str()));
+        reader = CziReaderManager::Instance.GetInstance(id);
+    }
+    catch (out_of_range&)
+    {
+        /*ErrHelper::ReportError_CziReaderInstanceNotExisting(libData, id);
+        return LIBRARY_FUNCTION_ERROR;*/
     }
 
-    args->plhs[0] = s;
+    try
+    {
+        //WolframLibLinkUtils::ThrowIfValueIsNotInt32OrNegative(blockNo);
+        auto out = reader->GetInfo();
+        //MArgument_setMImage(res, out);
+        args->plhs[0] = out;
+    }
+    catch (exception& excp)
+    {
+        //ErrHelper::ReportError_CziReaderGetSubBlockBitmapException(libData, excp);
+        //return LIBRARY_FUNCTION_ERROR;
+    }
 }

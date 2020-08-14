@@ -47,6 +47,38 @@ void CziReader::InitializeInfoFromCzi()
         });
 }
 
+mxArray* CziReader::GetInfo()
+{
+    auto statistics = this->reader->GetStatistics();
+
+    static const char* fieldNames[] = { "subblockcount", "boundingBox", "boundingBoxLayer0", "dimBounds" };
+    //static const char* fieldNames[] = { "key", "value" };
+    mwSize dims[2] = { 1, 1 };
+    auto s = mxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
+
+    auto no = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+    *((int*)mxGetData(no)) = statistics.subBlockCount;
+    mxSetFieldByNumber(s, 0, 0, no);
+
+    no = mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
+    *((int*)mxGetData(no)) = statistics.boundingBox.x;
+    *(1 + (int*)mxGetData(no)) = statistics.boundingBox.y;
+    *(2 + (int*)mxGetData(no)) = statistics.boundingBox.w;
+    *(3 + (int*)mxGetData(no)) = statistics.boundingBox.h;
+    mxSetFieldByNumber(s, 0, 1, no);
+
+    no = mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
+    *((int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.x;
+    *(1 + (int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.y;
+    *(2 + (int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.w;
+    *(3 + (int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.h;
+    mxSetFieldByNumber(s, 0, 2, no);
+
+    mxSetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(&statistics.dimBounds));
+
+    return s;
+}
+
 mxArray* CziReader::GetSubBlockImage(int sbBlkNo)
 {
     auto sbBlk = this->reader->ReadSubBlock(sbBlkNo);
@@ -329,4 +361,40 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
             ptrDst += lineStride;
         }
     }
+}
+
+/*static*/mxArray* CziReader::ConvertToMatlabStruct(const libCZI::IDimBounds* bounds)
+{
+    vector<string> dimensions;
+    for (auto i = (std::underlying_type<libCZI::DimensionIndex>::type)(libCZI::DimensionIndex::MinDim); i <= (std::underlying_type<libCZI::DimensionIndex>::type)(libCZI::DimensionIndex::MaxDim); ++i)
+    {
+        auto d = (libCZI::DimensionIndex)i;
+        if (bounds->IsValid(d))
+        {
+            char dimStr[2] = { Utils::DimensionToChar(d) ,'\0' };
+            dimensions.emplace_back(dimStr);
+        }
+    }
+
+    vector<const char*> fieldNames;
+    fieldNames.reserve(dimensions.size());
+    for( const auto& i : dimensions)
+    {
+        fieldNames.emplace_back(i.c_str());
+    }
+
+    mwSize dims[2] = { 1, 1 };
+    auto s = mxCreateStructArray(2, dims, (int)fieldNames.size(), &fieldNames[0]);
+
+    for (int i=0;i<dimensions.size();++i)
+    {
+        int startIndex, size;
+        bounds->TryGetInterval(Utils::CharToDimension(dimensions[i][0]), &startIndex, &size);
+        auto no = mxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
+        *((int*)mxGetData(no)) = startIndex;
+        *(1+(int*)mxGetData(no)) = size;
+        mxSetFieldByNumber(s, 0, i, no);
+    }
+
+    return s;
 }

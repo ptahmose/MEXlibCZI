@@ -27,7 +27,7 @@ public:
 
     void Open(const std::string& utf8_filename);
 
-    std::string GetInfo();
+    mxArray* GetInfo();
     std::string GetMetadataXml();
 
     mxArray* GetSubBlockImage(int sbBlkNo);
@@ -45,6 +45,8 @@ public:
     //std::string GetInfoFromSubBlock(mint handle);
 //    bool    ReleaseSubBlock(mint handle);
 private:
+    static mxArray* ConvertToMatlabStruct(const libCZI::IDimBounds* bounds);
+
     /// Initializes the members "displaySettingsFromCzi" and "scalingInfoFromCzi".
     void InitializeInfoFromCzi();
     std::shared_ptr<libCZI::IDisplaySettings> GetDisplaySettingsFromCzi();
