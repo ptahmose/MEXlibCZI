@@ -4,6 +4,7 @@
 #include <codecvt>
 
 #include "CziUtilities.h"
+#include "utils.h"
 
 using namespace std;
 using namespace libCZI;
@@ -25,6 +26,23 @@ std::array<double, 3> CziReader::GetScaling()
             scaling.IsScaleYValid() ? scaling.scaleY : -1,
             scaling.IsScaleZValid() ? scaling.scaleZ : -1
     };
+}
+
+mxArray* CziReader::GetScalingAsMatlabStruct()
+{
+    static const char* fieldNames[] = { "scaleX", "scaleY", "scaleZ" };
+
+    mwSize dims[2] = { 1, 1 };
+    auto s = mxCreateStructArray(
+        2,
+        dims,
+        sizeof(fieldNames) / sizeof(fieldNames[0]),
+        fieldNames);
+    const libCZI::ScalingInfo& scaling = this->GetScalingInfoFromCzi();
+    mxSetFieldByNumber(s, 0, 0, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleXValid() ? scaling.scaleX : numeric_limits<double>::quiet_NaN()));
+    mxSetFieldByNumber(s, 0, 1, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleYValid() ? scaling.scaleY : numeric_limits<double>::quiet_NaN()));
+    mxSetFieldByNumber(s, 0, 2, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleZValid() ? scaling.scaleZ : numeric_limits<double>::quiet_NaN()));
+    return s;
 }
 
 const libCZI::ScalingInfo& CziReader::GetScalingInfoFromCzi()
@@ -388,7 +406,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
         auto d = (libCZI::DimensionIndex)i;
         if (bounds->IsValid(d))
         {
-            char dimStr[2] = { Utils::DimensionToChar(d) ,'\0' };
+            char dimStr[2] = { libCZI::Utils::DimensionToChar(d) ,'\0' };
             dimensions.emplace_back(dimStr);
         }
     }
@@ -406,7 +424,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     for (int i = 0; i < dimensions.size(); ++i)
     {
         int startIndex, size;
-        bounds->TryGetInterval(Utils::CharToDimension(dimensions[i][0]), &startIndex, &size);
+        bounds->TryGetInterval(libCZI::Utils::CharToDimension(dimensions[i][0]), &startIndex, &size);
         auto no = mxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
         *((int*)mxGetData(no)) = startIndex;
         *(1 + (int*)mxGetData(no)) = size;

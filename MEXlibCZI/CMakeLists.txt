@@ -40,7 +40,7 @@ add_library (MEXlibCZI SHARED
 						"src/CziUtilities.h" 
 						"src/CziUtilities.cpp"
 						"src/utils.h"
-						"src/utils.cpp" "src/func_getinfo.h" "src/func_getinfo.cpp")
+						"src/utils.cpp" "src/func_getinfo.h" "src/func_getinfo.cpp" "src/func_getscaling.h" "src/func_getscaling.cpp")
 
 set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
 

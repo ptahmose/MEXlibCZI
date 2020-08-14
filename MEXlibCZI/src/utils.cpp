@@ -46,3 +46,25 @@
 
 	return 0xff;
 }
+
+// ----------------------------------------------------------------------------
+
+/*static*/mxArray* MexUtils::DoubleTo1x1Matrix(double v)
+{
+	auto m = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+	double* ptr = (double*)mxGetData(m);
+	if (isnan(v))
+	{
+		*ptr = mxGetNaN();
+	}
+	else if (isinf(v))
+	{
+		*ptr = mxGetInf();
+	}
+	else
+	{
+		*ptr = v;
+	}
+	
+	return m;
+}

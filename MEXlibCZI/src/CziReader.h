@@ -38,6 +38,7 @@ public:
      MImage GetMultiChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson);*/
 
     std::array<double, 3>   GetScaling();
+    mxArray* GetScalingAsMatlabStruct();
 
     //mint    ReadSubBlock(int no);
     //MImage  GetBitmapFromSubBlock(mint handle, WolframLibraryData libData);
