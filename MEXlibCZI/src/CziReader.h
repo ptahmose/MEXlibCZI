@@ -66,6 +66,9 @@ private:
     mxArray* GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom);
 
     static mxArray* ConvertToMxArray(libCZI::IBitmapData* bitmapData);
+    static mxArray* ConvertToMatlabStruct(const std::map<int, libCZI::BoundingBoxes>& boundingBoxMap);
+    static mxArray* ConvertToMatlabStruct(const libCZI::IntRect& rect);
+
     static void CopyTransposeGray8(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);
     static void CopyTransposeGray16(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);
     static void CopyTransposeGrayFloat(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);

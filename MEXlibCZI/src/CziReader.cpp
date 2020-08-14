@@ -51,10 +51,14 @@ mxArray* CziReader::GetInfo()
 {
     auto statistics = this->reader->GetStatistics();
 
-    static const char* fieldNames[] = { "subblockcount", "boundingBox", "boundingBoxLayer0", "dimBounds" };
-    //static const char* fieldNames[] = { "key", "value" };
+    static const char* fieldNames[] = { "subblockcount", "boundingBox", "boundingBoxLayer0", "dimBounds", "sceneBoundingBoxes", "minMindex", "maxMindex" };
+
     mwSize dims[2] = { 1, 1 };
-    auto s = mxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
+    auto s = mxCreateStructArray(
+        2,
+        dims,
+        (sizeof(fieldNames) / sizeof(fieldNames[0])) - (statistics.IsMIndexValid() ? 0 : 2),
+        fieldNames);
 
     auto no = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
     *((int*)mxGetData(no)) = statistics.subBlockCount;
@@ -75,6 +79,19 @@ mxArray* CziReader::GetInfo()
     mxSetFieldByNumber(s, 0, 2, no);
 
     mxSetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(&statistics.dimBounds));
+
+    mxSetFieldByNumber(s, 0, 4, CziReader::ConvertToMatlabStruct(statistics.sceneBoundingBoxes));
+
+    if (statistics.IsMIndexValid())
+    {
+        auto m = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+        *((int*)mxGetData(m)) = statistics.minMindex;
+        mxSetFieldByNumber(s, 0, 5, m);
+
+        m = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+        *((int*)mxGetData(m)) = statistics.maxMindex;
+        mxSetFieldByNumber(s, 0, 6, m);
+    }
 
     return s;
 }
@@ -378,7 +395,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 
     vector<const char*> fieldNames;
     fieldNames.reserve(dimensions.size());
-    for( const auto& i : dimensions)
+    for (const auto& i : dimensions)
     {
         fieldNames.emplace_back(i.c_str());
     }
@@ -386,15 +403,45 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     mwSize dims[2] = { 1, 1 };
     auto s = mxCreateStructArray(2, dims, (int)fieldNames.size(), &fieldNames[0]);
 
-    for (int i=0;i<dimensions.size();++i)
+    for (int i = 0; i < dimensions.size(); ++i)
     {
         int startIndex, size;
         bounds->TryGetInterval(Utils::CharToDimension(dimensions[i][0]), &startIndex, &size);
         auto no = mxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
         *((int*)mxGetData(no)) = startIndex;
-        *(1+(int*)mxGetData(no)) = size;
+        *(1 + (int*)mxGetData(no)) = size;
         mxSetFieldByNumber(s, 0, i, no);
     }
 
     return s;
+}
+
+/*static*/mxArray* CziReader::ConvertToMatlabStruct(const std::map<int, BoundingBoxes>& boundingBoxMap)
+{
+    static const char* fieldNames[] = { "sceneIndex", "boundingBox", "boundingBoxLayer0" };
+    mwSize dims[2] = { 1, boundingBoxMap.size() };
+    auto s = mxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
+
+    int i = 0;
+    for (auto& it = boundingBoxMap.cbegin(); it != boundingBoxMap.cend(); ++it)
+    {
+        auto no = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+        *((int*)mxGetData(no)) = it->first;
+        mxSetFieldByNumber(s, i, 0, no);
+        mxSetFieldByNumber(s, i, 1, CziReader::ConvertToMatlabStruct(it->second.boundingBox));
+        mxSetFieldByNumber(s, i, 2, CziReader::ConvertToMatlabStruct(it->second.boundingBoxLayer0));
+        ++i;
+    }
+
+    return s;
+}
+
+/*static*/ mxArray* CziReader::ConvertToMatlabStruct(const libCZI::IntRect& rect)
+{
+    auto m = mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
+    *((int*)mxGetData(m)) = rect.x;
+    *(1 + (int*)mxGetData(m)) = rect.y;
+    *(2 + (int*)mxGetData(m)) = rect.w;
+    *(3 + (int*)mxGetData(m)) = rect.h;
+    return m;
 }
