@@ -48,7 +48,7 @@ add_library (MEXlibCZI SHARED
 						"src/func_getmetadataxml.cpp"
 						"src/func_getmetadataxml.h" 
 						"src/func_getsinglechannelscalingtilecomposite.cpp" 
-						"src/func_getsinglechannelscalingtilecomposite.h")
+						"src/func_getsinglechannelscalingtilecomposite.h" "src/func_close.cpp" "src/func_close.h")
 
 set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
 
