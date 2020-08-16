@@ -3,6 +3,7 @@
 #include "CziInstanceManager.h"
 #include <vector>
 #include <memory>
+#include "octave_helpers.h"
 
 using namespace std;
 
@@ -15,9 +16,9 @@ void MexFunction_Open_Execute(MatlabArgs* args)
 {
     unique_ptr<char, void(*)(void*)> upArg2Str(mxArrayToUTF8String(args->prhs[1]), mxFree);
 
-    int id = CziReaderManager::Instance.CreateNewInstance();
+    int id = CziReaderManager::GetInstance().CreateNewInstance();
 
-    auto reader = CziReaderManager::Instance.GetInstance(id);
+    auto reader = CziReaderManager::GetInstance().GetInstance(id);
     try
     {
         //VDBGPRINT((CDbg::Level::Trace, "CZIReader_Open: attempt to open file \"%s\".", filename));

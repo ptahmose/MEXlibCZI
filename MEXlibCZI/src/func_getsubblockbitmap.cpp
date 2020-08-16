@@ -20,7 +20,7 @@ void MexFunction_GetSubBlockBitmap_Execute(MatlabArgs* args)
     b = CArgsUtils::TryGetInt32(args->prhs[2], &blkNo);
     try
     {
-        reader = CziReaderManager::Instance.GetInstance(id);
+        reader = CziReaderManager::GetInstance().GetInstance(id);
     }
     catch (out_of_range&)
     {

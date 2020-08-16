@@ -29,7 +29,7 @@ void MexFunction_GetMetadataXml_Execute(MatlabArgs* args)
     bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
     try
     {
-        reader = CziReaderManager::Instance.GetInstance(id);
+        reader = CziReaderManager::GetInstance().GetInstance(id);
     }
     catch (out_of_range&)
     {

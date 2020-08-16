@@ -37,6 +37,16 @@ message(STATUS "Mathematica_INCLUDE_DIR: ${Mathematica_INCLUDE_DIR}")
 message(STATUS "Mathematica_WolframLibrary_LIBRARIES: ${Mathematica_WolframLibrary_LIBRARIES}")
 ]]
 
+
+#[[ 
+set(OCTAVE_CONFIGEXECUTABLE_PATHHINT "D:/SW/Octave/Octave-5.2.0/mingw64/bin/")
+include("${CMAKE_SOURCE_DIR}/modules/FindOctave2.cmake")
+
+message(STATUS "Octave_INCLUDE_DIRS: ${OCTAVE_INCLUDE_DIRS}")
+message(STATUS "Octave_LIBRARIES: ${OCTAVE_LIBRARIES_PATHS}")
+]]
+
+
 include("${CMAKE_SOURCE_DIR}/modules/libCZI.cmake")
 FetchContent_GetProperties(libCZI)
 set(LIBCZI_INCLUDE_DIR "${libczi_SOURCE_DIR}/Src/libCZI")

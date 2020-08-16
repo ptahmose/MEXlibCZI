@@ -1,4 +1,5 @@
 #include "argsutils.h"
+#include "octave_helpers.h"
 #include <limits>
 
 using namespace std;
@@ -67,7 +68,7 @@ using namespace libCZI;
     case mxUINT32_CLASS:
     {
         const auto pui32 = mxGetUint32s(pArr);
-        if (*pui32 > static_cast<mxUint32>(numeric_limits<int>::max()))
+        if (*pui32 > static_cast<std::uint32_t>(numeric_limits<int>::max()))
         {
             return false;
         }
@@ -78,7 +79,7 @@ using namespace libCZI;
     case mxINT64_CLASS:
     {
         auto* pi64 = mxGetInt64s(pArr);
-        if (*pi64 > static_cast<mxInt64>(numeric_limits<int>::max()) || *pi64 < static_cast<mxInt64>(numeric_limits<int>::min()))
+        if (*pi64 > static_cast<int64_t>(numeric_limits<int>::max()) || *pi64 < static_cast<int64_t>(numeric_limits<int>::min()))
         {
             return false;
         }
@@ -89,7 +90,7 @@ using namespace libCZI;
     case mxUINT64_CLASS:
     {
         const auto pui64 = mxGetUint64s(pArr);
-        if (*pui64 > (mxUint64)(numeric_limits<int>::max()))
+        if (*pui64 > (uint64_t)(numeric_limits<int>::max()))
         {
             return false;
         }
@@ -178,7 +179,7 @@ using namespace libCZI;
     case mxUINT32_CLASS:
     {
         const auto pui32 = mxGetUint32s(pArr);
-        if (*pui32 > static_cast<mxUint32>(numeric_limits<int>::max()))
+        if (*pui32 > static_cast<uint32_t>(numeric_limits<int>::max()))
         {
             return false;
         }
@@ -189,8 +190,8 @@ using namespace libCZI;
     case mxINT64_CLASS:
     {
         auto* pi64 = mxGetInt64s(pArr);
-        mxInt64 v = *(pi64 + index);
-        if (v > static_cast<mxInt64>(numeric_limits<int>::max()) || v < static_cast<mxInt64>(numeric_limits<int>::min()))
+        int64_t v = *(pi64 + index);
+        if (v > static_cast<int64_t>(numeric_limits<int>::max()) || v < static_cast<int64_t>(numeric_limits<int>::min()))
         {
             return false;
         }
@@ -201,8 +202,8 @@ using namespace libCZI;
     case mxUINT64_CLASS:
     {
         const auto pui64 = mxGetUint64s(pArr);
-        mxUint64 v = *(pui64 + index);
-        if (v > (mxUint64)(numeric_limits<int>::max()))
+        uint64_t v = *(pui64 + index);
+        if (v > (uint64_t)(numeric_limits<int>::max()))
         {
             return false;
         }
@@ -286,7 +287,7 @@ using namespace libCZI;
     case mxUINT32_CLASS:
     {
         const auto pui32 = mxGetUint32s(pArr);
-        if (*pui32 > static_cast<mxUint32>(numeric_limits<int>::max()))
+        if (*pui32 > static_cast<uint32_t>(numeric_limits<int>::max()))
         {
             return false;
         }
@@ -297,8 +298,8 @@ using namespace libCZI;
     case mxINT64_CLASS:
     {
         auto* pi64 = mxGetInt64s(pArr);
-        mxInt64 v = *(pi64 + index);
-        if (v > static_cast<mxInt64>(numeric_limits<int>::max()) || v < static_cast<mxInt64>(numeric_limits<int>::min()))
+        int64_T v = *(pi64 + index);
+        if (v > static_cast<int64_t>(numeric_limits<int>::max()) || v < static_cast<int64_t>(numeric_limits<int>::min()))
         {
             return false;
         }
@@ -309,8 +310,8 @@ using namespace libCZI;
     case mxUINT64_CLASS:
     {
         const auto pui64 = mxGetUint64s(pArr);
-        mxUint64 v = *(pui64 + index);
-        if (v > (mxUint64)(numeric_limits<int>::max()))
+        uint64_t v = *(pui64 + index);
+        if (v > (uint64_t)(numeric_limits<int>::max()))
         {
             return false;
         }

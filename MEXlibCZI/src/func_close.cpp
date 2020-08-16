@@ -29,7 +29,7 @@ void MexFunction_Close_Execute(MatlabArgs* args)
     bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
     try
     {
-        CziReaderManager::Instance.RemoveInstance(id);
+        CziReaderManager::GetInstance().RemoveInstance(id);
     }
     catch (out_of_range&)
     {

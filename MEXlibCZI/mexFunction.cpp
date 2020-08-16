@@ -1,6 +1,8 @@
 #include "include_matlabheaders.h"
 #include "exportedFunctions.h"
 #include "mexFunctions.h"
+#include "src/octave_helpers.h"
+#include "src/CziInstanceManager.h"
 #include <Windows.h>
 #include <memory>
 
@@ -10,7 +12,7 @@ static bool gIsInitialized = false;
 
 static void OnShutdown()
 {
-
+    CziReaderManager::GetInstance().RemoveAllInstances();
 }
 
 static void Initialize()

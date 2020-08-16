@@ -52,10 +52,13 @@ unset(Octave_Development_FOUND)
 unset(Octave_Interpreter_FOUND)
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME Interpreter)
 
+message(STATUS "******************************")
+
 if(Development IN_LIST Octave_FIND_COMPONENTS)
   find_program(Octave_CONFIG_EXECUTABLE
-               NAMES octave-config)
-
+               HINTS  D:/SW/Octave/Octave-5.2.0/mingw64/bin/
+               NAMES octave-config.exe)
+  message(STATUS "**Octave_CONFIG_EXECUTABLE**: ${Octave_CONFIG_EXECUTABLE}")
   if(Octave_CONFIG_EXECUTABLE)
 
     execute_process(COMMAND ${Octave_CONFIG_EXECUTABLE} -p BINDIR

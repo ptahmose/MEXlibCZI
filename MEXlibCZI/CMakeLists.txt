@@ -48,24 +48,39 @@ add_library (MEXlibCZI SHARED
 						"src/func_getmetadataxml.cpp"
 						"src/func_getmetadataxml.h" 
 						"src/func_getsinglechannelscalingtilecomposite.cpp" 
-						"src/func_getsinglechannelscalingtilecomposite.h" "src/func_close.cpp" "src/func_close.h")
+						"src/func_getsinglechannelscalingtilecomposite.h"
+						"src/func_close.cpp" 
+						"src/func_close.h" 
+						"src/octave_helpers.h")
 
-set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
+set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 17)
 
+  
 target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
 
 target_include_directories(MEXlibCZI PRIVATE  ${CMAKE_CURRENT_BINARY_DIR})  # this is necessary so that we can find "wllczi_Config.h" which we created above
-
-#target_link_directories(MEXlibCZI PRIVATE mx mex mat)
-#target_link_libraries(MEXlibCZI PRIVATE mx mex mat)
-target_link_libraries(MEXlibCZI PRIVATE ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY})
-
-#set (CMAKE_LINK_DEF_FILE_FLAG "/DEF:${CMAKE_CURRENT_SOURCE_DIR}/MEXlibCZI.def")
-
-# target_compile_definitions(MEXlibCZI PRIVATE MEXlibCZI_EXPORTS MATLAB_MEX_FILE)
 target_include_directories(MEXlibCZI PRIVATE ${LIBCZI_INCLUDE_DIR})
+target_link_libraries(MEXlibCZI PRIVATE ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY})
 target_link_libraries(MEXlibCZI PRIVATE libCZIStatic JxrDecodeStatic)
 
 set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mexw64")
-
 SET_TARGET_PROPERTIES(MEXlibCZI PROPERTIES LINK_FLAGS "/export:mexFunction")
+
+
+#[[  
+# building a mex-file for Octave:
+# * "mx"-functions are found in liboctinterp-7 - DLL
+# * need to build an import-library for the DLL
+# * not all mx-functions are present (not the typed "mxGetInt8s"-etc. functions, not mxArrayToUTF8String)
+# * extension must be ".mex" I suppose, not ".mexw64" or so
+
+target_include_directories(MEXlibCZI PRIVATE ${OCTAVE_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
+
+target_include_directories(MEXlibCZI PRIVATE  ${CMAKE_CURRENT_BINARY_DIR})  # this is necessary so that we can find "wllczi_Config.h" which we created above
+target_include_directories(MEXlibCZI PRIVATE ${LIBCZI_INCLUDE_DIR})
+target_link_libraries(MEXlibCZI PRIVATE "D:/Temp/octave/liboctinterp-7.lib")
+target_link_libraries(MEXlibCZI PRIVATE libCZIStatic JxrDecodeStatic)
+
+set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mex")
+SET_TARGET_PROPERTIES(MEXlibCZI PROPERTIES LINK_FLAGS "/export:mexFunction")
+]]
