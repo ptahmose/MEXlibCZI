@@ -51,9 +51,14 @@ add_library (MEXlibCZI SHARED
 						"src/func_getsinglechannelscalingtilecomposite.h"
 						"src/func_close.cpp" 
 						"src/func_close.h" 
-						"src/octave_helpers.h")
+						"src/mexapi.h" 
+						"src/mexapi.cpp"
+						"errorcodes.h"
+						"errorcodes.cpp" 
+						"src/dbgprint.h" 
+						"src/dbgprint.cpp")
 
-set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 17)
+set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
 
   
 target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
@@ -65,6 +70,11 @@ target_link_libraries(MEXlibCZI PRIVATE libCZIStatic JxrDecodeStatic)
 
 set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mexw64")
 SET_TARGET_PROPERTIES(MEXlibCZI PROPERTIES LINK_FLAGS "/export:mexFunction")
+SET_TARGET_PROPERTIES (MEXlibCZI PROPERTIES DEFINE_SYMBOL  "MATLABMEXBUILD" )
+
+if(WIN32)
+ target_compile_definitions(MEXlibCZI PRIVATE _WIN32API=1)
+endif()
 
 
 #[[  
@@ -83,4 +93,5 @@ target_link_libraries(MEXlibCZI PRIVATE libCZIStatic JxrDecodeStatic)
 
 set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mex")
 SET_TARGET_PROPERTIES(MEXlibCZI PROPERTIES LINK_FLAGS "/export:mexFunction")
+SET_TARGET_PROPERTIES (MEXlibCZI PROPERTIES DEFINE_SYMBOL  "OCTAVEMEXBUILD" )
 ]]

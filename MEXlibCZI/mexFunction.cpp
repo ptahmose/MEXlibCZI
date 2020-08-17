@@ -1,10 +1,13 @@
 #include "include_matlabheaders.h"
 #include "exportedFunctions.h"
 #include "mexFunctions.h"
-#include "src/octave_helpers.h"
+#include "src/mexapi.h"
 #include "src/CziInstanceManager.h"
 #include <Windows.h>
 #include <memory>
+
+#include "errorcodes.h"
+#include "src/utils.h"
 
 using namespace std;
 
@@ -17,9 +20,15 @@ static void OnShutdown()
 
 static void Initialize()
 {
-    mexAtExit(OnShutdown);
+    MexApi::GetInstance().MexAtExit(OnShutdown);
 }
 
+/*
+ Some notes:
+  - if using mexErrMsgIdAndTxt, we leave the method by a trap of something; however this method does not return (and
+     therefore no cleanup happens here).
+  - here it is stated that the same happens if pressing "Ctrl-C" -> https://www.mathworks.com/help/matlab/matlab_external/automatic-cleanup-of-temporary-arrays.html
+ */
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
     if (!gIsInitialized)
@@ -34,42 +43,74 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     }
 
     /* input must be a string */
-    if (mxIsChar(prhs[0]) != 1)
+    if (!MexApi::GetInstance().MxIsChar(prhs[0]))
     {
         mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:inputNotString", "Input must be a string.");
     }
 
-    /* input must be a row vector */
-    if (mxGetM(prhs[0]) != 1)
-    {
-        mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:inputNotVector", "Input must be a row vector.");
-    }
+    ///* input must be a row vector */
+    //if (mxGetM(prhs[0]) != 1)
+    //{
+    //    mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:inputNotVector", "Input must be a row vector.");
+    //}
 
     /* copy the string data from prhs[0] into a C string input_ buf.    */
 
-    unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String(prhs[0]), mxFree);
+    //unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String(prhs[0]), mxFree);
+    //string functionName = MexApi::GetInstance().MxArrayToUtf8String(prhs[0]);
 
-    auto func = CMexFunctions::GetInstance().FindFunc(upArgStr.get());
-
-    if (func != nullptr)
+    bool errorOccurred = false;
+    char* errorText = nullptr;
+    const char* errorId = nullptr;
     {
-        MatlabArgs args = { nlhs,plhs,nrhs,prhs };
-
-        try
+        auto upArgStr = MexApi::GetInstance().UpMxArrayToMatlabAllocatedUtf8String(prhs[0]);
+        auto func = CMexFunctions::GetInstance().FindFunc(upArgStr.get());
+        if (func != nullptr)
         {
-            func->pfnCheckArguments(&args);
-        }
-        catch (exception& excp)
-        {
-            mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:invalidArguments", excp.what());
-            return;
-        }
+            MatlabArgs args = { nlhs,plhs,nrhs,prhs };
 
-        func->pfnExecute(&args);
+            try
+            {
+                func->pfnCheckArguments(&args);
+            }
+            catch (exception& excp)
+            {
+                errorOccurred = true;
+                errorText = MexApi::GetInstance().MxStrDup(excp.what());
+                errorId = ErrorIds::InvalidArguments;
+            }
+
+            if (!errorOccurred)
+            {
+                try
+                {
+                func->pfnExecute(&args);
+                }
+                catch (exception& excp)
+                {
+                    errorOccurred = true;
+                    errorText = MexApi::GetInstance().MxStrDup(excp.what());
+                    errorId = ErrorIds::InvalidArguments;
+                }
+            }
+        }
+        else
+        {
+            errorOccurred = true;
+            stringstream ss;
+            ss << "The string \"" << upArgStr.get() << "\" is not a known command.";
+            errorText = MexApi::GetInstance().MxStrDup(ss.str());
+            errorId = ErrorIds::UnknownCommand;
+            //mexErrMsgIdAndTxt(ErrorIds::UnknownCommand, "The string \"%ls\" is not a known command.", Utils::convertUtf8ToWchar_t(functionName).c_str());
+        }
     }
-    else
+
+    if (errorOccurred)
     {
-        plhs[0] = mxCreateString("THIS IS A STRING");
+        // Remember that we do NOT return from this call - we should make sure that no resource-cleanup is
+        //  done beyond this point. The memory for the errorText is allocated with Matlab's malloc - therefore,
+        //  it should be released automatically.
+        mexErrMsgIdAndTxt(errorId, errorText);
     }
 
     //plhs[0] = 

@@ -1,4 +1,8 @@
 #include "utils.h"
+#include <codecvt>
+#include <locale>
+
+#include "mexapi.h"
 
 /*static*/std::string Utils::trim(const std::string& str, const std::string& whitespace /*= " \t"*/)
 {
@@ -47,19 +51,26 @@
 	return 0xff;
 }
 
+/*static*/std::wstring Utils::convertUtf8ToWchar_t(const char* sz)
+{
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8conv;
+	std::wstring conv = utf8conv.from_bytes(sz);
+	return conv;
+}
+
 // ----------------------------------------------------------------------------
 
 /*static*/mxArray* MexUtils::DoubleTo1x1Matrix(double v)
 {
-	auto m = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
-	double* ptr = (double*)mxGetData(m);
+	auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+	double* ptr = MexApi::GetInstance().MxGetDoubles(m);//        (double*)mxGetData(m);
 	if (isnan(v))
 	{
-		*ptr = mxGetNaN();
+		*ptr = MexApi::GetInstance().GetDblNan();// mxGetNaN();
 	}
 	else if (isinf(v))
 	{
-		*ptr = mxGetInf();
+		*ptr = MexApi::GetInstance().GetDblInf();// mxGetInf();
 	}
 	else
 	{
@@ -67,4 +78,12 @@
 	}
 	
 	return m;
+}
+
+/*static*/mxArray* MexUtils::Int32To1x1Matrix(int v)
+{
+	auto rv = MexApi::GetInstance().MxCreateNumericMatrix(1,1, mxINT32_CLASS, mxREAL);
+	int* ptr = MexApi::GetInstance().MxGetInt32s(rv);
+	*ptr = v;
+	return rv;
 }

@@ -1,5 +1,5 @@
 #include "argsutils.h"
-#include "octave_helpers.h"
+#include "mexapi.h"
 #include <limits>
 
 using namespace std;
@@ -13,7 +13,7 @@ using namespace libCZI;
     {
     case mxDOUBLE_CLASS:
     {
-        auto* const pDbl = mxGetDoubles(pArr);
+        auto* const pDbl = MexApi::GetInstance().MxGetDoubles(pArr);
         const double v = *pDbl;
         if (mxIsNaN(v) || mxIsInf(v) || v > numeric_limits<int>::max() || v < numeric_limits<int>::min())
         {
@@ -25,7 +25,7 @@ using namespace libCZI;
     break;
     case mxSINGLE_CLASS:
     {
-        auto* const pFlt = mxGetSingles(pArr);
+        auto* const pFlt = MexApi::GetInstance().MxGetSingles(pArr);
         const float v = *pFlt;
         if (mxIsNaN(v) || mxIsInf(v) || v > numeric_limits<int>::max() || v < numeric_limits<int>::min())
         {
@@ -37,37 +37,37 @@ using namespace libCZI;
     break;
     case mxINT8_CLASS:
     {
-        auto* const pi8 = mxGetInt8s(pArr);
+        auto* const pi8 = MexApi::GetInstance().MxGetInt8s(pArr);
         rv = *pi8;  // NOLINT(bugprone-signed-char-misuse)
     }
     break;
     case mxUINT8_CLASS:
     {
-        auto* const pui8 = mxGetUint8s(pArr);
+        auto* const pui8 = MexApi::GetInstance().MxGetUint8s(pArr);
         rv = *pui8;
     }
     break;
     case mxINT16_CLASS:
     {
-        auto* const pi16 = mxGetInt16s(pArr);
+        auto* const pi16 = MexApi::GetInstance().MxGetInt16s(pArr);
         rv = *pi16;
     }
     break;
     case mxUINT16_CLASS:
     {
-        auto* const pui16 = mxGetUint16s(pArr);
+        auto* const pui16 = MexApi::GetInstance().MxGetUint16s(pArr);
         rv = *pui16;
     }
     break;
     case mxINT32_CLASS:
     {
-        const auto pi32 = mxGetInt32s(pArr);
+        const auto pi32 = MexApi::GetInstance().MxGetInt32s(pArr);
         rv = *pi32;
     }
     break;
     case mxUINT32_CLASS:
     {
-        const auto pui32 = mxGetUint32s(pArr);
+        const auto pui32 = MexApi::GetInstance().MxGetUint32s(pArr);
         if (*pui32 > static_cast<std::uint32_t>(numeric_limits<int>::max()))
         {
             return false;
@@ -78,7 +78,7 @@ using namespace libCZI;
     break;
     case mxINT64_CLASS:
     {
-        auto* pi64 = mxGetInt64s(pArr);
+        auto* pi64 = MexApi::GetInstance().MxGetInt64s(pArr);
         if (*pi64 > static_cast<int64_t>(numeric_limits<int>::max()) || *pi64 < static_cast<int64_t>(numeric_limits<int>::min()))
         {
             return false;
@@ -89,7 +89,7 @@ using namespace libCZI;
     break;
     case mxUINT64_CLASS:
     {
-        const auto pui64 = mxGetUint64s(pArr);
+        const auto pui64 = MexApi::GetInstance().MxGetUint64s(pArr);
         if (*pui64 > (uint64_t)(numeric_limits<int>::max()))
         {
             return false;
@@ -124,7 +124,7 @@ using namespace libCZI;
     {
     case mxDOUBLE_CLASS:
     {
-        auto* const pDbl = mxGetDoubles(pArr);
+        auto* const pDbl = MexApi::GetInstance().MxGetDoubles(pArr);
         const double v = *(pDbl + index);
         if (mxIsNaN(v) || mxIsInf(v) || v > numeric_limits<int>::max() || v < numeric_limits<int>::min())
         {
@@ -136,7 +136,7 @@ using namespace libCZI;
     break;
     case mxSINGLE_CLASS:
     {
-        auto* const pFlt = mxGetSingles(pArr);
+        auto* const pFlt = MexApi::GetInstance().MxGetSingles(pArr);
         const float v = *(pFlt + index);
         if (mxIsNaN(v) || mxIsInf(v) || v > numeric_limits<int>::max() || v < numeric_limits<int>::min())
         {
@@ -148,37 +148,37 @@ using namespace libCZI;
     break;
     case mxINT8_CLASS:
     {
-        auto* const pi8 = mxGetInt8s(pArr);
+        auto* const pi8 = MexApi::GetInstance().MxGetInt8s(pArr);
         rv = *(pi8 + index);  // NOLINT(bugprone-signed-char-misuse)
     }
     break;
     case mxUINT8_CLASS:
     {
-        auto* const pui8 = mxGetUint8s(pArr);
+        auto* const pui8 = MexApi::GetInstance().MxGetUint8s(pArr);
         rv = *(pui8 + index);
     }
     break;
     case mxINT16_CLASS:
     {
-        auto* const pi16 = mxGetInt16s(pArr);
+        auto* const pi16 = MexApi::GetInstance().MxGetInt16s(pArr);
         rv = *(pi16 + index);
     }
     break;
     case mxUINT16_CLASS:
     {
-        auto* const pui16 = mxGetUint16s(pArr);
+        auto* const pui16 = MexApi::GetInstance().MxGetUint16s(pArr);
         rv = *(pui16 + index);
     }
     break;
     case mxINT32_CLASS:
     {
-        const auto pi32 = mxGetInt32s(pArr);
+        const auto pi32 = MexApi::GetInstance().MxGetInt32s(pArr);
         rv = *(pi32 + index);
     }
     break;
     case mxUINT32_CLASS:
     {
-        const auto pui32 = mxGetUint32s(pArr);
+        const auto pui32 = MexApi::GetInstance().MxGetUint32s(pArr);
         if (*pui32 > static_cast<uint32_t>(numeric_limits<int>::max()))
         {
             return false;
@@ -189,7 +189,7 @@ using namespace libCZI;
     break;
     case mxINT64_CLASS:
     {
-        auto* pi64 = mxGetInt64s(pArr);
+        auto* pi64 = MexApi::GetInstance().MxGetInt64s(pArr);
         int64_t v = *(pi64 + index);
         if (v > static_cast<int64_t>(numeric_limits<int>::max()) || v < static_cast<int64_t>(numeric_limits<int>::min()))
         {
@@ -201,7 +201,7 @@ using namespace libCZI;
     break;
     case mxUINT64_CLASS:
     {
-        const auto pui64 = mxGetUint64s(pArr);
+        const auto pui64 = MexApi::GetInstance().MxGetUint64s(pArr);
         uint64_t v = *(pui64 + index);
         if (v > (uint64_t)(numeric_limits<int>::max()))
         {
@@ -242,51 +242,51 @@ using namespace libCZI;
     {
     case mxDOUBLE_CLASS:
     {
-        auto* const pDbl = mxGetDoubles(pArr);
+        auto* const pDbl = MexApi::GetInstance().MxGetDoubles(pArr);
         const double v = *(pDbl + index);
         rv = static_cast<float>(v);
     }
     break;
     case mxSINGLE_CLASS:
     {
-        auto* const pFlt = mxGetSingles(pArr);
+        auto* const pFlt = MexApi::GetInstance().MxGetSingles(pArr);
         const float v = *(pFlt + index);
         rv = v;
     }
     break;
     case mxINT8_CLASS:
     {
-        auto* const pi8 = mxGetInt8s(pArr);
+        auto* const pi8 = MexApi::GetInstance().MxGetInt8s(pArr);
         rv = *(pi8 + index);  // NOLINT(bugprone-signed-char-misuse)
     }
     break;
     case mxUINT8_CLASS:
     {
-        auto* const pui8 = mxGetUint8s(pArr);
+        auto* const pui8 = MexApi::GetInstance().MxGetUint8s(pArr);
         rv = *(pui8 + index);
     }
     break;
     case mxINT16_CLASS:
     {
-        auto* const pi16 = mxGetInt16s(pArr);
+        auto* const pi16 = MexApi::GetInstance().MxGetInt16s(pArr);
         rv = *(pi16 + index);
     }
     break;
     case mxUINT16_CLASS:
     {
-        auto* const pui16 = mxGetUint16s(pArr);
+        auto* const pui16 = MexApi::GetInstance().MxGetUint16s(pArr);
         rv = *(pui16 + index);
     }
     break;
     case mxINT32_CLASS:
     {
-        const auto pi32 = mxGetInt32s(pArr);
+        const auto pi32 = MexApi::GetInstance().MxGetInt32s(pArr);
         rv = *(pi32 + index);
     }
     break;
     case mxUINT32_CLASS:
     {
-        const auto pui32 = mxGetUint32s(pArr);
+        const auto pui32 = MexApi::GetInstance().MxGetUint32s(pArr);
         if (*pui32 > static_cast<uint32_t>(numeric_limits<int>::max()))
         {
             return false;
@@ -297,7 +297,7 @@ using namespace libCZI;
     break;
     case mxINT64_CLASS:
     {
-        auto* pi64 = mxGetInt64s(pArr);
+        auto* pi64 = MexApi::GetInstance().MxGetInt64s(pArr);
         int64_T v = *(pi64 + index);
         if (v > static_cast<int64_t>(numeric_limits<int>::max()) || v < static_cast<int64_t>(numeric_limits<int>::min()))
         {
@@ -309,7 +309,7 @@ using namespace libCZI;
     break;
     case mxUINT64_CLASS:
     {
-        const auto pui64 = mxGetUint64s(pArr);
+        const auto pui64 = MexApi::GetInstance().MxGetUint64s(pArr);
         uint64_t v = *(pui64 + index);
         if (v > (uint64_t)(numeric_limits<int>::max()))
         {
@@ -384,12 +384,13 @@ using namespace libCZI;
         return false;
     }
 
-    unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String(pArr), mxFree);
+    //unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String(pArr), mxFree);
+    string argStr = MexApi::GetInstance().MxArrayToUtf8String(pArr);
 
     CDimCoordinate planeCoordinate;
     try
     {
-        planeCoordinate = CDimCoordinate::Parse(upArgStr.get());
+        planeCoordinate = CDimCoordinate::Parse(argStr.c_str());
     }
     catch (libCZI::LibCZIStringParseException& libExcp)
     {
