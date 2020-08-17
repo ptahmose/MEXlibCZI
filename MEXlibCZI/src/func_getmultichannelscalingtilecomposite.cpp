@@ -1,8 +1,9 @@
-#include "func_getsubblockbitmap.h"
+#include "func_getmultichannelscalingtilecomposite.h"
 #include "CziInstanceManager.h"
 #include <vector>
 #include <memory>
 #include "argsutils.h"
+#include "utils.h"
 
 using namespace std;
 using namespace libCZI;
@@ -43,20 +44,10 @@ void MexFunction_GetMultiChannelScalingTileComposite_CheckArguments(MatlabArgs* 
 
 void MexFunction_GetMultiChannelScalingTileComposite_Execute(MatlabArgs* args)
 {
-    std::shared_ptr<CziReader> reader;
-
     int id;
     bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
-    try
-    {
-        reader = CziReaderManager::GetInstance().GetInstance(id);
-    }
-    catch (out_of_range&)
-    {
-        /*ErrHelper::ReportError_CziReaderInstanceNotExisting(libData, id);
-        return LIBRARY_FUNCTION_ERROR;*/
-    }
 
+    std::shared_ptr<CziReader> reader = ::Utils::GetReaderOrThrow(id);
     IntRect rect;
     b = CArgsUtils::TryGetIntRect(args->prhs[2], &rect);
 
@@ -66,7 +57,7 @@ void MexFunction_GetMultiChannelScalingTileComposite_Execute(MatlabArgs* args)
     float zoom;
     b = CArgsUtils::TryGetSingle(args->prhs[4], &zoom);
 
-    auto out = reader->GetMultiChannelScalingTileComposite(
+    auto* out = reader->GetMultiChannelScalingTileComposite(
         rect,
         &coord,
         (float)zoom,

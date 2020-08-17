@@ -1,8 +1,9 @@
-#include "func_getsubblockbitmap.h"
+#include "func_getmetadataxml.h"
 #include "CziInstanceManager.h"
 #include <vector>
 #include <memory>
 #include "argsutils.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -23,20 +24,9 @@ void MexFunction_GetMetadataXml_CheckArguments(MatlabArgs* args)
 
 void MexFunction_GetMetadataXml_Execute(MatlabArgs* args)
 {
-    std::shared_ptr<CziReader> reader;
-
     int id;
     bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
-    try
-    {
-        reader = CziReaderManager::GetInstance().GetInstance(id);
-    }
-    catch (out_of_range&)
-    {
-        /*ErrHelper::ReportError_CziReaderInstanceNotExisting(libData, id);
-        return LIBRARY_FUNCTION_ERROR;*/
-    }
-
-    auto m = reader->GetMetadataXmlAsMxArray();
+    std::shared_ptr<CziReader> reader = ::Utils::GetReaderOrThrow(id);
+    auto* m = reader->GetMetadataXmlAsMxArray();
     args->plhs[0] = m;
 }

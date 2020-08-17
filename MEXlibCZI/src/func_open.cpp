@@ -25,8 +25,6 @@ void MexFunction_Open_CheckArguments(MatlabArgs* args)
 
 void MexFunction_Open_Execute(MatlabArgs* args)
 {
-    //unique_ptr<char, void(*)(void*)> upArg2Str(mxArrayToUTF8String(args->prhs[1]), mxFree);
-    //string filename = MexApi::GetInstance().MxArrayToUtf8String(args->prhs[1]);
     auto filename = MexApi::GetInstance().UpMxArrayToMatlabAllocatedUtf8String(args->prhs[1]);
 
     int id = CziReaderManager::GetInstance().CreateNewInstance();
@@ -43,8 +41,5 @@ void MexFunction_Open_Execute(MatlabArgs* args)
         throw;
     }
 
-    /*auto rv = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetData(rv)) = id;
-    args->plhs[0] = rv;*/
     args->plhs[0] = MexUtils::Int32To1x1Matrix(id);
 }

@@ -1,8 +1,9 @@
-#include "func_getsubblockbitmap.h"
+#include "func_getscaling.h"
 #include "CziInstanceManager.h"
 #include <vector>
 #include <memory>
 #include "argsutils.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -21,20 +22,14 @@ void MexFunction_GetScaling_CheckArguments(MatlabArgs* args)
 
 void MexFunction_GetScaling_Execute(MatlabArgs* args)
 {
-    std::shared_ptr<CziReader> reader;
-
     int id;
     bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
-    try
+    if (!b)
     {
-        reader = CziReaderManager::GetInstance().GetInstance(id);
-    }
-    catch (out_of_range&)
-    {
-        /*ErrHelper::ReportError_CziReaderInstanceNotExisting(libData, id);
-        return LIBRARY_FUNCTION_ERROR;*/
+        throw invalid_argument("2nd argument must be an integer");
     }
 
-    auto m = reader->GetScalingAsMatlabStruct();
+    std::shared_ptr<CziReader> reader = ::Utils::GetReaderOrThrow(id);
+    auto* m = reader->GetScalingAsMatlabStruct();
     args->plhs[0] = m;
 }

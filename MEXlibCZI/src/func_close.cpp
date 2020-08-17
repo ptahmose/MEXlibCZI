@@ -1,10 +1,10 @@
-#include "func_open.h"
+#include "func_close.h"
 #include "libraryInfo.h"
 #include "CziInstanceManager.h"
 #include <vector>
 #include <memory>
-
 #include "argsutils.h"
+#include "dbgprint.h"
 
 using namespace std;
 
@@ -23,17 +23,16 @@ void MexFunction_Close_CheckArguments(MatlabArgs* args)
 
 void MexFunction_Close_Execute(MatlabArgs* args)
 {
-    std::shared_ptr<CziReader> reader;
-
     int id;
     bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
     try
     {
+        VDBGPRINT((CDbg::Level::Trace, "MexFunction_Close_Execute: trying to remove instance with id=%i.", id));
         CziReaderManager::GetInstance().RemoveInstance(id);
     }
     catch (out_of_range&)
     {
-        /*ErrHelper::ReportError_CziReaderInstanceNotExisting(libData, id);
-        return LIBRARY_FUNCTION_ERROR;*/
+        VDBGPRINT((CDbg::Level::Trace, "MexFunction_Close_Execute: removing instance with id=%i failed.", id));
+        throw invalid_argument("invalid handle specified");
     }
 }

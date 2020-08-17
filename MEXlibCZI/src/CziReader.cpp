@@ -33,7 +33,7 @@ mxArray* CziReader::GetScalingAsMatlabStruct()
     static const char* fieldNames[] = { "scaleX", "scaleY", "scaleZ" };
 
     mwSize dims[2] = { 1, 1 };
-    auto s = mxCreateStructArray(
+    auto* s = mxCreateStructArray(
         2,
         dims,
         sizeof(fieldNames) / sizeof(fieldNames[0]),
@@ -232,24 +232,6 @@ mxArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& r
         static_cast<size_t>(bitmap->GetHeight()),
         static_cast<size_t>(bitmap->GetWidth()) * static_cast<size_t>(bitmap->GetHeight()));
     return arr;
-
-    //auto mimagedeleter = std::bind(
-    //    [](WolframImageLibrary_Functions imgLibFuncs, MImage mimg)->void {imgLibFuncs->MImage_free(mimg); },
-    //    libData->imageLibraryFunctions, std::placeholders::_1);
-    //std::unique_ptr<IMAGEOBJ_ENTRY, decltype(mimagedeleter)> spMimg(
-    //    MImageHelper::CreateMImage(libData->imageLibraryFunctions, sizeResult, libCZI::PixelType::Bgr24),
-    //    mimagedeleter);
-
-    //CMImageWrapper mimgWrapper(libData->imageLibraryFunctions, spMimg.get());
-    //libCZI::Compositors::ComposeMultiChannel_Bgr24(
-    //    &mimgWrapper,
-    //    (int)channelBitmaps.size(),
-    //    &vecBm[0],
-    //    dsplHlp.GetChannelInfosArray());
-
-    //MImageHelper::SwapRgb(&mimgWrapper);
-
-    //return spMimg.release();
 }
 
 mxArray* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom)
@@ -293,23 +275,8 @@ mxArray* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& 
     accessorGetOptions.backGroundColor = backgroundColor;
     auto bitmap = scsta->Get(pixeltype, roi, planeCoordinate, zoom, &accessorGetOptions);
 
-    auto mxarray = ConvertToMxArray(bitmap.get());
+    auto* mxarray = ConvertToMxArray(bitmap.get());
     return mxarray;
-    //auto mimagedeleter = std::bind(
-    //    [](WolframImageLibrary_Functions imgLibFuncs, MImage mimg)->void {imgLibFuncs->MImage_free(mimg); },
-    //    libData->imageLibraryFunctions, std::placeholders::_1);
-    //std::unique_ptr<IMAGEOBJ_ENTRY, decltype(mimagedeleter)> spMimg(
-    //    MImageHelper::CreateMImage(libData->imageLibraryFunctions, size, pixeltype),
-    //    mimagedeleter);
-
-    //CMImageWrapper mimgWrapper(libData->imageLibraryFunctions, spMimg.get());
-    //ISingleChannelScalingTileAccessor::Options accessorGetOptions;
-    //accessorGetOptions.Clear();
-    //accessorGetOptions.backGroundColor = backgroundColor;
-    //scsta->Get(&mimgWrapper, roi, planeCoordinate, zoom, &accessorGetOptions);
-    //MImageHelper::SwapRgb(&mimgWrapper);
-
-    //return spMimg.release();
 }
 
 std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
@@ -522,7 +489,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 
 /*static*/ mxArray* CziReader::ConvertToMatlabStruct(const libCZI::IntRect& rect)
 {
-    auto m = mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
+    auto* m = mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
     *((int*)mxGetData(m)) = rect.x;
     *(1 + (int*)mxGetData(m)) = rect.y;
     *(2 + (int*)mxGetData(m)) = rect.w;

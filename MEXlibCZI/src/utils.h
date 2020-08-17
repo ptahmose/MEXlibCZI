@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstdint>
+#include "CziReader.h"
 #include "../include_matlabheaders.h"
 
 class Utils
@@ -12,6 +13,8 @@ public:
     static std::uint8_t HexCharToInt(char c);
     static std::wstring convertUtf8ToWchar_t(const std::string& str) { return Utils::convertUtf8ToWchar_t(str.c_str()); }
     static std::wstring convertUtf8ToWchar_t(const char* sz);
+
+    static std::shared_ptr<CziReader> GetReaderOrThrow(int id);
 };
 
 class MexUtils
