@@ -43,6 +43,9 @@ public:
 
     mxArray* MxCreateNumericMatrix(size_t m, size_t n, mxClassID classid, mxComplexity flag);
 
+    void MxSetFieldByNumber(mxArray* pa, size_t i, int fieldnum, mxArray* value);
+    mxArray* MxCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** fieldnames);
+
     double GetDblNan();
     double GetDblInf();
 

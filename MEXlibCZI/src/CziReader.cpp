@@ -4,6 +4,7 @@
 #include <codecvt>
 
 #include "CziUtilities.h"
+#include "mexapi.h"
 #include "utils.h"
 
 using namespace std;
@@ -32,16 +33,17 @@ mxArray* CziReader::GetScalingAsMatlabStruct()
 {
     static const char* fieldNames[] = { "scaleX", "scaleY", "scaleZ" };
 
-    mwSize dims[2] = { 1, 1 };
-    auto* s = mxCreateStructArray(
+    static const mwSize dims[2] = { 1, 1 };
+    auto mexApi = MexApi::GetInstance();
+    auto* s = mexApi.MxCreateStructArray(
         2,
         dims,
         sizeof(fieldNames) / sizeof(fieldNames[0]),
         fieldNames);
     const libCZI::ScalingInfo& scaling = this->GetScalingInfoFromCzi();
-    mxSetFieldByNumber(s, 0, 0, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleXValid() ? scaling.scaleX : numeric_limits<double>::quiet_NaN()));
-    mxSetFieldByNumber(s, 0, 1, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleYValid() ? scaling.scaleY : numeric_limits<double>::quiet_NaN()));
-    mxSetFieldByNumber(s, 0, 2, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleZValid() ? scaling.scaleZ : numeric_limits<double>::quiet_NaN()));
+    mexApi.MxSetFieldByNumber(s, 0, 0, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleXValid() ? scaling.scaleX : numeric_limits<double>::quiet_NaN()));
+    mexApi.MxSetFieldByNumber(s, 0, 1, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleYValid() ? scaling.scaleY : numeric_limits<double>::quiet_NaN()));
+    mexApi.MxSetFieldByNumber(s, 0, 2, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleZValid() ? scaling.scaleZ : numeric_limits<double>::quiet_NaN()));
     return s;
 }
 
@@ -72,29 +74,36 @@ mxArray* CziReader::GetInfo()
     static const char* fieldNames[] = { "subblockcount", "boundingBox", "boundingBoxLayer0", "dimBounds", "sceneBoundingBoxes", "minMindex", "maxMindex" };
 
     mwSize dims[2] = { 1, 1 };
-    auto s = mxCreateStructArray(
+    auto mexApi = MexApi::GetInstance();
+    auto s = mexApi.MxCreateStructArray(
         2,
         dims,
         (sizeof(fieldNames) / sizeof(fieldNames[0])) - (statistics.IsMIndexValid() ? 0 : 2),
         fieldNames);
 
-    auto no = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetData(no)) = statistics.subBlockCount;
-    mxSetFieldByNumber(s, 0, 0, no);
+    /*auto no = mexApi.MxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+    *(mexApi.MxGetInt32s(no)) = statistics.subBlockCount;
+    //*((int*)mxGetData(no)) = statistics.subBlockCount;
+    //mxSetFieldByNumber(s, 0, 0, no);
+    mexApi.MxSetFieldByNumber(s, 0, 0, no);*/
 
-    no = mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
+    mexApi.MxSetFieldByNumber(s, 0, 0, MexUtils::Int32To1x1Matrix(statistics.subBlockCount));
+
+    /*no = mexApi.MxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);//   mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
     *((int*)mxGetData(no)) = statistics.boundingBox.x;
     *(1 + (int*)mxGetData(no)) = statistics.boundingBox.y;
     *(2 + (int*)mxGetData(no)) = statistics.boundingBox.w;
     *(3 + (int*)mxGetData(no)) = statistics.boundingBox.h;
-    mxSetFieldByNumber(s, 0, 1, no);
+    mxSetFieldByNumber(s, 0, 1, no);*/
+    mexApi.MxSetFieldByNumber(s, 0, 1, CziReader::ConvertToMatlabStruct(statistics.boundingBox));
 
-    no = mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
+    /*no = mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
     *((int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.x;
     *(1 + (int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.y;
     *(2 + (int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.w;
     *(3 + (int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.h;
-    mxSetFieldByNumber(s, 0, 2, no);
+    mxSetFieldByNumber(s, 0, 2, no);*/
+    mexApi.MxSetFieldByNumber(s, 0, 2, CziReader::ConvertToMatlabStruct(statistics.boundingBoxLayer0Only));
 
     mxSetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(&statistics.dimBounds));
 
@@ -102,13 +111,15 @@ mxArray* CziReader::GetInfo()
 
     if (statistics.IsMIndexValid())
     {
-        auto m = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+        /*auto m = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
         *((int*)mxGetData(m)) = statistics.minMindex;
-        mxSetFieldByNumber(s, 0, 5, m);
+        mxSetFieldByNumber(s, 0, 5, m);*/
+        mexApi.MxSetFieldByNumber(s, 0, 5, MexUtils::Int32To1x1Matrix(statistics.minMindex));
 
-        m = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+        /*m = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
         *((int*)mxGetData(m)) = statistics.maxMindex;
-        mxSetFieldByNumber(s, 0, 6, m);
+        mxSetFieldByNumber(s, 0, 6, m);*/
+        mexApi.MxSetFieldByNumber(s, 0, 6, MexUtils::Int32To1x1Matrix(statistics.maxMindex));
     }
 
     return s;
@@ -376,7 +387,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     for (decltype(height) y = 0; y < height; ++y)
     {
         const float* ptrSrc = (const float*)(((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride);
-        float* ptrDst = (float*)(((uint8_t*)pDst) + y*4);
+        float* ptrDst = (float*)(((uint8_t*)pDst) + y * 4);
         for (decltype(width) x = 0; x < width; ++x)
         {
             *ptrDst = *ptrSrc++;
@@ -416,7 +427,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     for (decltype(height) y = 0; y < height; ++y)
     {
         const uint16_t* ptrSrc = (const uint16_t*)(((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride);
-        uint16_t* ptrDst = (uint16_t*)(((uint8_t*)pDst) + y*2);
+        uint16_t* ptrDst = (uint16_t*)(((uint8_t*)pDst) + y * 2);
         for (decltype(width) x = 0; x < width; ++x)
         {
             const uint16_t b = *ptrSrc++;
@@ -489,10 +500,11 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 
 /*static*/ mxArray* CziReader::ConvertToMatlabStruct(const libCZI::IntRect& rect)
 {
-    auto* m = mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetData(m)) = rect.x;
-    *(1 + (int*)mxGetData(m)) = rect.y;
-    *(2 + (int*)mxGetData(m)) = rect.w;
-    *(3 + (int*)mxGetData(m)) = rect.h;
+    auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
+    int* ptr = MexApi::GetInstance().MxGetInt32s(m);
+    ptr[0] = rect.x;
+    ptr[1] = rect.y;
+    ptr[2] = rect.w;
+    ptr[3] = rect.h;
     return m;
 }

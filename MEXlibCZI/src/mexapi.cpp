@@ -116,6 +116,17 @@ mxArray* MexApi::MxCreateNumericMatrix(size_t m, size_t n, mxClassID classid, mx
     return mxCreateNumericMatrix(m, n, classid, flag);
 }
 
+void MexApi::MxSetFieldByNumber(mxArray* pa, size_t i, int fieldnum, mxArray* value)
+{
+    mxSetFieldByNumber(pa, i, fieldnum, value);
+}
+
+mxArray* MexApi::MxCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** fieldnames)
+{
+    return mxCreateStructArray(ndim, dims, nfields, fieldnames);
+}
+
+
 double MexApi::GetDblNan()
 {
     return mxGetNaN();
