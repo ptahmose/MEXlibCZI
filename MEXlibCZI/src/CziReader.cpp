@@ -207,10 +207,12 @@ mxArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& r
         dsplHlp.GetChannelInfosArray());
 
     mwSize dims[3] = { bitmap->GetHeight(), bitmap->GetWidth(), 3 };
-    auto* arr = mxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
+    auto mexApi = MexApi::GetInstance();
+    //auto* arr = mxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
+    auto* arr = mexApi.MxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
     CziReader::CopyTransposeInterleavedToPlanarBgr24(
         bitmap.get(),
-        mxGetData(arr),
+        mexApi.MxGetData(arr),
         static_cast<size_t>(bitmap->GetHeight()),
         static_cast<size_t>(bitmap->GetWidth()) * static_cast<size_t>(bitmap->GetHeight()));
     return arr;
@@ -223,8 +225,8 @@ mxArray* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(const
     RgbFloatColor color{ 0,0,0 };
 
     mwSize dims[3] = { sizeResult.h, sizeResult.w, 3 };
-    auto* arr = mxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
-
+    //auto* arr = mxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
+    auto* arr = MexApi::GetInstance().MxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
     return arr;
 }
 
@@ -399,7 +401,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     for (decltype(height) y = 0; y < height; ++y)
     {
         const uint16_t* ptrSrc = (const uint16_t*)(((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride);
-        uint16_t* ptrDst = (uint16_t*)(((uint8_t*)pDst) + y * 2);
+        uint16_t* ptrDst = (uint16_t*)(((uint8_t*)pDst) + y * (size_t)2);
         for (decltype(width) x = 0; x < width; ++x)
         {
             const uint16_t b = *ptrSrc++;
