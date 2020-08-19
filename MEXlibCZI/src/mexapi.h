@@ -22,6 +22,7 @@ public:
     std::uint32_t* MxGetUint32s(const mxArray* pArr);
     std::int64_t* MxGetInt64s(const mxArray* pArr);
     std::uint64_t* MxGetUint64s(const mxArray* pArr);
+    void* MxGetData(const mxArray* pArr);
 
     std::string MxArrayToUtf8String(const mxArray* pArr);
 
@@ -42,6 +43,8 @@ public:
     bool MxIsChar(const mxArray* pArr);
 
     mxArray* MxCreateNumericMatrix(size_t m, size_t n, mxClassID classid, mxComplexity flag);
+
+    mxArray* MxCreateNumericArray(size_t ndim, const size_t* dims, mxClassID classid, mxComplexity flag);
 
     void MxSetFieldByNumber(mxArray* pa, size_t i, int fieldnum, mxArray* value);
     mxArray* MxCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** fieldnames);

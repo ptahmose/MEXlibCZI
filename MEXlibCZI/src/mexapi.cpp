@@ -62,6 +62,11 @@ std::uint64_t* MexApi::MxGetUint64s(const mxArray* pArr)
     return mxGetUint64s(pArr);
 }
 
+void* MexApi::MxGetData(const mxArray* pArr)
+{
+    return mxGetData(pArr);
+}
+
 bool MexApi::MxIsChar(const mxArray* pArr)
 {
     return mxIsChar(pArr);
@@ -114,6 +119,11 @@ void MexApi::MexAtExit(void (*mex_exit_fn)(void))
 mxArray* MexApi::MxCreateNumericMatrix(size_t m, size_t n, mxClassID classid, mxComplexity flag)
 {
     return mxCreateNumericMatrix(m, n, classid, flag);
+}
+
+mxArray* MexApi::MxCreateNumericArray(size_t ndim, const size_t* dims, mxClassID classid, mxComplexity flag)
+{
+    return mxCreateNumericArray(ndim, dims, classid, flag);
 }
 
 void MexApi::MxSetFieldByNumber(mxArray* pa, size_t i, int fieldnum, mxArray* value)

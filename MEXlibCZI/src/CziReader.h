@@ -1,6 +1,6 @@
 #pragma once
 
-#include "inc_libCzi.h"
+#include "inc_libczi.h"
 #include <mutex>
 #include <memory>
 #include <array>

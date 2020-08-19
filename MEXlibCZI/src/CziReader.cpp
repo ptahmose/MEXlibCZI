@@ -81,44 +81,15 @@ mxArray* CziReader::GetInfo()
         (sizeof(fieldNames) / sizeof(fieldNames[0])) - (statistics.IsMIndexValid() ? 0 : 2),
         fieldNames);
 
-    /*auto no = mexApi.MxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *(mexApi.MxGetInt32s(no)) = statistics.subBlockCount;
-    //*((int*)mxGetData(no)) = statistics.subBlockCount;
-    //mxSetFieldByNumber(s, 0, 0, no);
-    mexApi.MxSetFieldByNumber(s, 0, 0, no);*/
-
     mexApi.MxSetFieldByNumber(s, 0, 0, MexUtils::Int32To1x1Matrix(statistics.subBlockCount));
-
-    /*no = mexApi.MxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);//   mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetData(no)) = statistics.boundingBox.x;
-    *(1 + (int*)mxGetData(no)) = statistics.boundingBox.y;
-    *(2 + (int*)mxGetData(no)) = statistics.boundingBox.w;
-    *(3 + (int*)mxGetData(no)) = statistics.boundingBox.h;
-    mxSetFieldByNumber(s, 0, 1, no);*/
     mexApi.MxSetFieldByNumber(s, 0, 1, CziReader::ConvertToMatlabStruct(statistics.boundingBox));
-
-    /*no = mxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.x;
-    *(1 + (int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.y;
-    *(2 + (int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.w;
-    *(3 + (int*)mxGetData(no)) = statistics.boundingBoxLayer0Only.h;
-    mxSetFieldByNumber(s, 0, 2, no);*/
     mexApi.MxSetFieldByNumber(s, 0, 2, CziReader::ConvertToMatlabStruct(statistics.boundingBoxLayer0Only));
-
-    mxSetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(&statistics.dimBounds));
-
-    mxSetFieldByNumber(s, 0, 4, CziReader::ConvertToMatlabStruct(statistics.sceneBoundingBoxes));
+    mexApi.MxSetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(&statistics.dimBounds));
+    mexApi.MxSetFieldByNumber(s, 0, 4, CziReader::ConvertToMatlabStruct(statistics.sceneBoundingBoxes));
 
     if (statistics.IsMIndexValid())
     {
-        /*auto m = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-        *((int*)mxGetData(m)) = statistics.minMindex;
-        mxSetFieldByNumber(s, 0, 5, m);*/
         mexApi.MxSetFieldByNumber(s, 0, 5, MexUtils::Int32To1x1Matrix(statistics.minMindex));
-
-        /*m = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-        *((int*)mxGetData(m)) = statistics.maxMindex;
-        mxSetFieldByNumber(s, 0, 6, m);*/
         mexApi.MxSetFieldByNumber(s, 0, 6, MexUtils::Int32To1x1Matrix(statistics.maxMindex));
     }
 
@@ -298,46 +269,47 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 
 /*static*/mxArray* CziReader::ConvertToMxArray(libCZI::IBitmapData* bitmapData)
 {
+    auto mexApi = MexApi::GetInstance();
     switch (bitmapData->GetPixelType())
     {
     case PixelType::Gray8:
     {
-        auto* arr = mxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxUINT8_CLASS, mxREAL);
-        CziReader::CopyTransposeGray8(bitmapData, mxGetData(arr), 1 * static_cast<size_t>(bitmapData->GetHeight()));
+        auto* arr = mexApi.MxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxUINT8_CLASS, mxREAL);
+        CziReader::CopyTransposeGray8(bitmapData, mexApi.MxGetData(arr), 1 * static_cast<size_t>(bitmapData->GetHeight()));
         return arr;
     }
     case PixelType::Gray16:
     {
-        auto* arr = mxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxUINT16_CLASS, mxREAL);
-        CziReader::CopyTransposeGray16(bitmapData, mxGetData(arr), 2 * static_cast<size_t>(bitmapData->GetHeight()));
+        auto* arr = mexApi.MxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxUINT16_CLASS, mxREAL);
+        CziReader::CopyTransposeGray16(bitmapData, mexApi.MxGetData(arr), 2 * static_cast<size_t>(bitmapData->GetHeight()));
         return arr;
     }
     case PixelType::Bgr24:
     {
-        mwSize dims[3] = { bitmapData->GetHeight(), bitmapData->GetWidth(), 3 };
-        auto* arr = mxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
+        size_t dims[3] = { bitmapData->GetHeight(), bitmapData->GetWidth(), 3 };
+        auto* arr = mexApi.MxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
         CziReader::CopyTransposeInterleavedToPlanarBgr24(
             bitmapData,
-            mxGetData(arr),
+            mexApi.MxGetData(arr),
             static_cast<size_t>(bitmapData->GetHeight()),
             static_cast<size_t>(bitmapData->GetWidth()) * static_cast<size_t>(bitmapData->GetHeight()));
         return arr;
     }
     case PixelType::Bgr48:
     {
-        mwSize dims[3] = { bitmapData->GetHeight(), bitmapData->GetWidth() ,3 };
-        auto* arr = mxCreateNumericArray(3, dims, mxUINT16_CLASS, mxREAL);
+        size_t dims[3] = { bitmapData->GetHeight(), bitmapData->GetWidth() ,3 };
+        auto* arr = mexApi.MxCreateNumericArray(3, dims, mxUINT16_CLASS, mxREAL);
         CziReader::CopyTransposeInterleavedToPlanarBgr48(
             bitmapData,
-            mxGetData(arr),
+            mexApi.MxGetData(arr),
             static_cast<size_t>(bitmapData->GetHeight()) * 2,
             static_cast<size_t>(bitmapData->GetWidth()) * static_cast<size_t>(bitmapData->GetHeight()) * 2);
         return arr;
     }
     case PixelType::Gray32Float:
     {
-        auto* arr = mxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxSINGLE_CLASS, mxREAL);
-        CziReader::CopyTransposeGrayFloat(bitmapData, mxGetData(arr), 4 * static_cast<size_t>(bitmapData->GetHeight()));
+        auto* arr = mexApi.MxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxSINGLE_CLASS, mxREAL);
+        CziReader::CopyTransposeGrayFloat(bitmapData, mexApi.MxGetData(arr), 4 * static_cast<size_t>(bitmapData->GetHeight()));
         return arr;
     }
     default:
@@ -463,16 +435,23 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     }
 
     mwSize dims[2] = { 1, 1 };
-    auto s = mxCreateStructArray(2, dims, (int)fieldNames.size(), &fieldNames[0]);
+    auto mexApi = MexApi::GetInstance();
+    auto s = mexApi.MxCreateStructArray(2, dims, (int)fieldNames.size(), &fieldNames[0]);
 
     for (int i = 0; i < dimensions.size(); ++i)
     {
         int startIndex, size;
         bounds->TryGetInterval(libCZI::Utils::CharToDimension(dimensions[i][0]), &startIndex, &size);
+        auto no = mexApi.MxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
+        int* ptr = mexApi.MxGetInt32s(no);
+        *ptr = startIndex;
+        *(ptr + 1) = size;
+        mexApi.MxSetFieldByNumber(s, 0, i, no);
+/*
         auto no = mxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
         *((int*)mxGetData(no)) = startIndex;
         *(1 + (int*)mxGetData(no)) = size;
-        mxSetFieldByNumber(s, 0, i, no);
+        mxSetFieldByNumber(s, 0, i, no);*/
     }
 
     return s;
@@ -482,16 +461,15 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 {
     static const char* fieldNames[] = { "sceneIndex", "boundingBox", "boundingBoxLayer0" };
     mwSize dims[2] = { 1, boundingBoxMap.size() };
-    auto s = mxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
+    auto mexApi = MexApi::GetInstance();
+    auto s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
 
     int i = 0;
     for (auto& it = boundingBoxMap.cbegin(); it != boundingBoxMap.cend(); ++it)
     {
-        auto no = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-        *((int*)mxGetData(no)) = it->first;
-        mxSetFieldByNumber(s, i, 0, no);
-        mxSetFieldByNumber(s, i, 1, CziReader::ConvertToMatlabStruct(it->second.boundingBox));
-        mxSetFieldByNumber(s, i, 2, CziReader::ConvertToMatlabStruct(it->second.boundingBoxLayer0));
+        mexApi.MxSetFieldByNumber(s, i, 0, MexUtils::Int32To1x1Matrix(it->first));
+        mexApi.MxSetFieldByNumber(s, i, 1, CziReader::ConvertToMatlabStruct(it->second.boundingBox));
+        mexApi.MxSetFieldByNumber(s, i, 2, CziReader::ConvertToMatlabStruct(it->second.boundingBoxLayer0));
         ++i;
     }
 
