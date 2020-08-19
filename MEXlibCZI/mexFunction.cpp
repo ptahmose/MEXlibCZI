@@ -3,7 +3,7 @@
 #include "mexFunctions.h"
 #include "src/mexapi.h"
 #include "src/CziInstanceManager.h"
-#include <Windows.h>
+//#include <Windows.h>
 #include <memory>
 
 #include "errorcodes.h"
@@ -114,7 +114,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     }
 
     //plhs[0] = 
-    OutputDebugStringA("HELLO WORLD!");
+    //OutputDebugStringA("HELLO WORLD!");
 
     return;
 }
