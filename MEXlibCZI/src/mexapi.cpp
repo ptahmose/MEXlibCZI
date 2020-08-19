@@ -1,5 +1,6 @@
 #include "mexapi.h"
 #include <memory>
+#include <cstring>
 
 using namespace std;
 
