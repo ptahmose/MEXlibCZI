@@ -69,8 +69,12 @@ target_link_libraries(MEXlibCZI PRIVATE ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRAR
 target_link_libraries(MEXlibCZI PRIVATE libCZIStatic JxrDecodeStatic)
 
 set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mexw64")
-SET_TARGET_PROPERTIES(MEXlibCZI PROPERTIES LINK_FLAGS "/export:mexFunction")
-SET_TARGET_PROPERTIES (MEXlibCZI PROPERTIES DEFINE_SYMBOL  "MATLABMEXBUILD" )
+#SET_TARGET_PROPERTIES(MEXlibCZI PROPERTIES LINK_FLAGS "/export:mexFunction")
+SET_TARGET_PROPERTIES (MEXlibCZI PROPERTIES DEFINE_SYMBOL "MATLABMEXBUILD")
+#SET_TARGET_PROPERTIES (MEXlibCZI PROPERTIES DEFINE_SYMBOL "MW_NEEDS_VERSION_H")
+
+# this definition is necessary so that "mexFunction" is exported
+target_compile_definitions(MEXlibCZI PRIVATE MW_NEEDS_VERSION_H=1)
 
 if(WIN32)
  target_compile_definitions(MEXlibCZI PRIVATE _WIN32API=1)
