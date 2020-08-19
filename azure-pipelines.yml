@@ -23,5 +23,9 @@ jobs:
   - task: CmdLine@2
     inputs:
       script: 'cmake --build  .\build --config Release'
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: $(Build.SourcesDirectory)/build/MEXlibCZI/Release/MEXlibCZI.mexw64
+      artifactName: MEXlibCZIWinx64
   - script: echo Hello, world!
     displayName: 'Run a one-line script'
