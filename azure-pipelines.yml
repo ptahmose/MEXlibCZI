@@ -3,11 +3,11 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'windows-latest'
-
-steps:
- - task: DownloadSecureFile@1
+- job: Windowsx64
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - task: DownloadSecureFile@1
    inputs:
       secureFile: 'mlfiles.zip'
   - task: ExtractFiles@1
@@ -15,10 +15,9 @@ steps:
       archiveFilePatterns: '$(Agent.TempDirectory)\mlfiles.zip'
       destinationFolder: 'matlabheaders'
       cleanDestinationFolder: true    
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
+  - script: echo Hello, world!
+    displayName: 'Run a one-line script'
+  - script: |
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    displayName: 'Run a multi-line script'
