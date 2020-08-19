@@ -1,5 +1,6 @@
 #include "mexFunctions.h"
 #include <string>
+#include <cstring>
 
 #include "src/func_close.h"
 #include "src/func_getversion.h"
