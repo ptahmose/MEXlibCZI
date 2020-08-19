@@ -8,7 +8,7 @@ pool:
 
 steps:
  - task: DownloadSecureFile@1
-    inputs:
+   inputs:
       secureFile: 'mlfiles.zip'
   - task: ExtractFiles@1
     inputs:
