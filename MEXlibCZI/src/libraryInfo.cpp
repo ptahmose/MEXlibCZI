@@ -1,6 +1,6 @@
 #include <sstream>
-#include "libraryinfo.h"
-#include "inc_libCzi.h"
+#include "libraryInfo.h"
+#include "inc_libczi.h"
 #include <mexlibczi_Config.h>
 
 using namespace std;
