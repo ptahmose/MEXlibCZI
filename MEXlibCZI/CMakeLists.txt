@@ -76,6 +76,7 @@ elseif(UNIX)
 # set_target_properties(MEXlibCZI PROPERTIES LINK_SEARCH_END_STATIC ON)
 # set_property(TARGET MEXlibCZI PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_link_options(MEXlibCZI PRIVATE -static-libgcc -static-libstdc++ )
+ set_target_properties(MEXlibCZI PROPERTIES PREFIX "")
 endif()
 
 #SET_TARGET_PROPERTIES(MEXlibCZI PROPERTIES LINK_FLAGS "/export:mexFunction")
