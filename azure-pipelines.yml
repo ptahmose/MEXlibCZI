@@ -1,15 +1,20 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Build MEXlibCZI for Windows-x64 and Linux-x64
 
 trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'windows-latest'
 
 steps:
+ - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'mlfiles.zip'
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\mlfiles.zip'
+      destinationFolder: 'matlabheaders'
+      cleanDestinationFolder: true    
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
 

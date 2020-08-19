@@ -6,6 +6,7 @@ endif()
 
 set(mexlibczi_LOGLEVEL 1)
 
+
 set(mexlibczi_VERSION_MAJOR	${MEXCZI_MAJOR})
 set(mexlibczi_VERSION_MINOR	${MEXCZI_MINOR})
 set(mexlibczi_VERSION_PATCH	${MEXCZI_PATCH})

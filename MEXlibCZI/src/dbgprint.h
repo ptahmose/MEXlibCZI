@@ -24,9 +24,9 @@ public:
 };
 
 #if MEXLIBCZI_ENABLELOGGING
-#define DBGPRINT( x )  do { CDbg::Print x; } while (0)
-#define VDBGPRINT( x )  do { CDbg::vPrint x; } while (0)
+ #define DBGPRINT( x )  do { CDbg::Print x; } while (0)
+ #define VDBGPRINT( x )  do { CDbg::vPrint x; } while (0)
 #else
-#define DBGPRINT( x )
-#define VDBGPRINT( x )
+ #define DBGPRINT( x )
+ #define VDBGPRINT( x )
 #endif
