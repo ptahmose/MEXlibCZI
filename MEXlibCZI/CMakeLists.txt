@@ -72,16 +72,11 @@ if(WIN32)
  set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mexw64")
 elseif(UNIX)
  set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mexa64")
-# set_target_properties(MEXlibCZI PROPERTIES LINK_SEARCH_START_STATIC ON)
-# set_target_properties(MEXlibCZI PROPERTIES LINK_SEARCH_END_STATIC ON)
-# set_property(TARGET MEXlibCZI PROPERTY POSITION_INDEPENDENT_CODE ON)
  target_link_options(MEXlibCZI PRIVATE -static-libgcc -static-libstdc++ )
- set_target_properties(MEXlibCZI PROPERTIES PREFIX "")
+ set_target_properties(MEXlibCZI PROPERTIES PREFIX "") # otherwise "lib" is prepended
 endif()
 
-#SET_TARGET_PROPERTIES(MEXlibCZI PROPERTIES LINK_FLAGS "/export:mexFunction")
 SET_TARGET_PROPERTIES (MEXlibCZI PROPERTIES DEFINE_SYMBOL "MATLABMEXBUILD")
-#SET_TARGET_PROPERTIES (MEXlibCZI PROPERTIES DEFINE_SYMBOL "MW_NEEDS_VERSION_H")
 
 # this definition is necessary so that "mexFunction" is exported
 target_compile_definitions(MEXlibCZI PRIVATE MW_NEEDS_VERSION_H=1)
