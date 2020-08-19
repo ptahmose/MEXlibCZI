@@ -16,5 +16,12 @@ jobs:
       archiveFilePatterns: '$(Agent.TempDirectory)\mlfiles.zip'
       destinationFolder: 'matlabheaders'
       cleanDestinationFolder: true    
+  - task: CMake@1
+    inputs:
+      workingDirectory: $(Build.SourcesDirectory)/build
+      cmakeArgs: '.. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=$(Build.SourcesDirectory)\matlabheaders\include -DMEXLIBCZI_LIBS=$(Build.SourcesDirectory)\matlabheaders\lib'
+  - task: CmdLine@2
+    inputs:
+      script: 'cmake --build  .\build --config Release'
   - script: echo Hello, world!
     displayName: 'Run a one-line script'
