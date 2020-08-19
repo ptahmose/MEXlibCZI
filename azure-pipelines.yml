@@ -3,6 +3,7 @@
 trigger:
 - master
 
+jobs:
 - job: Windowsx64
   pool:
     vmImage: 'windows-latest'
