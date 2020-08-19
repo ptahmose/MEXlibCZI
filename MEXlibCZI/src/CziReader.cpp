@@ -465,7 +465,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     auto s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
 
     int i = 0;
-    for (const auto& it = boundingBoxMap.cbegin(); it != boundingBoxMap.cend(); ++it)
+    for (auto it = boundingBoxMap.cbegin(); it != boundingBoxMap.cend(); ++it)
     {
         mexApi.MxSetFieldByNumber(s, i, 0, MexUtils::Int32To1x1Matrix(it->first));
         mexApi.MxSetFieldByNumber(s, i, 1, CziReader::ConvertToMatlabStruct(it->second.boundingBox));
