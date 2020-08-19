@@ -35,3 +35,8 @@ b1=MEXlibCZI('GetMultiChannelScalingTileComposite',h,[0 0 139758 103021],'',0.00
 info=MEXlibCZI('GetInfo',h)
 
 b2=MEXlibCZI('GetSingleChannelScalingTileComposite',h,[0 0 139758 103021],'C1',0.01);
+
+
+---------------------------------------------------------------------------------------------------
+
+cd '~/dev/buildMEXlibCZI/MEXlibCZI'
