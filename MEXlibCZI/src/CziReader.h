@@ -4,7 +4,8 @@
 #include <mutex>
 #include <memory>
 #include <array>
-#include "../include_matlabheaders.h"
+//#include "../include_matlabheaders.h"
+#include "mexapi.h"
 //#include "finally.h"
 //#include <WolframLibrary.h>
 //#include <WolframImageLibrary.h>
@@ -27,22 +28,22 @@ public:
 
     void Open(const std::string& utf8_filename);
 
-    mxArray* GetInfo();
+    MexArray* GetInfo();
     std::string GetMetadataXml();
-    mxArray* GetMetadataXmlAsMxArray();
+    MexArray* GetMetadataXmlAsMxArray();
 
-    mxArray* GetSubBlockImage(int sbBlkNo);
-    mxArray* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson);
+    MexArray* GetSubBlockImage(int sbBlkNo);
+    MexArray* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson);
     /* MImage GetSubBlockImage(WolframLibraryData libData, int no);
      MImage GetSingleChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom);
      MImage GetSingleChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor);
      MImage GetMultiChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson);*/
 
-    mxArray* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom);
-    mxArray* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor);
+    MexArray* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom);
+    MexArray* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor);
 
     std::array<double, 3>   GetScaling();
-    mxArray* GetScalingAsMatlabStruct();
+    MexArray* GetScalingAsMatlabStruct();
 
     //mint    ReadSubBlock(int no);
     //MImage  GetBitmapFromSubBlock(mint handle, WolframLibraryData libData);
@@ -50,7 +51,7 @@ public:
     //std::string GetInfoFromSubBlock(mint handle);
 //    bool    ReleaseSubBlock(mint handle);
 private:
-    static mxArray* ConvertToMatlabStruct(const libCZI::IDimBounds* bounds);
+    static MexArray* ConvertToMatlabStruct(const libCZI::IDimBounds* bounds);
 
     /// Initializes the members "displaySettingsFromCzi" and "scalingInfoFromCzi".
     void InitializeInfoFromCzi();
@@ -67,12 +68,12 @@ private:
 
       //MImage GetMultiChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings);
       //MImage GetMultiChannelScalingTileCompositeAllChannelsDisabled(WolframLibraryData libData, const libCZI::IntRect& roi, float zoom);
-    mxArray* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings);
-    mxArray* GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom);
+    MexArray* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings);
+    MexArray* GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom);
 
-    static mxArray* ConvertToMxArray(libCZI::IBitmapData* bitmapData);
-    static mxArray* ConvertToMatlabStruct(const std::map<int, libCZI::BoundingBoxes>& boundingBoxMap);
-    static mxArray* ConvertToMatlabStruct(const libCZI::IntRect& rect);
+    static MexArray* ConvertToMxArray(libCZI::IBitmapData* bitmapData);
+    static MexArray* ConvertToMatlabStruct(const std::map<int, libCZI::BoundingBoxes>& boundingBoxMap);
+    static MexArray* ConvertToMatlabStruct(const libCZI::IntRect& rect);
 
     static void CopyTransposeGray8(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);
     static void CopyTransposeGray16(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);

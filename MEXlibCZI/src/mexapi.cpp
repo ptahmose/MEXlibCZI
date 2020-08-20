@@ -13,80 +13,80 @@ using namespace std;
 
 #if defined(MATLABMEXBUILD)
 
-double* MexApi::MxGetDoubles(const mxArray* pArr)
+double* MexApi::MxGetDoubles(const MexArray* pArr)
 {
-    return mxGetDoubles(pArr);
+    return mxGetDoubles((const mxArray*)pArr);
 }
 
-float* MexApi::MxGetSingles(const mxArray* pArr)
+float* MexApi::MxGetSingles(const MexArray* pArr)
 {
-    return mxGetSingles(pArr);
+    return mxGetSingles((const mxArray*)pArr);
 }
 
-std::int8_t* MexApi::MxGetInt8s(const mxArray* pArr)
+std::int8_t* MexApi::MxGetInt8s(const MexArray* pArr)
 {
-    return mxGetInt8s(pArr);
+    return mxGetInt8s((const mxArray*)pArr);
 }
 
-std::uint8_t* MexApi::MxGetUint8s(const mxArray* pArr)
+std::uint8_t* MexApi::MxGetUint8s(const MexArray* pArr)
 {
-    return mxGetUint8s(pArr);
+    return mxGetUint8s((const mxArray*)pArr);
 }
 
-std::int16_t* MexApi::MxGetInt16s(const mxArray* pArr)
+std::int16_t* MexApi::MxGetInt16s(const MexArray* pArr)
 {
-    return mxGetInt16s(pArr);
+    return mxGetInt16s((const mxArray*)pArr);
 }
 
-std::uint16_t* MexApi::MxGetUint16s(const mxArray* pArr)
+std::uint16_t* MexApi::MxGetUint16s(const MexArray* pArr)
 {
-    return mxGetUint16s(pArr);
+    return mxGetUint16s((const mxArray*)pArr);
 }
 
-std::int32_t* MexApi::MxGetInt32s(const mxArray* pArr)
+std::int32_t* MexApi::MxGetInt32s(const MexArray* pArr)
 {
-    return mxGetInt32s(pArr);
+    return mxGetInt32s((const mxArray*)pArr);
 }
 
-std::uint32_t* MexApi::MxGetUint32s(const mxArray* pArr)
+std::uint32_t* MexApi::MxGetUint32s(const MexArray* pArr)
 {
-    return mxGetUint32s(pArr);
+    return mxGetUint32s((const mxArray*)pArr);
 }
 
-std::int64_t* MexApi::MxGetInt64s(const mxArray* pArr)
+std::int64_t* MexApi::MxGetInt64s(const MexArray* pArr)
 {
-    return mxGetInt64s(pArr);
+    return mxGetInt64s((const mxArray*)pArr);
 }
 
-std::uint64_t* MexApi::MxGetUint64s(const mxArray* pArr)
+std::uint64_t* MexApi::MxGetUint64s(const MexArray* pArr)
 {
-    return mxGetUint64s(pArr);
+    return mxGetUint64s((const mxArray*)pArr);
 }
 
-void* MexApi::MxGetData(const mxArray* pArr)
+void* MexApi::MxGetData(const MexArray* pArr)
 {
-    return mxGetData(pArr);
+    return mxGetData((const mxArray*)pArr);
 }
 
-bool MexApi::MxIsChar(const mxArray* pArr)
+bool MexApi::MxIsChar(const MexArray* pArr)
 {
-    return mxIsChar(pArr);
+    return mxIsChar((const mxArray*)pArr);
 }
 
-std::string MexApi::MxArrayToUtf8String(const mxArray* pArr)
+std::string MexApi::MxArrayToUtf8String(const MexArray* pArr)
 {
-    std::unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String(pArr), mxFree);
+    std::unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String((const mxArray*)pArr), mxFree);
     return string(upArgStr.get());
 }
 
-char* MexApi::MxArrayToMatlabAllocatedUtf8String(const mxArray* pArr)
+char* MexApi::MxArrayToMatlabAllocatedUtf8String(const MexArray* pArr)
 {
-    return mxArrayToUTF8String(pArr);
+    return mxArrayToUTF8String((const mxArray*)pArr);
 }
 
-std::unique_ptr<char, void(*)(void*)> MexApi::UpMxArrayToMatlabAllocatedUtf8String(const mxArray* pArr)
+std::unique_ptr<char, void(*)(void*)> MexApi::UpMxArrayToMatlabAllocatedUtf8String(const MexArray* pArr)
 {
-    return std::unique_ptr<char, void(*)(void*)>(mxArrayToUTF8String(pArr), mxFree);
+    return std::unique_ptr<char, void(*)(void*)>(mxArrayToUTF8String((const mxArray*)pArr), mxFree);
 }
 
 void MexApi::MxFree(void* ptr)
@@ -117,24 +117,24 @@ void MexApi::MexAtExit(void (*mex_exit_fn)(void))
     mexAtExit(mex_exit_fn);
 }
 
-mxArray* MexApi::MxCreateNumericMatrix(size_t m, size_t n, mxClassID classid, mxComplexity flag)
+MexArray* MexApi::MxCreateNumericMatrix(size_t m, size_t n, mxClassID classid, mxComplexity flag)
 {
-    return mxCreateNumericMatrix(m, n, classid, flag);
+    return (MexArray*)mxCreateNumericMatrix(m, n, classid, flag);
 }
 
-mxArray* MexApi::MxCreateNumericArray(size_t ndim, const size_t* dims, mxClassID classid, mxComplexity flag)
+MexArray* MexApi::MxCreateNumericArray(size_t ndim, const size_t* dims, mxClassID classid, mxComplexity flag)
 {
-    return mxCreateNumericArray(ndim, dims, classid, flag);
+    return (MexArray*)mxCreateNumericArray(ndim, dims, classid, flag);
 }
 
-void MexApi::MxSetFieldByNumber(mxArray* pa, size_t i, int fieldnum, mxArray* value)
+void MexApi::MxSetFieldByNumber(MexArray* pa, size_t i, int fieldnum, MexArray* value)
 {
-    mxSetFieldByNumber(pa, i, fieldnum, value);
+    mxSetFieldByNumber((mxArray*)pa, i, fieldnum, (mxArray*)value);
 }
 
-mxArray* MexApi::MxCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** fieldnames)
+MexArray* MexApi::MxCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** fieldnames)
 {
-    return mxCreateStructArray(ndim, dims, nfields, fieldnames);
+    return (MexArray*)mxCreateStructArray(ndim, dims, nfields, fieldnames);
 }
 
 
@@ -146,6 +146,28 @@ double MexApi::GetDblNan()
 double MexApi::GetDblInf()
 {
     return mxGetInf();
+}
+
+[[ noreturn ]] void MexApi::MexErrMsgIdAndTxt(
+    const char* identifier, /* string with error message identifier */
+    const char* err_msg)
+{
+    mexErrMsgIdAndTxt(identifier, err_msg);
+}
+
+MexArray* MexApi::MxCreateString(const char* sz)
+{
+    return (MexArray*)mxCreateString(sz);
+}
+
+mxClassID MexApi::MxGetClassID(const MexArray* pArr)
+{
+    return mxGetClassID((const mxArray*)pArr);
+}
+
+size_t MexApi::MxGetNumberOfElements(const MexArray* pArr)
+{
+    return mxGetNumberOfElements((const mxArray*)pArr);
 }
 
 #elif defined(OCTAVEMEXBUILD)

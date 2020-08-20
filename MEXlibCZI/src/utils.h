@@ -3,7 +3,8 @@
 #include <string>
 #include <cstdint>
 #include "CziReader.h"
-#include "../include_matlabheaders.h"
+//#include "../include_matlabheaders.h"
+#include "mexapi.h"
 
 class Utils
 {
@@ -20,6 +21,6 @@ public:
 class MexUtils
 {
 public:
-    static mxArray* DoubleTo1x1Matrix(double v);
-    static mxArray* Int32To1x1Matrix(int v);
+    static MexArray* DoubleTo1x1Matrix(double v);
+    static MexArray* Int32To1x1Matrix(int v);
 };

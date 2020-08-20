@@ -1,13 +1,14 @@
 #pragma once
 
-#include "include_matlabheaders.h"
+//#include "include_matlabheaders.h"
+#include "src/mexapi.h"
 
 struct MatlabArgs
 {
     int nlhs; 
-    mxArray** plhs;
+    /*mxArray*/MexArray** plhs;
     int nrhs;
-    const mxArray** prhs;
+    const /*mxArray*/MexArray** prhs;
 };
 
 struct CMexFunc

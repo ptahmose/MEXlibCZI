@@ -29,7 +29,7 @@ std::array<double, 3> CziReader::GetScaling()
     };
 }
 
-mxArray* CziReader::GetScalingAsMatlabStruct()
+MexArray* CziReader::GetScalingAsMatlabStruct()
 {
     static const char* fieldNames[] = { "scaleX", "scaleY", "scaleZ" };
 
@@ -67,7 +67,7 @@ void CziReader::InitializeInfoFromCzi()
         });
 }
 
-mxArray* CziReader::GetInfo()
+MexArray* CziReader::GetInfo()
 {
     auto statistics = this->reader->GetStatistics();
 
@@ -108,13 +108,13 @@ std::string CziReader::GetMetadataXml()
     return m->GetXml();
 }
 
-mxArray* CziReader::GetMetadataXmlAsMxArray()
+MexArray* CziReader::GetMetadataXmlAsMxArray()
 {
-    auto s = mxCreateString(this->GetMetadataXml().c_str());
+    auto s = MexApi::GetInstance().MxCreateString(this->GetMetadataXml().c_str());
     return s;
 }
 
-mxArray* CziReader::GetSubBlockImage(int sbBlkNo)
+MexArray* CziReader::GetSubBlockImage(int sbBlkNo)
 {
     auto sbBlk = this->reader->ReadSubBlock(sbBlkNo);
     if (!sbBlk)
@@ -128,7 +128,7 @@ mxArray* CziReader::GetSubBlockImage(int sbBlkNo)
     return ConvertToMxArray(bm.get());
 }
 
-mxArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson)
+MexArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson)
 {
     if (displaySettingsJson == nullptr || *displaySettingsJson == '\0')
     {
@@ -152,7 +152,7 @@ mxArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& r
     }
 }
 
-mxArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings)
+MexArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings)
 {
     std::vector<int> activeChannels = libCZI::CDisplaySettingsHelper::GetActiveChannels(displaySettings);
 
@@ -218,7 +218,7 @@ mxArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& r
     return arr;
 }
 
-mxArray* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom)
+MexArray* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom)
 {
     auto accessor = reader->CreateSingleChannelScalingTileAccessor();
     const auto sizeResult = accessor->CalcSize(roi, zoom);
@@ -230,13 +230,13 @@ mxArray* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(const
     return arr;
 }
 
-mxArray* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom)
+MexArray* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom)
 {
     const RgbFloatColor backgndCol{ 0,0,0 };
     return this->GetSingleChannelScalingTileComposite(roi, planeCoordinate, zoom, backgndCol);
 }
 
-mxArray* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor)
+MexArray* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor)
 {
     auto scsta = this->reader->CreateSingleChannelScalingTileAccessor();
     libCZI::IntSize size = scsta->CalcSize(roi, zoom);
@@ -269,7 +269,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return this->displaySettingsFromCzi;
 }
 
-/*static*/mxArray* CziReader::ConvertToMxArray(libCZI::IBitmapData* bitmapData)
+/*static*/MexArray* CziReader::ConvertToMxArray(libCZI::IBitmapData* bitmapData)
 {
     auto mexApi = MexApi::GetInstance();
     switch (bitmapData->GetPixelType())
@@ -416,7 +416,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     }
 }
 
-/*static*/mxArray* CziReader::ConvertToMatlabStruct(const libCZI::IDimBounds* bounds)
+/*static*/MexArray* CziReader::ConvertToMatlabStruct(const libCZI::IDimBounds* bounds)
 {
     vector<string> dimensions;
     for (auto i = (std::underlying_type<libCZI::DimensionIndex>::type)(libCZI::DimensionIndex::MinDim); i <= (std::underlying_type<libCZI::DimensionIndex>::type)(libCZI::DimensionIndex::MaxDim); ++i)
@@ -459,7 +459,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return s;
 }
 
-/*static*/mxArray* CziReader::ConvertToMatlabStruct(const std::map<int, BoundingBoxes>& boundingBoxMap)
+/*static*/MexArray* CziReader::ConvertToMatlabStruct(const std::map<int, BoundingBoxes>& boundingBoxMap)
 {
     static const char* fieldNames[] = { "sceneIndex", "boundingBox", "boundingBoxLayer0" };
     mwSize dims[2] = { 1, boundingBoxMap.size() };
@@ -478,7 +478,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return s;
 }
 
-/*static*/ mxArray* CziReader::ConvertToMatlabStruct(const libCZI::IntRect& rect)
+/*static*/ MexArray* CziReader::ConvertToMatlabStruct(const libCZI::IntRect& rect)
 {
     auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
     int* ptr = MexApi::GetInstance().MxGetInt32s(m);

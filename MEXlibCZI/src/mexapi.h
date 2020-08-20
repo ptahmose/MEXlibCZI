@@ -5,6 +5,8 @@
 #include <memory>
 #include <string>
 
+class MexArray;
+
 class MexApi
 {
 private:
@@ -12,19 +14,19 @@ private:
 public:
     static MexApi& GetInstance();
 
-    double* MxGetDoubles(const mxArray* pArr);
-    float* MxGetSingles(const mxArray* pArr);
-    std::int8_t* MxGetInt8s(const mxArray* pArr);
-    std::uint8_t* MxGetUint8s(const mxArray* pArr);
-    std::int16_t* MxGetInt16s(const mxArray* pArr);
-    std::uint16_t* MxGetUint16s(const mxArray* pArr);
-    std::int32_t* MxGetInt32s(const mxArray* pArr);
-    std::uint32_t* MxGetUint32s(const mxArray* pArr);
-    std::int64_t* MxGetInt64s(const mxArray* pArr);
-    std::uint64_t* MxGetUint64s(const mxArray* pArr);
-    void* MxGetData(const mxArray* pArr);
+    double* MxGetDoubles(const MexArray* pArr);
+    float* MxGetSingles(const MexArray* pArr);
+    std::int8_t* MxGetInt8s(const MexArray* pArr);
+    std::uint8_t* MxGetUint8s(const MexArray* pArr);
+    std::int16_t* MxGetInt16s(const MexArray* pArr);
+    std::uint16_t* MxGetUint16s(const MexArray* pArr);
+    std::int32_t* MxGetInt32s(const MexArray* pArr);
+    std::uint32_t* MxGetUint32s(const MexArray* pArr);
+    std::int64_t* MxGetInt64s(const MexArray* pArr);
+    std::uint64_t* MxGetUint64s(const MexArray* pArr);
+    void* MxGetData(const MexArray* pArr);
 
-    std::string MxArrayToUtf8String(const mxArray* pArr);
+    std::string MxArrayToUtf8String(const MexArray* pArr);
 
     /// Convert to a Matlab allocated UTF8 string - this should be the
     /// preferred way because one cannot guarantee the execution of the d'tor (with std::string)
@@ -33,21 +35,23 @@ public:
     /// This memory must/should be freed by calling mxFree.
     /// \param pArr The mx-array.
     /// \returns Null if it fails, else a pointer to a Matlab-allocated string.
-    char* MxArrayToMatlabAllocatedUtf8String(const mxArray* pArr);
+    char* MxArrayToMatlabAllocatedUtf8String(const MexArray* pArr);
 
-    std::unique_ptr<char, void(*)(void*)> UpMxArrayToMatlabAllocatedUtf8String(const mxArray* pArr);
+    std::unique_ptr<char, void(*)(void*)> UpMxArrayToMatlabAllocatedUtf8String(const MexArray* pArr);
 
     char* MxStrDup(const char* sz);
     char* MxStrDup(const std::string& str);
 
-    bool MxIsChar(const mxArray* pArr);
+    bool MxIsChar(const MexArray* pArr);
 
-    mxArray* MxCreateNumericMatrix(size_t m, size_t n, mxClassID classid, mxComplexity flag);
+    MexArray* MxCreateNumericMatrix(size_t m, size_t n, mxClassID classid, mxComplexity flag);
 
-    mxArray* MxCreateNumericArray(size_t ndim, const size_t* dims, mxClassID classid, mxComplexity flag);
+    MexArray* MxCreateNumericArray(size_t ndim, const size_t* dims, mxClassID classid, mxComplexity flag);
 
-    void MxSetFieldByNumber(mxArray* pa, size_t i, int fieldnum, mxArray* value);
-    mxArray* MxCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** fieldnames);
+    void MxSetFieldByNumber(MexArray* pa, size_t i, int fieldnum, MexArray* value);
+    MexArray* MxCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** fieldnames);
+
+    MexArray* MxCreateString(const char* sz);
 
     double GetDblNan();
     double GetDblInf();
@@ -55,6 +59,13 @@ public:
     void MxFree(void* ptr);
     void MexAtExit(void (*mex_exit_fn)(void));
 
+    mxClassID MxGetClassID(const MexArray* pArr);
+    size_t MxGetNumberOfElements(const MexArray* pArr);
+
+    [[ noreturn ]] void MexErrMsgIdAndTxt(
+        const char* identifier, /* string with error message identifier */
+        const char* err_msg     /* string with error message printf-style format */
+    );
 };
 
 #if defined(HAVE_OCTAVE)

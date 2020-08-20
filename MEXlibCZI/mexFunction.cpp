@@ -37,15 +37,19 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
         gIsInitialized = true;
     }
 
+    auto mexApi = MexApi::GetInstance();
+
     if (nrhs < 1)
     {
-        mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:invalidNumInputs", "One input required.");
+        mexApi.MexErrMsgIdAndTxt("MATLAB:MEXlibCZI:invalidNumInputs", "One input required.");
+        //mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:invalidNumInputs", "One input required.");
     }
 
     /* input must be a string */
-    if (!MexApi::GetInstance().MxIsChar(prhs[0]))
+    if (!MexApi::GetInstance().MxIsChar((const MexArray*)(prhs[0])))
     {
-        mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:inputNotString", "Input must be a string.");
+        //mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:inputNotString", "Input must be a string.");
+        mexApi.MexErrMsgIdAndTxt("MATLAB:MEXlibCZI:inputNotString", "Input must be a string.");
     }
 
     ///* input must be a row vector */
@@ -63,11 +67,11 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     char* errorText = nullptr;
     const char* errorId = nullptr;
     {
-        auto upArgStr = MexApi::GetInstance().UpMxArrayToMatlabAllocatedUtf8String(prhs[0]);
+        auto upArgStr = mexApi.UpMxArrayToMatlabAllocatedUtf8String((const MexArray*)(prhs[0]));
         auto func = CMexFunctions::GetInstance().FindFunc(upArgStr.get());
         if (func != nullptr)
         {
-            MatlabArgs args = { nlhs,plhs,nrhs,prhs };
+            MatlabArgs args = { nlhs,(MexArray**)plhs,nrhs,(const MexArray**)prhs };
 
             try
             {
@@ -110,7 +114,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
         // Remember that we do NOT return from this call - we should make sure that no resource-cleanup is
         //  done beyond this point. The memory for the errorText is allocated with Matlab's malloc - therefore,
         //  it should be released automatically.
-        mexErrMsgIdAndTxt(errorId, errorText);
+        //mexErrMsgIdAndTxt(errorId, errorText);
+        mexApi.MexErrMsgIdAndTxt(errorId, errorText);
     }
 
     //plhs[0] = 

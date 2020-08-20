@@ -5,9 +5,9 @@
 using namespace std;
 using namespace libCZI;
 
-/*static*/bool CArgsUtils::TryGetInt32(const mxArray* pArr, std::int32_t* ptr)
+/*static*/bool CArgsUtils::TryGetInt32(const MexArray* pArr, std::int32_t* ptr)
 {
-    const mxClassID id = mxGetClassID(pArr);
+    const mxClassID id = MexApi::GetInstance().MxGetClassID(pArr);
     int rv;
     switch (id)
     {
@@ -110,15 +110,15 @@ using namespace libCZI;
     return true;
 }
 
-/*static*/bool CArgsUtils::TryGetInt32(const mxArray* pArr, size_t index, std::int32_t* ptr)
+/*static*/bool CArgsUtils::TryGetInt32(const MexArray* pArr, size_t index, std::int32_t* ptr)
 {
-    size_t numOfElements = mxGetNumberOfElements(pArr);
+    size_t numOfElements = MexApi::GetInstance().MxGetNumberOfElements(pArr);
     if (numOfElements <= index)
     {
         return false;
     }
 
-    const mxClassID id = mxGetClassID(pArr);
+    const mxClassID id = MexApi::GetInstance().MxGetClassID(pArr);
     int rv;
     switch (id)
     {
@@ -223,20 +223,20 @@ using namespace libCZI;
     return true;
 }
 
-/*static*/bool CArgsUtils::TryGetSingle(const mxArray* pArr, float* ptr)
+/*static*/bool CArgsUtils::TryGetSingle(const MexArray* pArr, float* ptr)
 {
     return CArgsUtils::TryGetSingle(pArr, 0, ptr);
 }
 
-/*static*/bool CArgsUtils::TryGetSingle(const mxArray* pArr, size_t index, float* ptr)
+/*static*/bool CArgsUtils::TryGetSingle(const MexArray* pArr, size_t index, float* ptr)
 {
-    size_t numOfElements = mxGetNumberOfElements(pArr);
+    size_t numOfElements = MexApi::GetInstance().MxGetNumberOfElements(pArr);
     if (numOfElements <= index)
     {
         return false;
     }
 
-    const mxClassID id = mxGetClassID(pArr);
+    const mxClassID id = MexApi::GetInstance().MxGetClassID(pArr);
     float rv;
     switch (id)
     {
@@ -331,9 +331,10 @@ using namespace libCZI;
     return true;
 }
 
-/*static*/bool CArgsUtils::IsNumericArrayOfMinSize(const mxArray* pArr, size_t minElementCount)
+/*static*/bool CArgsUtils::IsNumericArrayOfMinSize(const MexArray* pArr, size_t minElementCount)
 {
-    const mxClassID id = mxGetClassID(pArr);
+    auto mexApi = MexApi::GetInstance();
+    const mxClassID id = mexApi.MxGetClassID(pArr);
     if (!(id == mxDOUBLE_CLASS ||
         id == mxSINGLE_CLASS ||
         id == mxINT8_CLASS ||
@@ -348,11 +349,11 @@ using namespace libCZI;
         return false;
     }
 
-    size_t numOfElements = mxGetNumberOfElements(pArr);
+    size_t numOfElements = mexApi.MxGetNumberOfElements(pArr);
     return numOfElements >= minElementCount;
 }
 
-/*static*/bool CArgsUtils::TryGetIntRect(const mxArray* pArr, libCZI::IntRect* rect)
+/*static*/bool CArgsUtils::TryGetIntRect(const MexArray* pArr, libCZI::IntRect* rect)
 {
     IntRect r;
     r.Invalidate();
@@ -377,15 +378,16 @@ using namespace libCZI;
     return true;
 }
 
-/*static*/bool CArgsUtils::TryGetDimCoordinate(const mxArray* pArr, libCZI::CDimCoordinate* coord)
+/*static*/bool CArgsUtils::TryGetDimCoordinate(const MexArray* pArr, libCZI::CDimCoordinate* coord)
 {
-    if (!mxIsChar(pArr))
+    auto mexApi = MexApi::GetInstance();
+    if (!mexApi.MxIsChar(pArr))
     {
         return false;
     }
 
     //unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String(pArr), mxFree);
-    string argStr = MexApi::GetInstance().MxArrayToUtf8String(pArr);
+    string argStr = mexApi.MxArrayToUtf8String(pArr);
 
     CDimCoordinate planeCoordinate;
     try

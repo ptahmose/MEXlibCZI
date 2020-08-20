@@ -76,7 +76,7 @@ using namespace std;
 
 // ----------------------------------------------------------------------------
 
-/*static*/mxArray* MexUtils::DoubleTo1x1Matrix(double v)
+/*static*/MexArray* MexUtils::DoubleTo1x1Matrix(double v)
 {
     auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
     double* ptr = MexApi::GetInstance().MxGetDoubles(m);//        (double*)mxGetData(m);
@@ -96,7 +96,7 @@ using namespace std;
     return m;
 }
 
-/*static*/mxArray* MexUtils::Int32To1x1Matrix(int v)
+/*static*/MexArray* MexUtils::Int32To1x1Matrix(int v)
 {
     auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
     int* ptr = MexApi::GetInstance().MxGetInt32s(m);
