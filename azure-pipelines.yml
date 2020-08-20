@@ -29,6 +29,14 @@ jobs:
       artifactName: MEXlibCZIWinx64
   - script: echo Hello, world!
     displayName: 'Run a one-line script'
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: ptahmose (1)
+      repositoryName: 'ptahmose.MEXlibCZI'
+      action: 'create'
+      tagSource: 'auto'
+      assets: $(Build.SourcesDirectory)/build/MEXlibCZI/Release/MEXlibCZI.mexw64
+      isPreRelease: true
 - job: Linuxx64
   pool:
     vmImage: 'ubuntu-latest'
