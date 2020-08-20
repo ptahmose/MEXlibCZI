@@ -54,7 +54,7 @@ jobs:
   - task: GitHubRelease@0
     inputs:
       gitHubConnection: 'github.com_ptahmose'
-      repositoryName: 'ptahmose.MEXlibCZI'
+      repositoryName: 'ptahmose/MEXlibCZI'
       action: 'create'
       tagSource: manual
       tag: $(Build.BuildNumber)      
