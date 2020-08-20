@@ -4,12 +4,7 @@
 #include <mutex>
 #include <memory>
 #include <array>
-//#include "../include_matlabheaders.h"
 #include "mexapi.h"
-//#include "finally.h"
-//#include <WolframLibrary.h>
-//#include <WolframImageLibrary.h>
-//#include "CziReaderSbBlkStore.h"
 
 class CziReader
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include_matlabheaders.h"
+#include "mexapi.h"
 #include <cstdint>
 #include "mexapi.h"
 #include "inc_libczi.h"

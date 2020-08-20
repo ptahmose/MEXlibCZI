@@ -41,7 +41,7 @@ int CziReaderManager::CreateNewInstance()
 int CziReaderManager::RemoveAllInstances()
 {
     std::unique_lock<std::mutex> lck(this->mutex);
-    const int noOfExistingInstances = this->map.size();
+    const int noOfExistingInstances = static_cast<int>(this->map.size());
     VDBGPRINT((CDbg::Level::Trace, "CziReaderManager::RemoveAllInstances: # of existing instances is %i.\n", noOfExistingInstances));
     this->map.clear();
     return noOfExistingInstances;

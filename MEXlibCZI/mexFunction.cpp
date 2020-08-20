@@ -42,26 +42,13 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     if (nrhs < 1)
     {
         mexApi.MexErrMsgIdAndTxt("MATLAB:MEXlibCZI:invalidNumInputs", "One input required.");
-        //mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:invalidNumInputs", "One input required.");
     }
 
     /* input must be a string */
     if (!MexApi::GetInstance().MxIsChar((const MexArray*)(prhs[0])))
     {
-        //mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:inputNotString", "Input must be a string.");
         mexApi.MexErrMsgIdAndTxt("MATLAB:MEXlibCZI:inputNotString", "Input must be a string.");
     }
-
-    ///* input must be a row vector */
-    //if (mxGetM(prhs[0]) != 1)
-    //{
-    //    mexErrMsgIdAndTxt("MATLAB:MEXlibCZI:inputNotVector", "Input must be a row vector.");
-    //}
-
-    /* copy the string data from prhs[0] into a C string input_ buf.    */
-
-    //unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String(prhs[0]), mxFree);
-    //string functionName = MexApi::GetInstance().MxArrayToUtf8String(prhs[0]);
 
     bool errorOccurred = false;
     char* errorText = nullptr;
@@ -105,7 +92,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
             ss << "The string \"" << upArgStr.get() << "\" is not a known command.";
             errorText = MexApi::GetInstance().MxStrDup(ss.str());
             errorId = ErrorIds::UnknownCommand;
-            //mexErrMsgIdAndTxt(ErrorIds::UnknownCommand, "The string \"%ls\" is not a known command.", Utils::convertUtf8ToWchar_t(functionName).c_str());
         }
     }
 
@@ -114,12 +100,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
         // Remember that we do NOT return from this call - we should make sure that no resource-cleanup is
         //  done beyond this point. The memory for the errorText is allocated with Matlab's malloc - therefore,
         //  it should be released automatically.
-        //mexErrMsgIdAndTxt(errorId, errorText);
         mexApi.MexErrMsgIdAndTxt(errorId, errorText);
     }
-
-    //plhs[0] = 
-    //OutputDebugStringA("HELLO WORLD!");
-
-    return;
 }
