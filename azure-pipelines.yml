@@ -55,6 +55,7 @@ jobs:
     inputs:
       gitHubConnection: 'github.com_ptahmose'
       repositoryName: 'ptahmose.MEXlibCZI'
+      action: 'create'
       tagSource: manual
       tag: $(Build.BuildNumber)      
       assets: $(Build.SourcesDirectory)/build/MEXlibCZI/MEXlibCZI.mexa64
