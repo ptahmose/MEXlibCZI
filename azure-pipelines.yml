@@ -29,14 +29,6 @@ jobs:
       artifactName: MEXlibCZIWinx64
   - script: echo Hello, world!
     displayName: 'Run a one-line script'
-  - task: GitHubRelease@0
-    inputs:
-      gitHubConnection: 'MEXlibCZI_Release'
-      repositoryName: 'ptahmose.MEXlibCZI'
-      action: 'create'
-      tagSource: 'auto'
-      assets: $(Build.SourcesDirectory)/build/MEXlibCZI/Release/MEXlibCZI.mexw64
-      isPreRelease: true
 - job: Linuxx64
   pool:
     vmImage: 'ubuntu-latest'
@@ -59,3 +51,11 @@ jobs:
     inputs:
       targetPath: $(Build.SourcesDirectory)/build/MEXlibCZI/MEXlibCZI.mexa64
       artifactName: MEXlibCZILinuxx64
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: 'MEXlibCZI2_Release'
+      repositoryName: 'ptahmose.MEXlibCZI'
+      action: 'create'
+      tagSource: 'auto'
+      assets: $(Build.SourcesDirectory)/build/MEXlibCZI/Release/MEXlibCZI.mexw64
+      isPreRelease: true
