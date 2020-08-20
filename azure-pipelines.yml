@@ -47,3 +47,7 @@ jobs:
   - script: |
       cmake --build  ./build --config Release
     displayName: 'Build Linux-x64'
+ - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: $(Build.SourcesDirectory)/build/MEXlibCZI/Release/MEXlibCZI.mexa64
+      artifactName: MEXlibCZILinuxx64
