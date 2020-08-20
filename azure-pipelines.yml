@@ -31,7 +31,7 @@ jobs:
     displayName: 'Run a one-line script'
   - task: GitHubRelease@0
     inputs:
-      gitHubConnection: ptahmose (1)
+      gitHubConnection: 'MEXlibCZI_Release'
       repositoryName: 'ptahmose.MEXlibCZI'
       action: 'create'
       tagSource: 'auto'
