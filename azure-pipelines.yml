@@ -53,7 +53,7 @@ jobs:
       artifactName: MEXlibCZILinuxx64
   - task: GitHubRelease@0
     inputs:
-      gitHubConnection: 'MEXlibCZI2_Release'
+      gitHubConnection: 'github.com_ptahmose'
       repositoryName: 'ptahmose.MEXlibCZI'
       action: 'create'
       tagSource: 'auto'
