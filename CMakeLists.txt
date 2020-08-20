@@ -8,8 +8,6 @@ set(MEXCZI_MINOR 1)
 set(MEXCZI_PATCH 0)
 set(MEXCZI_EXT "alpha")
 
-#configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/Mathematica/CZIReader/PacletInfo.wl.in"  "${CMAKE_CURRENT_SOURCE_DIR}/Mathematica/CZIReader/PacletInfo.wl")
-
 if(WIN32)
   # use "static C-runtime" -> https://stackoverflow.com/questions/14172856/compile-with-mt-instead-of-md-using-cmake
   # Note: this requires CMAKE version 3.15+
@@ -24,27 +22,6 @@ project ("MEXCZI")
 # include RapidJSON -> https://www.jibbow.com/posts/rapidjson-cmake/
 include("${CMAKE_SOURCE_DIR}/modules/rapidJSON.cmake")
 
-#message(STATUS ${CMAKE_MODULE_PATH} )
-
-#[[ 
-if(WLLCZI_MATHEMATICAHEADERS)
-  set(Mathematica_INCLUDE_DIR ${WLLCZI_MATHEMATICAHEADERS})
-else()
-  find_package(Mathematica)
-endif(WLLCZI_MATHEMATICAHEADERS)
-
-message(STATUS "Mathematica_INCLUDE_DIR: ${Mathematica_INCLUDE_DIR}")
-message(STATUS "Mathematica_WolframLibrary_LIBRARIES: ${Mathematica_WolframLibrary_LIBRARIES}")
-]]
-
-
-#[[ 
-set(OCTAVE_CONFIGEXECUTABLE_PATHHINT "D:/SW/Octave/Octave-5.2.0/mingw64/bin/")
-include("${CMAKE_SOURCE_DIR}/modules/FindOctave2.cmake")
-
-message(STATUS "Octave_INCLUDE_DIRS: ${OCTAVE_INCLUDE_DIRS}")
-message(STATUS "Octave_LIBRARIES: ${OCTAVE_LIBRARIES_PATHS}")
-]]
 
 include("${CMAKE_SOURCE_DIR}/modules/libCZI.cmake")
 FetchContent_GetProperties(libCZI)
