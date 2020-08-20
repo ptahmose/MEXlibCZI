@@ -60,7 +60,7 @@ jobs:
   steps:
   - task: DownloadPipelineArtifact@2
     inputs:
-      artifact:MEXlibCZILinuxx64
+      artifact: MEXlibCZILinuxx64
       patterns: '**/*'
       path: $(Build.ArtifactStagingDirectory)
   - task: DownloadPipelineArtifact@2
