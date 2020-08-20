@@ -55,10 +55,7 @@ jobs:
     inputs:
       gitHubConnection: 'github.com_ptahmose'
       repositoryName: 'ptahmose.MEXlibCZI'
-      action: 'create'
-      target: '$(Build.SourceVersion)' 
-      tagSource: 'auto'
-      tagPattern: 'release-v[0-9]*\S*'
-      tag: 'test'
+      tagSource: manual
+      tag: $(Build.BuildNumber)      
       assets: $(Build.SourcesDirectory)/build/MEXlibCZI/MEXlibCZI.mexa64
       isPreRelease: true 
