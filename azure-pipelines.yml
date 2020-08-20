@@ -13,7 +13,7 @@ jobs:
       secureFile: 'mlfiles2.zip'
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\mlfiles2.zip'
+      archiveFilePatterns: '$(Agent.TempDirectory)/mlfiles2.zip'
       destinationFolder: 'matlabheaders'
       cleanDestinationFolder: true    
   - task: CMake@1
@@ -29,7 +29,7 @@ jobs:
       artifactName: MEXlibCZIWinx64
   - script: echo Hello, world!
     displayName: 'Run a one-line script'
-- job: LinuxARM
+- job: Linuxx64
   pool:
     vmImage: 'ubuntu-latest'
   steps:
@@ -38,12 +38,12 @@ jobs:
       secureFile: 'mlfiles2.zip'
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\mlfiles2.zip'
+      archiveFilePatterns: '$(Agent.TempDirectory)/mlfiles2.zip'
       destinationFolder: 'matlabheaders'
       cleanDestinationFolder: true    
   - task: CMake@1
     inputs:
-      cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=$(Build.SourcesDirectory)\matlabheaders\include -DMEXLIBCZI_LIBS=$(Build.SourcesDirectory)\matlabheaders\lib'
+      cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=$(Build.SourcesDirectory)/matlabheaders/include -DMEXLIBCZI_LIBS=$(Build.SourcesDirectory)/matlabheaders/lib'
   - script: |
       cmake --build  ./build --config Release
     displayName: 'Build Linux-x64'
