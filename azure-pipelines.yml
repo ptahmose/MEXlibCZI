@@ -49,5 +49,5 @@ jobs:
     displayName: 'Build Linux-x64'
   - task: PublishPipelineArtifact@1
     inputs:
-      targetPath: $(Build.SourcesDirectory)/build/MEXlibCZI/Release/MEXlibCZI.mexa64
+      targetPath: $(Build.SourcesDirectory)/build/MEXlibCZI/MEXlibCZI.mexa64
       artifactName: MEXlibCZILinuxx64
