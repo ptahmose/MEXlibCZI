@@ -60,3 +60,29 @@ jobs:
       tag: $(Build.BuildNumber)      
       assets: $(Build.SourcesDirectory)/build/MEXlibCZI/MEXlibCZI.mexa64
       isPreRelease: true 
+- job: Upload-Release
+  dependsOn: 
+  - Windowsx64
+  - Linuxx64
+  pool:
+    vmImage: 'ubuntu-latest'
+ steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      artifact: MEXlibCZI.mexa64
+      patterns: '**/*'
+      path: $(Build.ArtifactStagingDirectory)
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      artifact: MEXlibCZI.mexw64
+      patterns: '**/*'
+      path: $(Build.ArtifactStagingDirectory)
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: 'github.com_ptahmose'
+      repositoryName: 'ptahmose/MEXlibCZI'
+      action: 'create'
+      tagSource: manual
+      tag: $(Build.BuildNumber)      
+      assets: $(Build.ArtifactStagingDirectory)/*
+      isPreRelease: true 
