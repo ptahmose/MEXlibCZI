@@ -58,6 +58,7 @@ jobs:
   pool:
     vmImage: 'ubuntu-latest'
   steps:
+  - checkout: none #skip checking out the default repository resource
   - task: DownloadPipelineArtifact@2
     inputs:
       artifact: MEXlibCZILinuxx64
