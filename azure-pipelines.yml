@@ -70,6 +70,8 @@ jobs:
       patterns: '**/*'
       path: $(Build.ArtifactStagingDirectory)
   - task: GitHubRelease@0
+    displayName: 'Create GitHub Release'   
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/release-v') # only run this if tag starts with "release-v"
     inputs:
       gitHubConnection: 'github.com_ptahmose'
       repositoryName: 'ptahmose/MEXlibCZI'
