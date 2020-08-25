@@ -444,22 +444,17 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 
     size_t dims[2] = { 1, 1 };
     auto mexApi = MexApi::GetInstance();
-    auto s = mexApi.MxCreateStructArray(2, dims, (int)fieldNames.size(), &fieldNames[0]);
+    auto* s = mexApi.MxCreateStructArray(2, dims, (int)fieldNames.size(), &fieldNames[0]);
 
     for (int i = 0; i < dimensions.size(); ++i)
     {
         int startIndex, size;
         bounds->TryGetInterval(libCZI::Utils::CharToDimension(dimensions[i][0]), &startIndex, &size);
-        auto no = mexApi.MxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
+        auto* no = mexApi.MxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
         int* ptr = mexApi.MxGetInt32s(no);
         *ptr = startIndex;
         *(ptr + 1) = size;
         mexApi.MxSetFieldByNumber(s, 0, i, no);
-        /*
-                auto no = mxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
-                *((int*)mxGetData(no)) = startIndex;
-                *(1 + (int*)mxGetData(no)) = size;
-                mxSetFieldByNumber(s, 0, i, no);*/
     }
 
     return s;
@@ -470,7 +465,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     static const char* fieldNames[] = { "sceneIndex", "boundingBox", "boundingBoxLayer0" };
     size_t dims[2] = { 1, boundingBoxMap.size() };
     auto mexApi = MexApi::GetInstance();
-    auto s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
+    auto* s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
 
     int i = 0;
     for (auto it = boundingBoxMap.cbegin(); it != boundingBoxMap.cend(); ++it)
