@@ -20,6 +20,11 @@ public:
 class MexUtils
 {
 public:
+    static MexArray* FloatTo1x1Matrix(float v);
     static MexArray* DoubleTo1x1Matrix(double v);
     static MexArray* Int32To1x1Matrix(int v);
+    static MexArray* BooleanTo1x1Matrix(bool b);
+    static MexArray* DoublesAsNx1Matrix(int count, ...);
+private:
+    static double CoerceValue(double d);
 };

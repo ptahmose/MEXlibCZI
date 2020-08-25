@@ -11,6 +11,7 @@
 #include "src/func_getmetadataxml.h"
 #include "src/func_getscaling.h"
 #include "src/func_getsinglechannelscalingtilecomposite.h"
+#include "src/func_getdefaultdisplaysettings.h"
 
 /*static*/const CMexFunctions::MexFuncItem CMexFunctions::funcItems[] =
 {
@@ -22,7 +23,8 @@
     {u8"GetScaling", {MexFunction_GetScaling_CheckArguments,MexFunction_GetScaling_Execute}},
     {u8"GetMetadataXml", {MexFunction_GetMetadataXml_CheckArguments,MexFunction_GetMetadataXml_Execute}},
     {u8"GetSingleChannelScalingTileComposite", {MexFunction_GetSingleChannelScalingTileComposite_CheckArguments,MexFunction_GetSingleChannelScalingTileComposite_Execute}},
-    {u8"Close", {MexFunction_Close_CheckArguments,MexFunction_Close_Execute}}
+    {u8"Close", {MexFunction_Close_CheckArguments,MexFunction_Close_Execute}},
+    {u8"GetDefaultDisplaySettings", {MexFunction_GetDefaultDisplaySettings_CheckArguments,MexFunction_GetDefaultDisplaySettings_Execute}}
 };
 
 /*static*/CMexFunctions CMexFunctions::instance;

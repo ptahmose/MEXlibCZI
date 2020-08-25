@@ -114,6 +114,12 @@ MexArray* CziReader::GetMetadataXmlAsMxArray()
     return s;
 }
 
+MexArray* CziReader::GetDefaultDisplaySettingsAsMxArray()
+{
+    const auto displaySettings = this->GetDisplaySettingsFromCzi();
+    return this->ConvertToMatlabStruct(*displaySettingsFromCzi);
+}
+
 MexArray* CziReader::GetSubBlockImage(int sbBlkNo)
 {
     auto sbBlk = this->reader->ReadSubBlock(sbBlkNo);
@@ -436,7 +442,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
         fieldNames.emplace_back(i.c_str());
     }
 
-    mwSize dims[2] = { 1, 1 };
+    size_t dims[2] = { 1, 1 };
     auto mexApi = MexApi::GetInstance();
     auto s = mexApi.MxCreateStructArray(2, dims, (int)fieldNames.size(), &fieldNames[0]);
 
@@ -449,11 +455,11 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
         *ptr = startIndex;
         *(ptr + 1) = size;
         mexApi.MxSetFieldByNumber(s, 0, i, no);
-/*
-        auto no = mxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
-        *((int*)mxGetData(no)) = startIndex;
-        *(1 + (int*)mxGetData(no)) = size;
-        mxSetFieldByNumber(s, 0, i, no);*/
+        /*
+                auto no = mxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
+                *((int*)mxGetData(no)) = startIndex;
+                *(1 + (int*)mxGetData(no)) = size;
+                mxSetFieldByNumber(s, 0, i, no);*/
     }
 
     return s;
@@ -462,7 +468,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 /*static*/MexArray* CziReader::ConvertToMatlabStruct(const std::map<int, BoundingBoxes>& boundingBoxMap)
 {
     static const char* fieldNames[] = { "sceneIndex", "boundingBox", "boundingBoxLayer0" };
-    mwSize dims[2] = { 1, boundingBoxMap.size() };
+    size_t dims[2] = { 1, boundingBoxMap.size() };
     auto mexApi = MexApi::GetInstance();
     auto s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
 
@@ -480,11 +486,104 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 
 /*static*/ MexArray* CziReader::ConvertToMatlabStruct(const libCZI::IntRect& rect)
 {
-    auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
-    int* ptr = MexApi::GetInstance().MxGetInt32s(m);
+    auto mexApi = MexApi::GetInstance();
+    auto* m = mexApi.MxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
+    int* ptr = mexApi.MxGetInt32s(m);
     ptr[0] = rect.x;
     ptr[1] = rect.y;
     ptr[2] = rect.w;
     ptr[3] = rect.h;
     return m;
+}
+
+/*static*/ MexArray* CziReader::ConvertToMatlabStruct(const libCZI::IDisplaySettings& ds)
+{
+    static const char* tintingModesNone = "none";
+    static const char* tintingModesColor = "color";
+
+    static const char* gradationcurveLinear = "linear";
+    static const char* gradationcurveGamma = "gamma";
+    static const char* gradationcurveSpline = "spline";
+
+    static const char* fieldNames[] = {
+        "channelIndex",
+        "isEnabled",
+        "weight",
+        "tintingmode",
+        "tintingcolor",
+        "blackwhitepoint",
+        "gradationcurvemode",
+        "gamma",
+        "splinectrlpts" };
+    vector<int> chIndices;
+    ds.EnumChannels(
+        [&](int idx) -> bool
+        {
+            chIndices.emplace_back(idx);
+            return true;
+        }
+    );
+
+    size_t dims[2] = { 1, chIndices.size() };
+    auto mexApi = MexApi::GetInstance();
+    auto* s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
+    size_t i = 0;
+    for (auto it : chIndices)
+    {
+        auto chDs = ds.GetChannelDisplaySettings(it);
+        mexApi.MxSetFieldByNumber(s, i, 0, MexUtils::Int32To1x1Matrix(it));
+        mexApi.MxSetFieldByNumber(s, i, 1, MexUtils::BooleanTo1x1Matrix(chDs->GetIsEnabled()));
+        mexApi.MxSetFieldByNumber(s, i, 2, MexUtils::DoubleTo1x1Matrix(chDs->GetWeight()));
+
+        Rgb8Color tintingColor;
+        if (chDs->TryGetTintingColorRgb8(&tintingColor))
+        {
+            mexApi.MxSetFieldByNumber(s, i, 3, mexApi.MxCreateString(tintingModesColor));
+            auto* m = MexApi::GetInstance().MxCreateNumericMatrix(3, 1, mxUINT8_CLASS, mxREAL);
+            auto* ptr = MexApi::GetInstance().MxGetUint8s(m);
+            ptr[0] = tintingColor.r;
+            ptr[1] = tintingColor.g;
+            ptr[2] = tintingColor.b;
+            mexApi.MxSetFieldByNumber(s, i, 4, m);
+        }
+        /*else if TODO -> Lookup-Table */
+        else
+        {
+            mexApi.MxSetFieldByNumber(s, i, 3, mexApi.MxCreateString(tintingModesNone));
+        }
+
+        float blackPoint, whitePoint;
+        chDs->GetBlackWhitePoint(&blackPoint, &whitePoint);
+        mexApi.MxSetFieldByNumber(s, i, 5, MexUtils::DoublesAsNx1Matrix(2, static_cast<double>(blackPoint), static_cast<double>(whitePoint)));
+
+        switch (chDs->GetGradationCurveMode())
+        {
+        case IDisplaySettings::GradationCurveMode::Linear:
+            mexApi.MxSetFieldByNumber(s, i, 6, mexApi.MxCreateString(gradationcurveLinear));
+            break;
+        case IDisplaySettings::GradationCurveMode::Gamma:
+            mexApi.MxSetFieldByNumber(s, i, 6, mexApi.MxCreateString(gradationcurveGamma));
+            float gamma;
+            chDs->TryGetGamma(&gamma);
+            mexApi.MxSetFieldByNumber(s, i, 7, MexUtils::DoubleTo1x1Matrix(gamma));
+            break;
+        case IDisplaySettings::GradationCurveMode::Spline:
+            mexApi.MxSetFieldByNumber(s, i, 6, mexApi.MxCreateString(gradationcurveSpline));
+            vector<libCZI::IDisplaySettings::SplineControlPoint> splineCtrlPts;
+            chDs->TryGetSplineControlPoints(&splineCtrlPts);
+            auto* m = MexApi::GetInstance().MxCreateNumericMatrix(splineCtrlPts.size(), 2, mxDOUBLE_CLASS, mxREAL);
+            auto* ptrDbls = MexApi::GetInstance().MxGetDoubles(m);
+            for (const auto& splineCtrlPt : splineCtrlPts)
+            {
+                *ptrDbls++ = splineCtrlPt.x;
+                *ptrDbls++ = splineCtrlPt.y;
+            }
+
+            mexApi.MxSetFieldByNumber(s, i, 8, m);
+        }
+
+        ++i;
+    }
+
+    return s;
 }

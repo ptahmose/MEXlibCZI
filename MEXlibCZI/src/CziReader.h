@@ -27,24 +27,15 @@ public:
     std::string GetMetadataXml();
     MexArray* GetMetadataXmlAsMxArray();
 
+    MexArray* GetDefaultDisplaySettingsAsMxArray();
+
     MexArray* GetSubBlockImage(int sbBlkNo);
     MexArray* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson);
-    /* MImage GetSubBlockImage(WolframLibraryData libData, int no);
-     MImage GetSingleChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom);
-     MImage GetSingleChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor);
-     MImage GetMultiChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson);*/
-
     MexArray* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom);
     MexArray* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor);
 
     std::array<double, 3>   GetScaling();
     MexArray* GetScalingAsMatlabStruct();
-
-    //mint    ReadSubBlock(int no);
-    //MImage  GetBitmapFromSubBlock(mint handle, WolframLibraryData libData);
-    //std::string GetMetadataFromSubBlock(mint handle);
-    //std::string GetInfoFromSubBlock(mint handle);
-//    bool    ReleaseSubBlock(mint handle);
 private:
     static MexArray* ConvertToMatlabStruct(const libCZI::IDimBounds* bounds);
 
@@ -53,22 +44,16 @@ private:
     std::shared_ptr<libCZI::IDisplaySettings> GetDisplaySettingsFromCzi();
     const libCZI::ScalingInfo& GetScalingInfoFromCzi();
 
-    std::string StatisticsToJson(const libCZI::SubBlockStatistics& statistics);
-    std::string SubblockInfoToJson(const libCZI::SubBlockInfo& subblockInfo);
+   /* std::string StatisticsToJson(const libCZI::SubBlockStatistics& statistics);
+    std::string SubblockInfoToJson(const libCZI::SubBlockInfo& subblockInfo);*/
 
-    /*  static MImage ConvertToMImage(WolframImageLibrary_Functions imgLibFunctions, libCZI::IBitmapData* bitmapData);
-      static void CopyStrided(libCZI::IBitmapData* bitmapData, void* pDst);
-      static void CopyStrided_RGB24_to_BGR24(libCZI::IBitmapData* bitmapData, void* pDst);
-      static void CopyStrided_RGB48_to_BGR48(libCZI::IBitmapData* bitmapData, void* pDst);*/
-
-      //MImage GetMultiChannelScalingTileComposite(WolframLibraryData libData, const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings);
-      //MImage GetMultiChannelScalingTileCompositeAllChannelsDisabled(WolframLibraryData libData, const libCZI::IntRect& roi, float zoom);
     MexArray* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings);
     MexArray* GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom);
 
     static MexArray* ConvertToMxArray(libCZI::IBitmapData* bitmapData);
     static MexArray* ConvertToMatlabStruct(const std::map<int, libCZI::BoundingBoxes>& boundingBoxMap);
     static MexArray* ConvertToMatlabStruct(const libCZI::IntRect& rect);
+    static MexArray* ConvertToMatlabStruct(const libCZI::IDisplaySettings& ds);
 
     static void CopyTransposeGray8(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);
     static void CopyTransposeGray16(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);

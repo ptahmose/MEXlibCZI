@@ -57,7 +57,7 @@ add_library (MEXlibCZI SHARED
 						"errorcodes.h"
 						"errorcodes.cpp" 
 						"src/dbgprint.h" 
-						"src/dbgprint.cpp")
+						"src/dbgprint.cpp" "src/func_getdefaultdisplaysettings.cpp" "src/func_getdefaultdisplaysettings.h")
 
 set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
 

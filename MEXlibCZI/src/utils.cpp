@@ -1,6 +1,7 @@
 #include "utils.h"
 #include <codecvt>
 #include <locale>
+#include <cstdarg> 
 #include "CziInstanceManager.h"
 #include "mexapi.h"
 #include "dbgprint.h"
@@ -79,19 +80,24 @@ using namespace std;
 /*static*/MexArray* MexUtils::DoubleTo1x1Matrix(double v)
 {
     auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
-    double* ptr = MexApi::GetInstance().MxGetDoubles(m);//        (double*)mxGetData(m);
-    if (isnan(v))
+    double* ptr = MexApi::GetInstance().MxGetDoubles(m);
+    *ptr = MexUtils::CoerceValue(v);
+    return m;
+}
+
+/*static*/MexArray* MexUtils::DoublesAsNx1Matrix(int count, ...)
+{
+    auto m = MexApi::GetInstance().MxCreateNumericMatrix(count, 1, mxDOUBLE_CLASS, mxREAL);
+    double* ptr = MexApi::GetInstance().MxGetDoubles(m);
+    va_list list;
+    va_start(list, count);
+    for (int arg = 0; arg < count; ++arg)
     {
-        *ptr = MexApi::GetInstance().GetDblNan();// mxGetNaN();
+        *ptr++ = MexUtils::CoerceValue(va_arg(list, double));
     }
-    else if (isinf(v))
-    {
-        *ptr = MexApi::GetInstance().GetDblInf();// mxGetInf();
-    }
-    else
-    {
-        *ptr = v;
-    }
+
+    // Cleanup the va_list when we're done.
+    va_end(list);
 
     return m;
 }
@@ -102,4 +108,28 @@ using namespace std;
     int* ptr = MexApi::GetInstance().MxGetInt32s(m);
     *ptr = v;
     return m;
+}
+
+/*static*/MexArray* MexUtils::BooleanTo1x1Matrix(bool b)
+{
+    auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxLOGICAL_CLASS, mxREAL);
+    bool* ptr = MexApi::GetInstance().MxGetLogicals(m);
+    *ptr = b;
+    return m;
+}
+
+/*static*/double MexUtils::CoerceValue(double d)
+{
+    if (isnan(d))
+    {
+        return MexApi::GetInstance().GetDblNan();
+    }
+    else if (isinf(d))
+    {
+        return MexApi::GetInstance().GetDblInf();
+    }
+    else
+    {
+        return d;
+    }
 }

@@ -48,6 +48,11 @@ std::int32_t* MexApi::MxGetInt32s(const MexArray* pArr)
     return mxGetInt32s((const mxArray*)pArr);
 }
 
+bool* MexApi::MxGetLogicals(const MexArray* pArr)
+{
+    return mxGetLogicals((const mxArray*)pArr);
+}
+
 std::uint32_t* MexApi::MxGetUint32s(const MexArray* pArr)
 {
     return mxGetUint32s((const mxArray*)pArr);

@@ -24,6 +24,7 @@ public:
     std::uint32_t* MxGetUint32s(const MexArray* pArr);
     std::int64_t* MxGetInt64s(const MexArray* pArr);
     std::uint64_t* MxGetUint64s(const MexArray* pArr);
+    bool* MxGetLogicals(const MexArray* pArr);
     void* MxGetData(const MexArray* pArr);
 
     std::string MxArrayToUtf8String(const MexArray* pArr);
