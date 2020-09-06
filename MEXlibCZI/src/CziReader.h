@@ -4,6 +4,7 @@
 #include <mutex>
 #include <memory>
 #include <array>
+#include "CziReaderSbBlkStore.h"
 #include "mexapi.h"
 
 class CziReader
@@ -16,7 +17,7 @@ private:
     std::shared_ptr<libCZI::IDisplaySettings> displaySettingsFromCzi;
     libCZI::ScalingInfoEx scalingInfoFromCzi;
 
-    // CziReaderSubBlockStore sbBlkStore;
+    CziReaderSubBlockStore sbBlkStore;
 public:
     CziReader() : reader(libCZI::CreateCZIReader())
     {}
@@ -36,6 +37,11 @@ public:
 
     std::array<double, 3>   GetScaling();
     MexArray* GetScalingAsMatlabStruct();
+
+    MexArray* ReadSubBlock(int no);
+    MexArray* GetInfoFromSubBlock(int subBlkHandle);
+    MexArray* GetMetadataFromSubBlock(int subBlkHandle);
+    bool    ReleaseSubBlock(int subBlkHandle);
 private:
     static MexArray* ConvertToMatlabStruct(const libCZI::IDimBounds* bounds);
 
@@ -53,7 +59,9 @@ private:
     static MexArray* ConvertToMxArray(libCZI::IBitmapData* bitmapData);
     static MexArray* ConvertToMatlabStruct(const std::map<int, libCZI::BoundingBoxes>& boundingBoxMap);
     static MexArray* ConvertToMatlabStruct(const libCZI::IntRect& rect);
+    static MexArray* ConvertToMatlabStruct(const libCZI::IntSize& size);
     static MexArray* ConvertToMatlabStruct(const libCZI::IDisplaySettings& ds);
+    static MexArray* ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo);
 
     static void CopyTransposeGray8(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);
     static void CopyTransposeGray16(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);

@@ -49,4 +49,13 @@ message(STATUS "Matlab_MX_LIBRARY: " ${Matlab_MX_LIBRARY})
 message(STATUS "Matlab_LIBRARIES: " ${Matlab_LIBRARIES}) 
 message("########################################")
 
+
+#[[ 
+set(OCTAVE_CONFIGEXECUTABLE_PATHHINT "D:/SW/Octave/Octave-5.2.0/mingw64/bin/")
+find_package(Octave)
+message("########################################")
+message(STATUS "OCTAVE_INCLUDE_DIRS: " ${OCTAVE_INCLUDE_DIRS})
+message("########################################")
+]]
+
 add_subdirectory ("MEXlibCZI")

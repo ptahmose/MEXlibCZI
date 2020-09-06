@@ -491,6 +491,16 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return m;
 }
 
+/*static*/ MexArray* CziReader::ConvertToMatlabStruct(const libCZI::IntSize& size)
+{
+    auto mexApi = MexApi::GetInstance();
+    auto* m = mexApi.MxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
+    int* ptr = mexApi.MxGetInt32s(m);
+    ptr[0] = size.w;
+    ptr[1] = size.h;
+    return m;
+}
+
 /*static*/ MexArray* CziReader::ConvertToMatlabStruct(const libCZI::IDisplaySettings& ds)
 {
     static const char* tintingModesNone = "none";
@@ -580,5 +590,89 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
         ++i;
     }
 
+    return s;
+}
+
+MexArray* CziReader::ReadSubBlock(int no)
+{
+    auto sbBlk = this->reader->ReadSubBlock(no);
+    if (!sbBlk)
+    {
+        std::stringstream ss;
+        ss << "SubBlock for id=" << no << " was not found.";
+        throw invalid_argument(ss.str());
+    }
+
+    int32_t h = this->sbBlkStore.AddSubBlock(sbBlk);
+    return MexUtils::Int32To1x1Matrix(h);
+}
+
+MexArray* CziReader::GetInfoFromSubBlock(int subBlkHandle)
+{
+    auto sbBlk = this->sbBlkStore.GetForHandle(subBlkHandle);
+    if (!sbBlk)
+    {
+        std::stringstream ss;
+        ss << "SubBlock for handle=" << subBlkHandle << " is not present.";
+        throw invalid_argument(ss.str());
+    }
+
+    const auto& sbInfo = sbBlk->GetSubBlockInfo();
+    return CziReader::ConvertToMatlabStruct(sbInfo);
+}
+
+MexArray* CziReader::GetMetadataFromSubBlock(int subBlkHandle)
+{
+    auto sbBlk = this->sbBlkStore.GetForHandle(subBlkHandle);
+    if (!sbBlk)
+    {
+        std::stringstream ss;
+        ss << "SubBlock for handle=" << subBlkHandle << " is not present.";
+        throw invalid_argument(ss.str());
+    }
+
+    auto mexApi = MexApi::GetInstance();
+    size_t sizeData;
+    auto ptrData = sbBlk->GetRawData(ISubBlock::MemBlkType::Metadata, &sizeData);
+    if (!ptrData)
+    {
+        return mexApi.MxCreateString("");
+    }
+
+    string metadataXml(static_cast<const char*>(ptrData.get()), sizeData);
+    return mexApi.MxCreateString(metadataXml.c_str());
+}
+
+bool CziReader::ReleaseSubBlock(int subBlkHandle)
+{
+    return this->sbBlkStore.RemoveSubBlock(subBlkHandle);
+}
+
+/*static*/MexArray* CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo)
+{
+    static const char* fieldNames[] = { "property","value" };
+
+    auto mexApi = MexApi::GetInstance();
+    size_t dims[2] = { 1, 7 };
+    auto* s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
+
+    mexApi.MxSetFieldByNumber(s, 0, 0, mexApi.MxCreateString("Mode"));
+    mexApi.MxSetFieldByNumber(s, 0, 1, mexApi.MxCreateString(libCZI::Utils::CompressionModeToInformalString(sbBlkInfo.mode)));
+    mexApi.MxSetFieldByNumber(s, 1, 0, mexApi.MxCreateString("Pixeltype"));
+    mexApi.MxSetFieldByNumber(s, 1, 1, mexApi.MxCreateString(libCZI::Utils::PixelTypeToInformalString(sbBlkInfo.pixelType)));
+    mexApi.MxSetFieldByNumber(s, 2, 0, mexApi.MxCreateString("Coordinate"));
+    mexApi.MxSetFieldByNumber(s, 2, 1, mexApi.MxCreateString(libCZI::Utils::DimCoordinateToString(&sbBlkInfo.coordinate).c_str()));
+    mexApi.MxSetFieldByNumber(s, 3, 0, mexApi.MxCreateString("LogicalRect"));
+    mexApi.MxSetFieldByNumber(s, 3, 1, CziReader::ConvertToMatlabStruct(sbBlkInfo.logicalRect));
+    mexApi.MxSetFieldByNumber(s, 4, 0, mexApi.MxCreateString("PhysicalSize"));
+    mexApi.MxSetFieldByNumber(s, 4, 1, CziReader::ConvertToMatlabStruct(sbBlkInfo.physicalSize));
+    mexApi.MxSetFieldByNumber(s, 5, 0, mexApi.MxCreateString("MIndex"));
+    if (sbBlkInfo.mIndex != std::numeric_limits<int>::max())
+    {
+        mexApi.MxSetFieldByNumber(s, 5, 1, MexUtils::Int32To1x1Matrix(sbBlkInfo.mIndex));
+    }
+
+    mexApi.MxSetFieldByNumber(s, 6, 0, mexApi.MxCreateString("Zoom"));
+    mexApi.MxSetFieldByNumber(s, 6, 1, MexUtils::DoubleTo1x1Matrix(sbBlkInfo.GetZoom()));
     return s;
 }

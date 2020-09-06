@@ -17,8 +17,8 @@ configure_file (
   "${CMAKE_CURRENT_BINARY_DIR}/mexlibczi_Config.h"
 	ESCAPE_QUOTES @ONLY)
 
-add_library (MEXlibCZI SHARED
-						"mexFunction.cpp"
+set(mexoctaveSourceFiles 
+  					"mexFunction.cpp"
 						"mexFunctions.h" 
 						"include_matlabheaders.h" 
 						"mexFunctions.cpp" 
@@ -57,10 +57,20 @@ add_library (MEXlibCZI SHARED
 						"errorcodes.h"
 						"errorcodes.cpp" 
 						"src/dbgprint.h" 
-						"src/dbgprint.cpp" "src/func_getdefaultdisplaysettings.cpp" "src/func_getdefaultdisplaysettings.h")
+						"src/dbgprint.cpp" 
+						"src/func_getdefaultdisplaysettings.cpp" 
+						"src/func_getdefaultdisplaysettings.h" 
+						"src/func_readsubblock.h" 
+						"src/func_readsubblock.cpp" 
+						"src/CziReaderSbBlkStore.h" 
+						"src/CziReaderSbBlkStore.cpp"
+						"src/func_getsubblock.h"
+						"src/func_getsubblock.cpp")
+
+add_library (MEXlibCZI SHARED
+			       ${mexoctaveSourceFiles})
 
 set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
-
   
 target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
 
@@ -85,6 +95,41 @@ target_compile_definitions(MEXlibCZI PRIVATE MW_NEEDS_VERSION_H=1)
 if(WIN32)
  target_compile_definitions(MEXlibCZI PRIVATE _WIN32API=1)
 endif()
+
+#------------------------------------------------------------------------------------------
+
+#[[ 
+add_library (OctlibCZI SHARED
+			       ${mexoctaveSourceFiles})
+
+set_target_properties(OctlibCZI PROPERTIES CXX_STANDARD 11)
+target_include_directories(OctlibCZI PRIVATE ${OCTAVE_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
+
+target_include_directories(OctlibCZI PRIVATE  ${CMAKE_CURRENT_BINARY_DIR})  # this is necessary so that we can find "wllczi_Config.h" which we created above
+target_include_directories(OctlibCZI PRIVATE ${LIBCZI_INCLUDE_DIR})
+target_link_libraries(OctlibCZI PRIVATE libCZIStatic JxrDecodeStatic)
+SET_TARGET_PROPERTIES(OctlibCZI PROPERTIES DEFINE_SYMBOL "OCTAVEBUILD")
+
+if(WIN32)
+ target_compile_definitions(OctlibCZI PRIVATE _WIN32API=1)
+endif()
+
+set_target_properties(OctlibCZI PROPERTIES SUFFIX ".oct")
+]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #[[  

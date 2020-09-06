@@ -12,6 +12,7 @@
 #include "src/func_getscaling.h"
 #include "src/func_getsinglechannelscalingtilecomposite.h"
 #include "src/func_getdefaultdisplaysettings.h"
+#include "src/func_getsubblock.h"
 
 /*static*/const CMexFunctions::MexFuncItem CMexFunctions::funcItems[] =
 {
@@ -24,7 +25,11 @@
     {u8"GetMetadataXml", {MexFunction_GetMetadataXml_CheckArguments,MexFunction_GetMetadataXml_Execute}},
     {u8"GetSingleChannelScalingTileComposite", {MexFunction_GetSingleChannelScalingTileComposite_CheckArguments,MexFunction_GetSingleChannelScalingTileComposite_Execute}},
     {u8"Close", {MexFunction_Close_CheckArguments,MexFunction_Close_Execute}},
-    {u8"GetDefaultDisplaySettings", {MexFunction_GetDefaultDisplaySettings_CheckArguments,MexFunction_GetDefaultDisplaySettings_Execute}}
+    {u8"GetDefaultDisplaySettings", {MexFunction_GetDefaultDisplaySettings_CheckArguments,MexFunction_GetDefaultDisplaySettings_Execute}},
+    {u8"GetSubBlock", {MexFunction_GetSubBlock_CheckArguments,MexFunction_GetSubBlock_Execute}},
+    {u8"GetInfoFromSubBlock", {MexFunction_GetInfoFromSubBlock_CheckArguments,MexFunction_GetInfoFromSubBlock_Execute}},
+    {u8"GetMetadataFromSubBlock", {MexFunction_GetMetadataFromSubBlock_CheckArguments,MexFunction_GetMetadataFromSubBlock_Execute}},
+    {u8"ReleaseSubBlock", {MexFunction_ReleaseSubBlock_CheckArguments,MexFunction_ReleaseSubBlock_Execute}},
 };
 
 /*static*/CMexFunctions CMexFunctions::instance;
