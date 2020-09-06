@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <unordered_map>
-#include "inc_libCzi.h"
+#include "inc_libczi.h"
 
 class CziReaderSubBlockStore
 {
