@@ -643,6 +643,20 @@ MexArray* CziReader::GetMetadataFromSubBlock(int subBlkHandle)
     return mexApi.MxCreateString(metadataXml.c_str());
 }
 
+MexArray* CziReader::GetBitmapFromSubBlock(int subBlkHandle)
+{
+    auto sbBlk = this->sbBlkStore.GetForHandle(subBlkHandle);
+    if (!sbBlk)
+    {
+        std::stringstream ss;
+        ss << "SubBlock for handle=" << subBlkHandle << " is not present.";
+        throw invalid_argument(ss.str());
+    }
+
+    auto bm = sbBlk->CreateBitmap();
+    return ConvertToMxArray(bm.get());
+}
+
 bool CziReader::ReleaseSubBlock(int subBlkHandle)
 {
     return this->sbBlkStore.RemoveSubBlock(subBlkHandle);

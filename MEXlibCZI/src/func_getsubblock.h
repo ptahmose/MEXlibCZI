@@ -11,5 +11,8 @@ void MexFunction_GetInfoFromSubBlock_Execute(MatlabArgs* args);
 void MexFunction_GetMetadataFromSubBlock_CheckArguments(MatlabArgs* args);
 void MexFunction_GetMetadataFromSubBlock_Execute(MatlabArgs* args);
 
+void MexFunction_GetBitmapFromSubBlock_CheckArguments(MatlabArgs* args);
+void MexFunction_GetBitmapFromSubBlock_Execute(MatlabArgs* args);
+
 void MexFunction_ReleaseSubBlock_CheckArguments(MatlabArgs* args);
 void MexFunction_ReleaseSubBlock_Execute(MatlabArgs* args);

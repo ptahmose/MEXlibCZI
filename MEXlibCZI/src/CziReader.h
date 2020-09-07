@@ -41,6 +41,7 @@ public:
     MexArray* ReadSubBlock(int no);
     MexArray* GetInfoFromSubBlock(int subBlkHandle);
     MexArray* GetMetadataFromSubBlock(int subBlkHandle);
+    MexArray* GetBitmapFromSubBlock(int subBlkHandle);
     bool    ReleaseSubBlock(int subBlkHandle);
 private:
     static MexArray* ConvertToMatlabStruct(const libCZI::IDimBounds* bounds);

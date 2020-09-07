@@ -103,6 +103,38 @@ void MexFunction_GetMetadataFromSubBlock_Execute(MatlabArgs* args)
 
 //-------------------------------------------------------------------------------------
 
+void MexFunction_GetBitmapFromSubBlock_CheckArguments(MatlabArgs* args)
+{
+    if (args->nrhs < 3)
+    {
+        throw invalid_argument("not enough arguments");
+    }
+
+    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[1], 1))
+    {
+        throw invalid_argument("2nd argument must be an integer");
+    }
+
+    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[2], 1))
+    {
+        throw invalid_argument("3rd argument must be an integer");
+    }
+}
+
+void MexFunction_GetBitmapFromSubBlock_Execute(MatlabArgs* args)
+{
+    int id;
+    bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
+    std::shared_ptr<CziReader> reader = ::Utils::GetReaderOrThrow(id);
+
+    int sbBlkHandle;
+    b = CArgsUtils::TryGetInt32(args->prhs[2], &sbBlkHandle);
+    auto* sbBlk = reader->GetBitmapFromSubBlock(sbBlkHandle);
+    args->plhs[0] = sbBlk;
+}
+
+//-------------------------------------------------------------------------------------
+
 void MexFunction_ReleaseSubBlock_CheckArguments(MatlabArgs* args)
 {
     if (args->nrhs < 3)

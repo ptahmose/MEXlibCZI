@@ -28,6 +28,7 @@
     {u8"GetDefaultDisplaySettings", {MexFunction_GetDefaultDisplaySettings_CheckArguments,MexFunction_GetDefaultDisplaySettings_Execute}},
     {u8"GetSubBlock", {MexFunction_GetSubBlock_CheckArguments,MexFunction_GetSubBlock_Execute}},
     {u8"GetInfoFromSubBlock", {MexFunction_GetInfoFromSubBlock_CheckArguments,MexFunction_GetInfoFromSubBlock_Execute}},
+    {u8"GetBitmapFromSubBlock", {MexFunction_GetBitmapFromSubBlock_CheckArguments,MexFunction_GetBitmapFromSubBlock_Execute}},
     {u8"GetMetadataFromSubBlock", {MexFunction_GetMetadataFromSubBlock_CheckArguments,MexFunction_GetMetadataFromSubBlock_Execute}},
     {u8"ReleaseSubBlock", {MexFunction_ReleaseSubBlock_CheckArguments,MexFunction_ReleaseSubBlock_Execute}},
 };
