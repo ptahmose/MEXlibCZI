@@ -15,7 +15,6 @@ void MexFunction_GetSingleChannelScalingTileComposite_CheckArguments(MatlabArgs*
     // (2)  ROI -> array of >=4 numbers
     // (3)  plane-coordinate
     // (4)  zoom (number)
-    // (5)  (optional) display-settings
     if (args->nrhs < 5)
     {
         throw invalid_argument("not enough arguments");
