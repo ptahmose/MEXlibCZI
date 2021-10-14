@@ -671,7 +671,7 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
     auto* s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
 
     mexApi.MxSetFieldByNumber(s, 0, 0, mexApi.MxCreateString("Mode"));
-    mexApi.MxSetFieldByNumber(s, 0, 1, mexApi.MxCreateString(libCZI::Utils::CompressionModeToInformalString(sbBlkInfo.mode)));
+    mexApi.MxSetFieldByNumber(s, 0, 1, mexApi.MxCreateString(libCZI::Utils::CompressionModeToInformalString(sbBlkInfo.GetCompressionMode())));
     mexApi.MxSetFieldByNumber(s, 1, 0, mexApi.MxCreateString("Pixeltype"));
     mexApi.MxSetFieldByNumber(s, 1, 1, mexApi.MxCreateString(libCZI::Utils::PixelTypeToInformalString(sbBlkInfo.pixelType)));
     mexApi.MxSetFieldByNumber(s, 2, 0, mexApi.MxCreateString("Coordinate"));

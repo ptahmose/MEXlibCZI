@@ -4,7 +4,7 @@ include(FetchContent)
 FetchContent_Declare(
   libCZI
   GIT_REPOSITORY https://github.com/ptahmose/libCZI.git
-  GIT_TAG        origin/wolframliblink  # use the latest in this branch
+  GIT_TAG        origin/master
   # this version is "known-to-work"
   #GIT_TAG        9aa6b6e411de217a9f2aa91909107def843fe1ec
   #CMAKE_ARGS "-DLIBCZI_BUILD_CZICMD=OFF -DLIBCZI_BUILD_DYNLIB=OFF"
