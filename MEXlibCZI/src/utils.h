@@ -26,5 +26,5 @@ public:
     static MexArray* BooleanTo1x1Matrix(bool b);
     static MexArray* DoublesAsNx1Matrix(int count, ...);
 private:
-    static double CoerceValue(double d);
+    static double CoerceValueDbl(double d);
 };

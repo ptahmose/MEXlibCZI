@@ -77,11 +77,19 @@ using namespace std;
 
 // ----------------------------------------------------------------------------
 
+/*static*/MexArray* MexUtils::FloatTo1x1Matrix(float v)
+{
+    auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
+    float* ptr = MexApi::GetInstance().MxGetSingles(m);
+    *ptr = v;
+    return m;
+}
+
 /*static*/MexArray* MexUtils::DoubleTo1x1Matrix(double v)
 {
     auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
     double* ptr = MexApi::GetInstance().MxGetDoubles(m);
-    *ptr = MexUtils::CoerceValue(v);
+    *ptr = MexUtils::CoerceValueDbl(v);
     return m;
 }
 
@@ -93,7 +101,7 @@ using namespace std;
     va_start(list, count);
     for (int arg = 0; arg < count; ++arg)
     {
-        *ptr++ = MexUtils::CoerceValue(va_arg(list, double));
+        *ptr++ = MexUtils::CoerceValueDbl(va_arg(list, double));
     }
 
     // Cleanup the va_list when we're done.
@@ -118,7 +126,7 @@ using namespace std;
     return m;
 }
 
-/*static*/double MexUtils::CoerceValue(double d)
+/*static*/double MexUtils::CoerceValueDbl(double d)
 {
     if (isnan(d))
     {
