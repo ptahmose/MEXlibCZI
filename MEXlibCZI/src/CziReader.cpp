@@ -73,7 +73,7 @@ MexArray* CziReader::GetInfo()
 
 	static const char* fieldNames[] = { "subblockcount", "boundingBox", "boundingBoxLayer0", "dimBounds", "sceneBoundingBoxes", "minMindex", "maxMindex" };
 
-	mwSize dims[2] = { 1, 1 };
+	static const mwSize dims[2] = { 1, 1 };
 	auto mexApi = MexApi::GetInstance();
 	auto s = mexApi.MxCreateStructArray(
 		2,
@@ -658,7 +658,29 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
 
 /*static*/MexArray* CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo)
 {
-	static const char* fieldNames[] = { "property","value" };
+	static const mwSize dims[2] = { 1, 1 };
+
+	auto mexApi = MexApi::GetInstance();
+	array<const char*,6> fieldNames = { "Mode", "Pixeltype", "Coordinate", "LogicalRect", "PhysicalSize", "MIndex"};
+	auto s = mexApi.MxCreateStructArray(
+		2,
+		dims,
+		fieldNames.size(),
+		fieldNames.data());
+	mexApi.MxSetFieldByNumber(s, 0, 0, mexApi.MxCreateString(libCZI::Utils::CompressionModeToInformalString(sbBlkInfo.GetCompressionMode())));
+	mexApi.MxSetFieldByNumber(s, 0, 1, mexApi.MxCreateString(libCZI::Utils::PixelTypeToInformalString(sbBlkInfo.pixelType)));
+	mexApi.MxSetFieldByNumber(s, 0, 2, mexApi.MxCreateString(libCZI::Utils::DimCoordinateToString(&sbBlkInfo.coordinate).c_str()));
+	mexApi.MxSetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(sbBlkInfo.logicalRect));
+	mexApi.MxSetFieldByNumber(s, 0, 4, CziReader::ConvertToMatlabStruct(sbBlkInfo.physicalSize));
+	if (sbBlkInfo.mIndex != std::numeric_limits<int>::max())
+	{
+		mexApi.MxSetFieldByNumber(s, 0, 5, MexUtils::Int32To1x1Matrix(sbBlkInfo.mIndex));
+	}
+
+	return s;
+
+	/*
+	 static const char* fieldNames[] = {"property","value"};
 
 	auto mexApi = MexApi::GetInstance();
 	size_t dims[2] = { 1, 7 };
@@ -683,4 +705,5 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
 	mexApi.MxSetFieldByNumber(s, 6, 0, mexApi.MxCreateString("Zoom"));
 	mexApi.MxSetFieldByNumber(s, 6, 1, MexUtils::DoubleTo1x1Matrix(sbBlkInfo.GetZoom()));
 	return s;
+	*/
 }
