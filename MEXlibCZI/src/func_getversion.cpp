@@ -4,6 +4,7 @@
 #include <vector>
 #include "argsutils.h"
 #include "CziInstanceManager.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -25,14 +26,13 @@ void MexFunction_GetVersion_Execute(MatlabArgs* args)
         fieldNamesRawStrings.emplace_back(key.c_str());
     }
 
-    static constexpr mwSize dims[2] = { 1, 1 };
     auto* s = mexApi.MxCreateStructArray(
         2,
-        dims,
+        MexUtils::Dims_1_by_1,
         static_cast<int>(keys.size()),
         &fieldNamesRawStrings[0]);
 
-    for (int i = 0; i < (int)keys.size(); ++i)
+    for (int i = 0; i < static_cast<int>(keys.size()); ++i)
     {
         string value;
         CLibraryInfo::GetValue(keys[i], value);

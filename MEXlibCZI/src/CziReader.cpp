@@ -658,13 +658,13 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
 
 /*static*/MexArray* CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo)
 {
-	static const mwSize dims[2] = { 1, 1 };
+	//static const mwSize dims[2] = { 1, 1 };
 
 	auto mexApi = MexApi::GetInstance();
 	array<const char*,6> fieldNames = { "Mode", "Pixeltype", "Coordinate", "LogicalRect", "PhysicalSize", "MIndex"};
 	auto s = mexApi.MxCreateStructArray(
 		2,
-		dims,
+		MexUtils::Dims_1_by_1, 
 		fieldNames.size(),
 		fieldNames.data());
 	mexApi.MxSetFieldByNumber(s, 0, 0, mexApi.MxCreateString(libCZI::Utils::CompressionModeToInformalString(sbBlkInfo.GetCompressionMode())));

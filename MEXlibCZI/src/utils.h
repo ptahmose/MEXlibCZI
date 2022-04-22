@@ -20,6 +20,7 @@ public:
 class MexUtils
 {
 public:
+    static mwSize Dims_1_by_1[2];
     static MexArray* FloatTo1x1Matrix(float v);
     static MexArray* DoubleTo1x1Matrix(double v);
     static MexArray* Int32To1x1Matrix(int v);
