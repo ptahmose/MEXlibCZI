@@ -73,11 +73,10 @@ MexArray* CziReader::GetInfo()
 
 	static const char* fieldNames[] = { "subblockcount", "boundingBox", "boundingBoxLayer0", "dimBounds", "sceneBoundingBoxes", "minMindex", "maxMindex" };
 
-	static const mwSize dims[2] = { 1, 1 };
 	auto mexApi = MexApi::GetInstance();
 	auto s = mexApi.MxCreateStructArray(
 		2,
-		dims,
+		MexUtils::Dims_1_by_1, 
 		(sizeof(fieldNames) / sizeof(fieldNames[0])) - (statistics.IsMIndexValid() ? 0 : 2),
 		fieldNames);
 
