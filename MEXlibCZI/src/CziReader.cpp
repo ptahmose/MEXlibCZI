@@ -658,7 +658,7 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
 /*static*/MexArray* CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo)
 {
 	auto mexApi = MexApi::GetInstance();
-	array<const char*,6> fieldNames = { "Mode", "Pixeltype", "Coordinate", "LogicalRect", "PhysicalSize", "MIndex"};
+	array<const char*,7> fieldNames = { "Mode", "Pixeltype", "Coordinate", "LogicalRect", "PhysicalSize", "MIndex", "Zoom"};
 	auto s = mexApi.MxCreateStructArray(
 		2,
 		MexUtils::Dims_1_by_1, 
@@ -674,5 +674,6 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
 		mexApi.MxSetFieldByNumber(s, 0, 5, MexUtils::Int32To1x1Matrix(sbBlkInfo.mIndex));
 	}
 
+	mexApi.MxSetFieldByNumber(s, 0, 6, MexUtils::DoubleTo1x1Matrix(sbBlkInfo.GetZoom()));
 	return s;
 }
