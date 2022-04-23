@@ -77,6 +77,8 @@ using namespace std;
 
 // ----------------------------------------------------------------------------
 
+/*static*/mwSize MexUtils::Dims_1_by_1[2] = {1, 1};
+
 /*static*/MexArray* MexUtils::FloatTo1x1Matrix(float v)
 {
     auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);

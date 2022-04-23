@@ -73,11 +73,10 @@ MexArray* CziReader::GetInfo()
 
 	static const char* fieldNames[] = { "subblockcount", "boundingBox", "boundingBoxLayer0", "dimBounds", "sceneBoundingBoxes", "minMindex", "maxMindex" };
 
-	mwSize dims[2] = { 1, 1 };
 	auto mexApi = MexApi::GetInstance();
 	auto s = mexApi.MxCreateStructArray(
 		2,
-		dims,
+		MexUtils::Dims_1_by_1, 
 		(sizeof(fieldNames) / sizeof(fieldNames[0])) - (statistics.IsMIndexValid() ? 0 : 2),
 		fieldNames);
 
@@ -658,29 +657,23 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
 
 /*static*/MexArray* CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo)
 {
-	static const char* fieldNames[] = { "property","value" };
-
 	auto mexApi = MexApi::GetInstance();
-	size_t dims[2] = { 1, 7 };
-	auto* s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
-
-	mexApi.MxSetFieldByNumber(s, 0, 0, mexApi.MxCreateString("Mode"));
-	mexApi.MxSetFieldByNumber(s, 0, 1, mexApi.MxCreateString(libCZI::Utils::CompressionModeToInformalString(sbBlkInfo.GetCompressionMode())));
-	mexApi.MxSetFieldByNumber(s, 1, 0, mexApi.MxCreateString("Pixeltype"));
-	mexApi.MxSetFieldByNumber(s, 1, 1, mexApi.MxCreateString(libCZI::Utils::PixelTypeToInformalString(sbBlkInfo.pixelType)));
-	mexApi.MxSetFieldByNumber(s, 2, 0, mexApi.MxCreateString("Coordinate"));
-	mexApi.MxSetFieldByNumber(s, 2, 1, mexApi.MxCreateString(libCZI::Utils::DimCoordinateToString(&sbBlkInfo.coordinate).c_str()));
-	mexApi.MxSetFieldByNumber(s, 3, 0, mexApi.MxCreateString("LogicalRect"));
-	mexApi.MxSetFieldByNumber(s, 3, 1, CziReader::ConvertToMatlabStruct(sbBlkInfo.logicalRect));
-	mexApi.MxSetFieldByNumber(s, 4, 0, mexApi.MxCreateString("PhysicalSize"));
-	mexApi.MxSetFieldByNumber(s, 4, 1, CziReader::ConvertToMatlabStruct(sbBlkInfo.physicalSize));
-	mexApi.MxSetFieldByNumber(s, 5, 0, mexApi.MxCreateString("MIndex"));
-	if (sbBlkInfo.mIndex != std::numeric_limits<int>::max())
+	array<const char*,7> fieldNames = { "Mode", "Pixeltype", "Coordinate", "LogicalRect", "PhysicalSize", "MIndex", "Zoom"};
+	auto s = mexApi.MxCreateStructArray(
+		2,
+		MexUtils::Dims_1_by_1, 
+		static_cast<int>(fieldNames.size()),
+		fieldNames.data());
+	mexApi.MxSetFieldByNumber(s, 0, 0, mexApi.MxCreateString(libCZI::Utils::CompressionModeToInformalString(sbBlkInfo.GetCompressionMode())));
+	mexApi.MxSetFieldByNumber(s, 0, 1, mexApi.MxCreateString(libCZI::Utils::PixelTypeToInformalString(sbBlkInfo.pixelType)));
+	mexApi.MxSetFieldByNumber(s, 0, 2, mexApi.MxCreateString(libCZI::Utils::DimCoordinateToString(&sbBlkInfo.coordinate).c_str()));
+	mexApi.MxSetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(sbBlkInfo.logicalRect));
+	mexApi.MxSetFieldByNumber(s, 0, 4, CziReader::ConvertToMatlabStruct(sbBlkInfo.physicalSize));
+	if (sbBlkInfo.mIndex != std::numeric_limits<int>::max() && sbBlkInfo.mIndex != std::numeric_limits<int>::min())
 	{
-		mexApi.MxSetFieldByNumber(s, 5, 1, MexUtils::Int32To1x1Matrix(sbBlkInfo.mIndex));
+		mexApi.MxSetFieldByNumber(s, 0, 5, MexUtils::Int32To1x1Matrix(sbBlkInfo.mIndex));
 	}
 
-	mexApi.MxSetFieldByNumber(s, 6, 0, mexApi.MxCreateString("Zoom"));
-	mexApi.MxSetFieldByNumber(s, 6, 1, MexUtils::DoubleTo1x1Matrix(sbBlkInfo.GetZoom()));
+	mexApi.MxSetFieldByNumber(s, 0, 6, MexUtils::DoubleTo1x1Matrix(sbBlkInfo.GetZoom()));
 	return s;
 }

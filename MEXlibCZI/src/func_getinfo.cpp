@@ -24,7 +24,7 @@ void MexFunction_GetInfo_Execute(MatlabArgs* args)
 {
     int id;
     bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
-    std::shared_ptr<CziReader> reader = ::Utils::GetReaderOrThrow(id);
+    const std::shared_ptr<CziReader> reader = ::Utils::GetReaderOrThrow(id);
 
     auto* info = reader->GetInfo();
     args->plhs[0] = info;
