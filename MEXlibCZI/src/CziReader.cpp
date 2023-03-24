@@ -167,25 +167,23 @@ MexArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& 
 		return CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(roi, zoom);
 	}
 
-	std::vector<shared_ptr<IBitmapData>> channelBitmaps;
-	IntSize sizeResult;
+    IntSize sizeResult;
+	std::vector<shared_ptr<IBitmapData>> channelBitmaps = CziUtilities::GetBitmapsFromSpecifiedChannels(
+        this->reader.get(),
+        planeCoordinate,
+        roi,
+        zoom,
+        [&](int idx, int& chNo)-> bool
+        {
+            if (idx < (int)activeChannels.size())
+            {
+                chNo = activeChannels.at(idx);
+                return true;
+            }
 
-	channelBitmaps = CziUtilities::GetBitmapsFromSpecifiedChannels(
-		this->reader.get(),
-		planeCoordinate,
-		roi,
-		zoom,
-		[&](int idx, int& chNo)->bool
-		{
-			if (idx < (int)activeChannels.size())
-			{
-				chNo = activeChannels.at(idx);
-				return true;
-			}
-
-			return false;
-		},
-		&sizeResult);
+            return false;
+        },
+        &sizeResult);
 
 	libCZI::CDisplaySettingsHelper dsplHlp;
 	dsplHlp.Initialize(displaySettings, [&](int chIndx)->libCZI::PixelType

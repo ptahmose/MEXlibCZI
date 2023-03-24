@@ -70,10 +70,10 @@ using namespace libCZI;
 
     if (key == CLibraryInfo::KeyLibCZIVersion)
     {
-        int major, minor;
-        libCZI::GetLibCZIVersion(&major, &minor);
+        int major, minor, patch;
+        libCZI::GetLibCZIVersion(&major, &minor, &patch);
         stringstream ss;
-        ss << major << "." << minor;
+        ss << major << '.' << minor << '.' << patch;
         value = ss.str();
         return true;
     }
