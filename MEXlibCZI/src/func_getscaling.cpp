@@ -23,7 +23,7 @@ void MexFunction_GetScaling_CheckArguments(MatlabArgs* args)
 void MexFunction_GetScaling_Execute(MatlabArgs* args)
 {
     int id;
-    bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
+    const bool b = CArgsUtils::TryGetInt32(args->prhs[1], &id);
     if (!b)
     {
         throw invalid_argument("2nd argument must be an integer");
