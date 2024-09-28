@@ -1,4 +1,4 @@
-#include "CziInstanceManager.h"
+#include "CziReaderManager.h"
 #include "dbgprint.h"
 
 using namespace std;

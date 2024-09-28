@@ -1,5 +1,5 @@
 #include "func_getmetadataxml.h"
-#include "CziInstanceManager.h"
+#include "CziReaderManager.h"
 #include <vector>
 #include <memory>
 #include "argsutils.h"

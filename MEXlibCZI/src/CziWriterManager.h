@@ -6,7 +6,7 @@
 #include "CziReader.h"
 #include <mutex>
 
-/// This is the manager of "CZIReader"-objects. They are created by the manager and are accessed
+/// This is the manager of "CZIWriter"-objects. They are created by the manager and are accessed
 /// by a handle.
 class CziReaderManager
 {
@@ -14,7 +14,7 @@ private:
     std::atomic<int> instanceCounter;
     mutable std::mutex mutex;
     std::unordered_map<int, std::shared_ptr<CziReader>> map;
-    CziReaderManager() : instanceCounter{ 1 } {};
+    CziWriterManager() : instanceCounter{ 1 } {}
 
     static CziReaderManager instance;
 public:

@@ -2,7 +2,7 @@
 #include <codecvt>
 #include <locale>
 #include <cstdarg> 
-#include "CziInstanceManager.h"
+#include "CziReaderManager.h"
 #include "mexapi.h"
 #include "dbgprint.h"
 

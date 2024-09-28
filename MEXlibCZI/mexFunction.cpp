@@ -2,7 +2,7 @@
 #include "exportedFunctions.h"
 #include "mexFunctions.h"
 #include "src/mexapi.h"
-#include "src/CziInstanceManager.h"
+#include "src/CziReaderManager.h"
 //#include <Windows.h>
 #include <memory>
 
