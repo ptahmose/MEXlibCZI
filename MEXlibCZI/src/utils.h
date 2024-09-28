@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdint>
 #include "CziReader.h"
+#include "CziWriter.h"
 #include "mexapi.h"
 
 class Utils
@@ -15,6 +16,7 @@ public:
     static std::wstring convertUtf8ToWchar_t(const char* sz);
 
     static std::shared_ptr<CziReader> GetReaderOrThrow(int id);
+    static std::shared_ptr<CziWriter> GetWriterOrThrow(int id);
 };
 
 class MexUtils

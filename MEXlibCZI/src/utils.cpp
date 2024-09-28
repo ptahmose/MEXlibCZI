@@ -3,6 +3,7 @@
 #include <locale>
 #include <cstdarg> 
 #include "CziReaderManager.h"
+#include "CziWriterManager.h"
 #include "mexapi.h"
 #include "dbgprint.h"
 
@@ -71,6 +72,19 @@ using namespace std;
     catch (out_of_range&)
     {
         VDBGPRINT((CDbg::Level::Warn, "Utils::GetReaderOrThrow: No instance found for id=%i.", id));
+        throw invalid_argument("invalid handle specified");
+    }
+}
+
+/*static*/std::shared_ptr<CziWriter> Utils::GetWriterOrThrow(int id)
+{
+    try
+    {
+        return CziWriterManager::GetInstance().GetInstance(id);
+    }
+    catch (out_of_range&)
+    {
+        VDBGPRINT((CDbg::Level::Warn, "Utils::GetWriterOrThrow: No instance found for id=%i.", id));
         throw invalid_argument("invalid handle specified");
     }
 }

@@ -57,11 +57,25 @@ public:
     double GetDblNan();
     double GetDblInf();
 
+    ///  Determine whether the specified array contains numeric (as opposed
+    ///  to cell or struct) data.
+    /// \param  pArr    The array.
+    /// \returns    True if the array is numeric, false otherwise.
+    bool MxIsNumeric(const MexArray* pArr);
+
+    /// Determine whether the given array is a sparse (as opposed to full).
+    /// \param  pArr    The array.
+    /// \returns    True if the array is sparse, false otherwise.
+    bool MxIsSparse(const MexArray* pArr);
+
     void MxFree(void* ptr);
     void MexAtExit(void (*mex_exit_fn)(void));
 
     mxClassID MxGetClassID(const MexArray* pArr);
     size_t MxGetNumberOfElements(const MexArray* pArr);
+    size_t MxGetNumberOfDimensions(const MexArray* pArr);
+
+    void GetSizeOfDimensions(const MexArray* pArr, size_t number_of_dimension, size_t* sizes);
 
     [[ noreturn ]] void MexErrMsgIdAndTxt(
         const char* identifier, /* string with error message identifier */
