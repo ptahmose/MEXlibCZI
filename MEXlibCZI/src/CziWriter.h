@@ -22,6 +22,7 @@ public:
 
     void Create(const std::string& utf8_filename, bool overwrite_existing);
 
+    void AddSubBlock(const libCZI::AddSubBlockInfoBase& add_sub_block_info_base, const std::shared_ptr<libCZI::IBitmapData>& bitmap_data);
 /*    MexArray* GetInfo();
     std::string GetMetadataXml();
     MexArray* GetMetadataXmlAsMxArray();

@@ -89,9 +89,100 @@ using namespace std;
     }
 }
 
+class Converters
+{
+public:
+    static void Convert_UINT8_to_Gray8(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination)
+    {
+        libCZI::ScopedBitmapLockerP destination_locker(destination);
+        for (size_t y = 0; y < array_info.dimensions[1]; ++y)
+        {
+            const uint8_t* src = static_cast<const uint8_t*>(array_info.data) + y * array_info.dimensions[0];
+            uint8_t* dst = static_cast<uint8_t*>(destination_locker.ptrDataRoi) + y * destination_locker.stride;
+            for (size_t x = 0; x < array_info.dimensions[0]; ++x)
+            {
+                *dst++ = *src++;
+            }
+        }
+    }
+
+    static void Convert_UINT8_3d_to_Bgr24(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination)
+    {
+        libCZI::ScopedBitmapLockerP destination_locker(destination);
+        for (size_t y = 0; y < array_info.dimensions[1]; ++y)
+        {
+            const uint8_t* src = static_cast<const uint8_t*>(array_info.data) + 3 * y * array_info.dimensions[0];
+            uint8_t* dst = static_cast<uint8_t*>(destination_locker.ptrDataRoi) + y * destination_locker.stride;
+            for (size_t x = 0; x < 3 * array_info.dimensions[0]; ++x)
+            {
+                *dst++ = *src++;
+            }
+        }
+    }
+
+    static void Convert_UINT16_to_Gray16(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination)
+    {
+
+    }
+
+    static void Convert_UINT16_3d_to_Bgr48(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination)
+    {
+
+    }
+};
+
+/*static*/std::shared_ptr<libCZI::IBitmapData> Utils::ConvertToBitmapData(const CArgsUtils::ArrayInfo& array_info, libCZI::PixelType pixel_type)
+{
+    // check arguments and whether we can deal with the input
+    if (array_info.number_of_dimensions < 2)
+    {
+        throw invalid_argument("array must be at least 2-dimensional");
+    }
+
+    if (array_info.number_of_dimensions == 3)
+    {
+        if (array_info.dimensions[2] != 3)
+        {
+            throw invalid_argument("3rd dimension must be of size 3 (for RGB)");
+        }
+    }
+
+    if (array_info.number_of_dimensions > 3)
+    {
+        throw invalid_argument("array must be at most 3-dimensional");
+    }
+
+    static constexpr  struct ConversionInfo
+    {
+        mxClassID mxClass;
+        bool has_3rd_dimension; // whether the 3rd dimension is present and has size 3
+        libCZI::PixelType pixelType;
+        void (*conversionFunction)(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination);
+    } kConversionTable[] =
+    {
+        { mxUINT8_CLASS, false, libCZI::PixelType::Gray8 , Converters::Convert_UINT8_to_Gray8},
+        { mxUINT8_CLASS, true, libCZI::PixelType::Bgr24, Converters::Convert_UINT8_3d_to_Bgr24 },
+        { mxUINT16_CLASS, false, libCZI::PixelType::Gray16, Converters::Convert_UINT16_to_Gray16 },
+        { mxUINT16_CLASS, true, libCZI::PixelType::Bgr48, Converters::Convert_UINT16_3d_to_Bgr48 },
+    };
+
+    const bool has_3rd_dimension = array_info.number_of_dimensions == 3/* && array_info.dimensions[2] == 3*/;
+    for (const auto& conversionInfo : kConversionTable)
+    {
+        if (conversionInfo.mxClass == array_info.class_id && conversionInfo.has_3rd_dimension == has_3rd_dimension)
+        {
+            auto bitmapData = make_shared<Bitmap>(pixel_type, array_info.dimensions[0], array_info.dimensions[1]);
+            conversionInfo.conversionFunction(array_info, bitmapData.get());
+            return bitmapData;
+        }
+    }
+
+    throw invalid_argument("unsupported array type");
+}
+
 // ----------------------------------------------------------------------------
 
-/*static*/mwSize MexUtils::Dims_1_by_1[2] = {1, 1};
+/*static*/mwSize MexUtils::Dims_1_by_1[2] = { 1, 1 };
 
 /*static*/MexArray* MexUtils::FloatTo1x1Matrix(float v)
 {
@@ -156,4 +247,46 @@ using namespace std;
     {
         return d;
     }
+}
+
+// ----------------------------------------------------------------------------
+
+Bitmap::Bitmap(libCZI::PixelType pixel_type, std::uint32_t width, std::uint32_t height)
+    : pixeltype_(pixel_type), width_(width), height_(height)
+{
+    this->stride_ = width * libCZI::Utils::GetBytesPerPixel(pixel_type);
+    this->ptrData_ = malloc(static_cast<size_t>(this->stride_) * height);
+}
+
+Bitmap::~Bitmap()
+{
+    if (this->ptrData_)
+    {
+        free(this->ptrData_);
+    }
+}
+
+libCZI::PixelType Bitmap::GetPixelType() const
+{
+    return this->pixeltype_;
+}
+
+libCZI::IntSize Bitmap::GetSize() const
+{
+    return libCZI::IntSize{ this->width_, this->height_ };
+}
+
+libCZI::BitmapLockInfo  Bitmap::Lock()
+{
+    libCZI::BitmapLockInfo bitmapLockInfo;
+    bitmapLockInfo.ptrData = this->ptrData_;
+    bitmapLockInfo.ptrDataRoi = this->ptrData_;
+    bitmapLockInfo.stride = this->stride_;
+    bitmapLockInfo.size = static_cast<uint64_t>(this->stride_) * this->height_;
+    return bitmapLockInfo;
+}
+
+void Bitmap::Unlock()
+{
+    // nothing to do
 }

@@ -5,6 +5,7 @@
 #include "CziReader.h"
 #include "CziWriter.h"
 #include "mexapi.h"
+#include "argsutils.h"
 
 class Utils
 {
@@ -17,6 +18,8 @@ public:
 
     static std::shared_ptr<CziReader> GetReaderOrThrow(int id);
     static std::shared_ptr<CziWriter> GetWriterOrThrow(int id);
+
+    static std::shared_ptr<libCZI::IBitmapData> ConvertToBitmapData(const CArgsUtils::ArrayInfo& array_info, libCZI::PixelType pixel_type);
 };
 
 class MexUtils
@@ -30,4 +33,21 @@ public:
     static MexArray* DoublesAsNx1Matrix(int count, ...);
 private:
     static double CoerceValueDbl(double d);
+};
+
+class Bitmap : public libCZI::IBitmapData
+{
+private:
+    void* ptrData_{ nullptr };
+    libCZI::PixelType pixeltype_{ libCZI::PixelType::Invalid };
+    std::uint32_t width_{ 0 };
+    std::uint32_t height_{ 0 };
+    std::uint32_t stride_{ 0 };
+public:
+    Bitmap(libCZI::PixelType pixel_type, std::uint32_t width, std::uint32_t height);
+    virtual ~Bitmap();
+    virtual libCZI::PixelType GetPixelType() const;
+    virtual libCZI::IntSize GetSize() const;
+    virtual libCZI::BitmapLockInfo  Lock();
+    virtual void Unlock();
 };
