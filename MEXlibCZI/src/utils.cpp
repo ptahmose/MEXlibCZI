@@ -109,11 +109,11 @@ public:
     static void Convert_UINT8_3d_to_Bgr24(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination)
     {
         libCZI::ScopedBitmapLockerP destination_locker(destination);
-        for (size_t y = 0; y < array_info.dimensions[1]; ++y)
+        for (size_t y = 0; y < array_info.dimensions[0]; ++y)
         {
-            const uint8_t* src = static_cast<const uint8_t*>(array_info.data) + 3 * y * array_info.dimensions[0];
+            const uint8_t* src = static_cast<const uint8_t*>(array_info.data) + 3 * y * array_info.dimensions[1];
             uint8_t* dst = static_cast<uint8_t*>(destination_locker.ptrDataRoi) + y * destination_locker.stride;
-            for (size_t x = 0; x < 3 * array_info.dimensions[0]; ++x)
+            for (size_t x = 0; x < 3 * array_info.dimensions[1]; ++x)
             {
                 *dst++ = *src++;
             }
@@ -171,7 +171,7 @@ public:
     {
         if (conversionInfo.mxClass == array_info.class_id && conversionInfo.has_3rd_dimension == has_3rd_dimension)
         {
-            auto bitmapData = make_shared<Bitmap>(pixel_type, array_info.dimensions[0], array_info.dimensions[1]);
+            auto bitmapData = make_shared<Bitmap>(pixel_type, array_info.dimensions[1], array_info.dimensions[0]);
             conversionInfo.conversionFunction(array_info, bitmapData.get());
             return bitmapData;
         }
