@@ -95,13 +95,16 @@ public:
     static void Convert_UINT8_to_Gray8(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination)
     {
         libCZI::ScopedBitmapLockerP destination_locker(destination);
-        for (size_t y = 0; y < array_info.dimensions[1]; ++y)
+
+        const uint8_t* src = static_cast<const uint8_t*>(array_info.data);
+
+        for (size_t x = 0; x < array_info.dimensions[1]; ++x)
         {
-            const uint8_t* src = static_cast<const uint8_t*>(array_info.data) + y * array_info.dimensions[0];
-            uint8_t* dst = static_cast<uint8_t*>(destination_locker.ptrDataRoi) + y * destination_locker.stride;
-            for (size_t x = 0; x < array_info.dimensions[0]; ++x)
+            uint8_t* dst = static_cast<uint8_t*>(destination_locker.ptrDataRoi) + x;
+            for (size_t y = 0; y < array_info.dimensions[0]; ++y)
             {
-                *dst++ = *src++;
+                *(dst) = *src++;
+                dst += destination_locker.stride;
             }
         }
     }
@@ -120,23 +123,12 @@ public:
             uint8_t* dst = static_cast<uint8_t*>(destination_locker.ptrDataRoi) + 3 * x;
             for (size_t y = 0; y < array_info.dimensions[0]; ++y)
             {
-                *(dst + y * destination_locker.stride) = *src_r++;
-                *(1 + dst + y * destination_locker.stride) = *src_g++;
-                *(2 + dst + y * destination_locker.stride) = *src_b++;
+                *(dst) = *src_r++;
+                *(1 + dst) = *src_g++;
+                *(2 + dst) = *src_b++;
+                dst += destination_locker.stride;
             }
         }
-
-        //for (size_t y = 0; y < array_info.dimensions[0]; ++y)
-        //{
-        //    //const uint8_t* src = static_cast<const uint8_t*>(array_info.data) + 3 * y * array_info.dimensions[1];
-        //    uint8_t* dst = static_cast<uint8_t*>(destination_locker.ptrDataRoi) + y * destination_locker.stride;
-        //    for (size_t x = 0; x < 3 * array_info.dimensions[1]; ++x)
-        //    {
-        //        *dst++ = *src_r++;
-        //        *dst++ = *src_g++;
-        //        *dst++ = *src_b++;
-        //    }
-        //}
     }
 
     static void Convert_UINT16_to_Gray16(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination)
