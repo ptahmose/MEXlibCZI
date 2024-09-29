@@ -103,7 +103,7 @@ public:
             uint8_t* dst = static_cast<uint8_t*>(destination_locker.ptrDataRoi) + x;
             for (size_t y = 0; y < array_info.dimensions[0]; ++y)
             {
-                *(dst) = *src++;
+                *dst = *src++;
                 dst += destination_locker.stride;
             }
         }
@@ -123,9 +123,9 @@ public:
             uint8_t* dst = static_cast<uint8_t*>(destination_locker.ptrDataRoi) + 3 * x;
             for (size_t y = 0; y < array_info.dimensions[0]; ++y)
             {
-                *(dst) = *src_r++;
-                *(1 + dst) = *src_g++;
-                *(2 + dst) = *src_b++;
+                *dst = *src_r++;
+                *(dst + 1) = *src_g++;
+                *(dst + 2) = *src_b++;
                 dst += destination_locker.stride;
             }
         }
@@ -133,12 +133,40 @@ public:
 
     static void Convert_UINT16_to_Gray16(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination)
     {
+        libCZI::ScopedBitmapLockerP destination_locker(destination);
 
+        const uint16_t* src = static_cast<const uint16_t*>(array_info.data);
+
+        for (size_t x = 0; x < array_info.dimensions[1]; ++x)
+        {
+            uint16_t* dst = static_cast<uint16_t*>(destination_locker.ptrDataRoi) + x;
+            for (size_t y = 0; y < array_info.dimensions[0]; ++y)
+            {
+                *dst = *src++;
+                dst = reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(dst) + destination_locker.stride);
+            }
+        }
     }
 
     static void Convert_UINT16_3d_to_Bgr48(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination)
     {
+        libCZI::ScopedBitmapLockerP destination_locker(destination);
 
+        const uint16_t* src_b = static_cast<const uint16_t*>(array_info.data);
+        const uint16_t* src_g = static_cast<const uint16_t*>(array_info.data) + array_info.dimensions[0] * array_info.dimensions[1];
+        const uint16_t* src_r = static_cast<const uint16_t*>(array_info.data) + 2 * array_info.dimensions[0] * array_info.dimensions[1];
+
+        for (size_t x = 0; x < array_info.dimensions[1]; ++x)
+        {
+            uint16_t* dst = static_cast<uint16_t*>(destination_locker.ptrDataRoi) + 3 * x;
+            for (size_t y = 0; y < array_info.dimensions[0]; ++y)
+            {
+                *dst = *src_r++;
+                *(dst + 1) = *src_g++;
+                *(dst + 2) = *src_b++;
+                dst = reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(dst) + destination_locker.stride);
+            }
+        }
     }
 };
 
