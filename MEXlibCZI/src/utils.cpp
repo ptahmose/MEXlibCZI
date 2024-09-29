@@ -193,10 +193,10 @@ public:
 
     static constexpr  struct ConversionInfo
     {
-        mxClassID mxClass;
+        mxClassID mx_class;
         bool has_3rd_dimension; // whether the 3rd dimension is present and has size 3
-        libCZI::PixelType pixelType;
-        void (*conversionFunction)(const CArgsUtils::ArrayInfo& array_info, libCZI::IBitmapData* destination);
+        libCZI::PixelType pixel_type;
+        void(*conversion_function)(const CArgsUtils::ArrayInfo&, libCZI::IBitmapData*);
     } kConversionTable[] =
     {
         { mxUINT8_CLASS, false, libCZI::PixelType::Gray8 , Converters::Convert_UINT8_to_Gray8},
@@ -208,10 +208,10 @@ public:
     const bool has_3rd_dimension = array_info.number_of_dimensions == 3/* && array_info.dimensions[2] == 3*/;
     for (const auto& conversionInfo : kConversionTable)
     {
-        if (conversionInfo.mxClass == array_info.class_id && conversionInfo.has_3rd_dimension == has_3rd_dimension)
+        if (conversionInfo.mx_class == array_info.class_id && conversionInfo.has_3rd_dimension == has_3rd_dimension)
         {
             auto bitmapData = make_shared<Bitmap>(pixel_type, array_info.dimensions[1], array_info.dimensions[0]);
-            conversionInfo.conversionFunction(array_info, bitmapData.get());
+            conversionInfo.conversion_function(array_info, bitmapData.get());
             return bitmapData;
         }
     }
