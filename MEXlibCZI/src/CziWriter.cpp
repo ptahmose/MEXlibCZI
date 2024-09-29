@@ -46,3 +46,16 @@ void CziWriter::AddSubBlock(const libCZI::AddSubBlockInfoBase& add_sub_block_inf
 
     this->writer->SyncAddSubBlock(add_sub_block_info_strided_bitmap);
 }
+
+void CziWriter::Close()
+{
+    PrepareMetadataInfo prepare_metadata_info;
+    auto mdBldr = writer->GetPreparedMetadata(prepare_metadata_info);
+    auto xml = mdBldr->GetXml(true);
+    WriteMetadataInfo writerMdInfo;
+    writerMdInfo.Clear();
+    writerMdInfo.szMetadata = xml.c_str();
+    writerMdInfo.szMetadataSize = xml.size();
+    writer->SyncWriteMetadata(writerMdInfo);
+    this->writer->Close();
+}

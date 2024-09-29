@@ -64,6 +64,10 @@ void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
     libCZI::IntRect rect;
     b = CArgsUtils::TryGetIntRect(args->prhs[3], &rect);
 
+    // get the coordinate of the subblock
+    libCZI::CDimCoordinate coord;
+    b = CArgsUtils::TryGetDimCoordinate(args->prhs[2], &coord);
+
     // determine the pixel type for the subblock
     libCZI::PixelType pixel_type = GetPixelTypeOrThrow(args->prhs[5]);
 
@@ -79,6 +83,7 @@ void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
     }
 
     libCZI::AddSubBlockInfoBase add_sub_block_info_base;
+    add_sub_block_info_base.coordinate = coord;
     add_sub_block_info_base.x = rect.x;
     add_sub_block_info_base.y = rect.y;
     add_sub_block_info_base.logicalWidth = rect.w;
