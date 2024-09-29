@@ -191,7 +191,7 @@ public:
         throw invalid_argument("array must be at most 3-dimensional");
     }
 
-    static constexpr  struct ConversionInfo
+    static constexpr struct ConversionInfo
     {
         mxClassID mx_class;
         bool has_3rd_dimension; // whether the 3rd dimension is present and has size 3
