@@ -380,14 +380,11 @@ using namespace libCZI;
 
 /*static*/bool CArgsUtils::TryGetDimCoordinate(const MexArray* pArr, libCZI::CDimCoordinate* coord)
 {
-    auto mexApi = MexApi::GetInstance();
-    if (!mexApi.MxIsChar(pArr))
+    string argStr;
+    if (!CArgsUtils::TryGetString(pArr, &argStr))
     {
         return false;
     }
-
-    //unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String(pArr), mxFree);
-    string argStr = mexApi.MxArrayToUtf8String(pArr);
 
     CDimCoordinate planeCoordinate;
     try
@@ -406,6 +403,23 @@ using namespace libCZI;
     if (coord != nullptr)
     {
         *coord = planeCoordinate;
+    }
+
+    return true;
+}
+
+/*static*/bool CArgsUtils::TryGetString(const MexArray* pArr, std::string* str)
+{
+    auto mexApi = MexApi::GetInstance();
+    if (!mexApi.MxIsChar(pArr))
+    {
+        return false;
+    }
+
+    if (str != nullptr)
+    {
+        string argStr = mexApi.MxArrayToUtf8String(pArr);
+        *str = argStr;
     }
 
     return true;

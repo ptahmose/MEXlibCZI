@@ -32,4 +32,6 @@ public:
     static bool TryGetDimCoordinate(const MexArray* pArr, libCZI::CDimCoordinate* coord);
 
     static bool TryGetArrayInfo(const MexArray* pArr, ArrayInfo* array_info);
+
+    static bool TryGetString(const MexArray* pArr, std::string* str);
 };

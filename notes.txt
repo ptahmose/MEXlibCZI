@@ -50,5 +50,5 @@ cd '~/dev/buildMEXlibCZI/MEXlibCZI'
 imageData = imread('m:\warpaffine.png');
 imageData = imread('m:\2x3.png');
 h = MEXlibCZI('CreateCziWriter', 'M:\test.czi','overwrite')
-MEXlibCZI('AddSubBlock', h, 'C0T0',[0,0,660,663],[1,2],2,imageData)
+MEXlibCZI('AddSubBlock', h, 'C0T0',[0,0,660,663],'bgr24',imageData)
 MEXlibCZI('CloseCziWriter', h)
