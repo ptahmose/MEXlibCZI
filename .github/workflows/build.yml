@@ -17,7 +17,8 @@ jobs:
         shell: cmd
         run: |
           set
-          dir c:\
+          dir c:\ /s
+          dir d:\ /s
           mkdir build
           cd build
           cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=$(Build.SourcesDirectory)/matlabheaders/include -DMEXLIBCZI_LIBS=$(Build.SourcesDirectory)/matlabheaders/lib
