@@ -15,14 +15,16 @@ jobs:
         uses: matlab-actions/run-command@v2
         with:
           command: |
-            headerPath = fullfile(matlabroot, 'extern', 'include');fprintf('Header files are located at: %s\n', headerPath);
+            headerPath = fullfile(matlabroot, 'extern', 'include');libPath = fullfile(matlabroot, 'extern', 'lib', computer('arch'));envFile = getenv('GITHUB_ENV');fid = fopen(envFile, 'a');fprintf(fid, 'MATLAB_HEADER_PATH=%s\n', headerPath);fprintf(fid, 'MATLAB_LIB_PATH=%s\n', libPath);fclose(fid);
+      - name: Use environment variables from MATLAB
+        run: |
+          echo "Header path is $MATLAB_HEADER_PATH"
+          echo "Library path is $MATLAB_LIB_PATH"
+        shell: bash
       - name: run build
         shell: cmd
         run: |
-          set
-          dir c:\ /s
-          dir d:\ /s
           mkdir build
           cd build
-          cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=$(Build.SourcesDirectory)/matlabheaders/include -DMEXLIBCZI_LIBS=$(Build.SourcesDirectory)/matlabheaders/lib
+          cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS%$MATLAB_HEADER_PATH% -DMEXLIBCZI_LIBS=%$MATLAB_LIB_PATH%
           cmake --build . --config Release
