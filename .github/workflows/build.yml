@@ -14,7 +14,8 @@ jobs:
       - name: Run MATLAB script
         uses: matlab-actions/run-command@v2
         with:
-          command: headerPath = fullfile(matlabroot, 'extern', 'include');fprintf('Header files are located at: %s\n', headerPath);
+          command: |
+            headerPath = fullfile(matlabroot, 'extern', 'include');fprintf('Header files are located at: %s\n', headerPath);
       - name: run build
         shell: cmd
         run: |
