@@ -34,4 +34,13 @@ public:
     static bool TryGetArrayInfo(const MexArray* pArr, ArrayInfo* array_info);
 
     static bool TryGetString(const MexArray* pArr, std::string* str);
+
+    /// Attempts to interpret the given mxArray as a pixel type.
+    /// It can be either a string or a scalar integer.
+    ///
+    /// \param          argument        The array.
+    /// \param [out]    pixel_type  If non-null and successful, the pixel type is put here.
+    ///
+    /// \returns    True if it succeeds; false otherwise.
+    static bool TryGetPixelType(const MexArray* argument, libCZI::PixelType* pixel_type);
 };

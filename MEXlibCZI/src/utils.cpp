@@ -205,7 +205,7 @@ public:
         { mxUINT16_CLASS, true, libCZI::PixelType::Bgr48, Converters::Convert_UINT16_3d_to_Bgr48 },
     };
 
-    const bool has_3rd_dimension = array_info.number_of_dimensions == 3/* && array_info.dimensions[2] == 3*/;
+    const bool has_3rd_dimension = array_info.number_of_dimensions == 3;
     for (const auto& conversionInfo : kConversionTable)
     {
         if (conversionInfo.mx_class == array_info.class_id && conversionInfo.has_3rd_dimension == has_3rd_dimension)

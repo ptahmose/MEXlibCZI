@@ -52,3 +52,18 @@ imageData = imread('m:\2x3.png');
 h = MEXlibCZI('CreateCziWriter', 'M:\test.czi','overwrite')
 MEXlibCZI('AddSubBlock', h, 'C0T0',[0,0,660,663],'bgr24',imageData)
 MEXlibCZI('CloseCziWriter', h)
+
+
+
+
+
+image1 = imread('D:\OneDrive\jbohl\OneDrive\Bilder\SamplePictures\Chrysanthemum.jpg');
+image2 = imread('D:\OneDrive\jbohl\OneDrive\Bilder\SamplePictures\Desert.jpg');
+image3 = imread('D:\OneDrive\jbohl\OneDrive\Bilder\SamplePictures\Koala.jpg');
+
+h = MEXlibCZI('CreateCziWriter', 'M:\test.czi','overwrite')
+
+MEXlibCZI('AddSubBlock', h, 'C0T0',[0,0,1024,768],'bgr24',image1)
+MEXlibCZI('AddSubBlock', h, 'C0T1',[0,0,1024,768],'bgr24',image2)
+MEXlibCZI('AddSubBlock', h, 'C0T2',[0,0,1024,768],'bgr24',image3)
+MEXlibCZI('CloseCziWriter', h)

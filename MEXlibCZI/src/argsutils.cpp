@@ -1,5 +1,6 @@
 #include "argsutils.h"
 #include "mexapi.h"
+#include "utils.h"
 #include <limits>
 
 using namespace std;
@@ -490,4 +491,57 @@ using namespace libCZI;
     }
 
     return true;*/
+}
+
+/*static*/bool CArgsUtils::TryGetPixelType(const MexArray* argument, libCZI::PixelType* pixel_type)
+{
+    string string_argument;
+    if (CArgsUtils::TryGetString(argument, &string_argument))
+    {
+        static constexpr struct
+        {
+            const char* pixel_type_string;
+            libCZI::PixelType pixel_type;
+        } kPixelTypeNames[] =
+        {
+            { "gray8", libCZI::PixelType::Gray8 },
+            { "gray16", libCZI::PixelType::Gray16 },
+            { "bgr24", libCZI::PixelType::Bgr24 }
+        };
+
+        for (const auto& item : kPixelTypeNames)
+        {
+            if (::Utils::icasecmp(string_argument, item.pixel_type_string))
+            {
+                if (pixel_type != nullptr)
+                {
+                    *pixel_type = item.pixel_type;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    int int_argument;
+    if (CArgsUtils::TryGetInt32(argument, &int_argument))
+    {
+        switch (int_argument)
+        {
+        case libCZI::PixelType::Gray8:
+        case libCZI::PixelType::Gray16:
+        case libCZI::PixelType::Bgr24:
+            if (pixel_type != nullptr)
+            {
+                *pixel_type = static_cast<libCZI::PixelType>(int_argument);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    return false;
 }

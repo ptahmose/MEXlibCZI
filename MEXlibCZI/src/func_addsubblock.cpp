@@ -45,48 +45,6 @@ void MexFunction_AddSubBlock_CheckArguments(MatlabArgs* args)
     }
 }
 
-static libCZI::PixelType GetPixelTypeOrThrow(const MexArray* argument)
-{
-    string string_argument;
-    if (CArgsUtils::TryGetString(argument, &string_argument))
-    {
-        static constexpr struct
-        {
-            const char* pixel_type_string;
-            libCZI::PixelType pixel_type;
-        } kPixelTypeNames[] =
-        {
-            { "gray8", libCZI::PixelType::Gray8 },
-            { "gray16", libCZI::PixelType::Gray16 },
-            { "bgr24", libCZI::PixelType::Bgr24 }
-        };
-
-        for (const auto& item : kPixelTypeNames)
-        {
-            if (Utils::icasecmp(string_argument, item.pixel_type_string))
-            {
-                return item.pixel_type;
-            }
-        }
-
-        throw invalid_argument("Not a valid pixel type");
-    }
-
-    int int_argument;
-    if (CArgsUtils::TryGetInt32(argument, &int_argument))
-    {
-        switch (int_argument)
-        {
-        case libCZI::PixelType::Gray8:
-        case libCZI::PixelType::Gray16:
-        case libCZI::PixelType::Bgr24:
-            return static_cast<libCZI::PixelType>(int_argument);
-        }
-
-        throw invalid_argument("Not a valid pixel type");
-    }
-}
-
 void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
 {
     int id;
@@ -113,41 +71,33 @@ void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
     }
 
     // determine the pixel type for the subblock
-    libCZI::PixelType pixel_type = GetPixelTypeOrThrow(args->prhs[4]);
-
-    std::shared_ptr<CziWriter> writer = ::Utils::GetWriterOrThrow(id);
-
-    auto data = args->prhs[5];
+    libCZI::PixelType pixel_type;
+    b = CArgsUtils::TryGetPixelType(args->prhs[4], &pixel_type);
+    if (!b)
+    {
+        throw invalid_argument("4th argument must be an integer or a string identifying a valid pixel type");
+    }
 
     CArgsUtils::ArrayInfo array_info;
-    b = CArgsUtils::TryGetArrayInfo(data, &array_info);
+    b = CArgsUtils::TryGetArrayInfo(args->prhs[5], &array_info);
     if (!b)
     {
         throw invalid_argument("5th argument must be an array");
     }
 
+    std::shared_ptr<CziWriter> writer = ::Utils::GetWriterOrThrow(id);
     libCZI::AddSubBlockInfoBase add_sub_block_info_base;
     add_sub_block_info_base.coordinate = coord;
     add_sub_block_info_base.x = rect.x;
     add_sub_block_info_base.y = rect.y;
     add_sub_block_info_base.logicalWidth = rect.w;
     add_sub_block_info_base.logicalHeight = rect.h;
-    add_sub_block_info_base.physicalWidth = array_info.dimensions[0];
-    add_sub_block_info_base.physicalHeight = array_info.dimensions[1];
+    add_sub_block_info_base.physicalWidth = array_info.dimensions[1];
+    add_sub_block_info_base.physicalHeight = array_info.dimensions[0];
     add_sub_block_info_base.PixelType = pixel_type;
 
     auto bitmap_data = Utils::ConvertToBitmapData(array_info, pixel_type);
 
     writer->AddSubBlock(add_sub_block_info_base, bitmap_data);
-    /*auto numberofelements = mxGetNumberOfElements((const mxArray*)data);
-    auto numberOfDimensions = mxGetNumberOfDimensions((const mxArray*)data);
-    auto mwSize = mxGetDimensions((const mxArray*)data);
-    double* d1 = (double*)mxGetPr((const mxArray*)data);
-    float* singles = mxGetSingles((const mxArray*)data);
-    double* dbl  = mxGetDoubles((const mxArray*)data);*/
-}
-
-void AddSubBlock(std::shared_ptr<CziWriter> writer, const libCZI::AddSubBlockInfoBase& add_sub_block_info_base, const CArgsUtils::ArrayInfo& array_info)
-{
 
 }

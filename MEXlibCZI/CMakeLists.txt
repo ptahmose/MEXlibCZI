@@ -39,7 +39,7 @@ set(mexoctaveSourceFiles
 						"src/CziWriter.h"
 						"src/CziWriter.cpp"
 						"src/argsutils.h"
-						"src/argutils.cpp" 
+						"src/argsutils.cpp" 
 						"src/func_getmultichannelscalingtilecomposite.h" 
 						"src/func_getmultichannelscalingtilecomposite.cpp"
 						"src/CziUtilities.h" 
