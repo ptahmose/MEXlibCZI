@@ -1,11 +1,6 @@
 #include "CziWriter.h"
 #include "inc_libczi.h"
 #include <locale>
-#include <codecvt>
-#include <windows.h>
-
-#include "CziUtilities.h"
-#include "mexapi.h"
 #include "utils.h"
 
 using namespace std;
