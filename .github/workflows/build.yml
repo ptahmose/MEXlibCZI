@@ -14,11 +14,10 @@ jobs:
 #      - name: Run build
 #        uses: matlab-actions/run-build@v2
       - name: run build
-        shell: bash
+        shell: cmd
         run: |
-          env
-          ls -l /
-          tree /
+          set
+          dir c:\
           mkdir build
           cd build
           cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=$(Build.SourcesDirectory)/matlabheaders/include -DMEXLIBCZI_LIBS=$(Build.SourcesDirectory)/matlabheaders/lib
