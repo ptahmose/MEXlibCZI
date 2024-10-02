@@ -5,26 +5,23 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
-      - name: Run MATLAB script
+      - name: Run MATLAB script to give the header and library paths
+        # We run a MATLAB script, which writes the header and library paths the GITHUB_ENV file,
+        # which is a special file that can be used to set environment variables for subsequent steps.
         uses: matlab-actions/run-command@v2
         with:
           command: |
             headerPath = fullfile(matlabroot, 'extern', 'include');libPath = fullfile(matlabroot, 'extern', 'lib', computer('arch'));envFile = getenv('GITHUB_ENV');fid = fopen(envFile, 'a');fprintf(fid, 'MATLAB_HEADER_PATH=%s\n', headerPath);fprintf(fid, 'MATLAB_LIB_PATH=%s\n', libPath);fclose(fid);
-      - name: Use environment variables from MATLAB
-        run: |
-          echo "Header path is $MATLAB_HEADER_PATH"
-          echo "Library path is $MATLAB_LIB_PATH"
-        shell: bash
       - name: run build
-        shell: cmd
+        shell: bash
         run: |
           mkdir build
           cd build
-          cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=%MATLAB_HEADER_PATH% -DMEXLIBCZI_LIBS=%MATLAB_LIB_PATH%\microsoft
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=$MATLAB_HEADER_PATH -DMEXLIBCZI_LIBS=$MATLAB_LIB_PATH
           cmake --build . --config Release
