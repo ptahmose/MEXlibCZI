@@ -11,5 +11,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
-      - name: Run build
-        uses: matlab-actions/run-build@v2
+#      - name: Run build
+#        uses: matlab-actions/run-build@v2
+      - name: run build
+        shell: bash
+        run: |
+          env
+          ls -l /
+          tree /
+          mkdir build
+          cd build
+          cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=$(Build.SourcesDirectory)/matlabheaders/include -DMEXLIBCZI_LIBS=$(Build.SourcesDirectory)/matlabheaders/lib
+          cmake --build . --config Release
