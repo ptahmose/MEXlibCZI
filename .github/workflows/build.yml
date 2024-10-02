@@ -11,8 +11,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
-#      - name: Run build
-#        uses: matlab-actions/run-build@v2
+      - name: Run MATLAB script
+        uses: matlab-actions/run-build@v2
+        with:
+          command: headerPath = fullfile(matlabroot, 'extern', 'include');fprintf('Header files are located at: %s\n', headerPath);
       - name: run build
         shell: cmd
         run: |
