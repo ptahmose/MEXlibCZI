@@ -28,5 +28,6 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=%MATLAB_HEADER_PATH% -DMEXLIBCZI_LIBS=%MATLAB_LIB_PATH%\microsoft
+          #cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=%MATLAB_HEADER_PATH% -DMEXLIBCZI_LIBS=%MATLAB_LIB_PATH%\microsoft
+          cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release
