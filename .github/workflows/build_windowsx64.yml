@@ -24,15 +24,16 @@ jobs:
           echo "Library path is $MATLAB_LIB_PATH"
         shell: bash
       - name: run build
-        shell: cmd
+        shell: bash
         run: |
           mkdir build
           cd build
+          # actually, we don't need to pass the MATLAB header and library paths to CMake, we can rely on CMake to find them
           #cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=%MATLAB_HEADER_PATH% -DMEXLIBCZI_LIBS=%MATLAB_LIB_PATH%\microsoft
           cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release
       - name: Prepare artifact
-        shell: cmd
+        shell: bash
         run: |
           mkdir -p artifacts
           name="MEXlibCZI-windows-x64-$(git describe --always)"
