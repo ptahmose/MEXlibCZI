@@ -71,3 +71,4 @@ MEXlibCZI('CloseCziWriter', h)
 
 t=struct('M',0,'metadata_xml','TestText')
 t=struct('M',0,'metadata_xml','<TEST><A>32</A></TEST>')
+t=struct('M',0,'compression','zstd1:ExplicitLevel=1;PreProcess=HiLoByteUnpack')

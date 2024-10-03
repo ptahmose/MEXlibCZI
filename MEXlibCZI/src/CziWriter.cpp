@@ -18,7 +18,35 @@ void CziWriter::Create(const std::string& utf8_filename, bool overwrite_existing
     this->writer->Create(output_stream, nullptr);
 }
 
-void CziWriter::AddSubBlock(const libCZI::AddSubBlockInfoBase& add_sub_block_info_base, const std::shared_ptr<libCZI::IBitmapData>& bitmap_data, const std::string& subblock_metadata_xml)
+void CziWriter::AddSubBlock(const libCZI::AddSubBlockInfoBase& add_sub_block_info_base, const std::shared_ptr<libCZI::IBitmapData>& bitmap_data, const std::string& subblock_metadata_xml, const libCZI::Utils::CompressionOption& compression_option)
+{
+    if (compression_option.first == libCZI::CompressionMode::UnCompressed)
+    {
+        this->AddSubBlockUncompressed(add_sub_block_info_base, bitmap_data, subblock_metadata_xml);
+    }
+    else
+    {
+        this->CompressAndAddSubBlock(add_sub_block_info_base, bitmap_data, subblock_metadata_xml, compression_option);
+    }
+}
+
+void CziWriter::Close()
+{
+    PrepareMetadataInfo prepare_metadata_info;
+    auto mdBldr = writer->GetPreparedMetadata(prepare_metadata_info);
+    auto xml = mdBldr->GetXml(true);
+    WriteMetadataInfo writerMdInfo;
+    writerMdInfo.Clear();
+    writerMdInfo.szMetadata = xml.c_str();
+    writerMdInfo.szMetadataSize = xml.size();
+    writer->SyncWriteMetadata(writerMdInfo);
+    this->writer->Close();
+}
+
+void CziWriter::AddSubBlockUncompressed(
+    const libCZI::AddSubBlockInfoBase& add_sub_block_info_base,
+    const std::shared_ptr<libCZI::IBitmapData>& bitmap_data,
+    const std::string& subblock_metadata_xml)
 {
     libCZI::AddSubBlockInfoStridedBitmap add_sub_block_info_strided_bitmap;
     add_sub_block_info_strided_bitmap.Clear();
@@ -33,30 +61,92 @@ void CziWriter::AddSubBlock(const libCZI::AddSubBlockInfoBase& add_sub_block_inf
     add_sub_block_info_strided_bitmap.physicalHeight = add_sub_block_info_base.physicalHeight;
     add_sub_block_info_strided_bitmap.PixelType = add_sub_block_info_base.PixelType;
     add_sub_block_info_strided_bitmap.pyramid_type = add_sub_block_info_base.pyramid_type;
-    add_sub_block_info_strided_bitmap.compressionModeRaw = add_sub_block_info_base.compressionModeRaw;
+    add_sub_block_info_strided_bitmap.SetCompressionMode(libCZI::CompressionMode::UnCompressed);
 
     if (!subblock_metadata_xml.empty())
     {
-        add_sub_block_info_strided_bitmap.ptrSbBlkMetadata= subblock_metadata_xml.c_str();
+        add_sub_block_info_strided_bitmap.ptrSbBlkMetadata = subblock_metadata_xml.c_str();
         add_sub_block_info_strided_bitmap.sbBlkMetadataSize = subblock_metadata_xml.size();
     }
 
-    libCZI::ScopedBitmapLockerSP destination_locker(bitmap_data);
-    add_sub_block_info_strided_bitmap.ptrBitmap = destination_locker.ptrDataRoi;
-    add_sub_block_info_strided_bitmap.strideBitmap = destination_locker.stride;
+    libCZI::ScopedBitmapLockerSP bitmap_locker(bitmap_data);
+    add_sub_block_info_strided_bitmap.ptrBitmap = bitmap_locker.ptrDataRoi;
+    add_sub_block_info_strided_bitmap.strideBitmap = bitmap_locker.stride;
 
     this->writer->SyncAddSubBlock(add_sub_block_info_strided_bitmap);
 }
 
-void CziWriter::Close()
+void CziWriter::CompressAndAddSubBlock(
+    const libCZI::AddSubBlockInfoBase& add_sub_block_info_base,
+    const std::shared_ptr<libCZI::IBitmapData>& bitmap_data,
+    const std::string& subblock_metadata_xml,
+    const libCZI::Utils::CompressionOption& compression_option)
 {
-    PrepareMetadataInfo prepare_metadata_info;
-    auto mdBldr = writer->GetPreparedMetadata(prepare_metadata_info);
-    auto xml = mdBldr->GetXml(true);
-    WriteMetadataInfo writerMdInfo;
-    writerMdInfo.Clear();
-    writerMdInfo.szMetadata = xml.c_str();
-    writerMdInfo.szMetadataSize = xml.size();
-    writer->SyncWriteMetadata(writerMdInfo);
-    this->writer->Close();
+    if (compression_option.first == CompressionMode::Zstd0)
+    {
+        libCZI::ScopedBitmapLockerSP bitmap_locker(bitmap_data);
+        auto compressed_data_memory_block = ZstdCompress::CompressZStd0Alloc(
+            bitmap_data->GetWidth(),
+            bitmap_data->GetHeight(),
+            bitmap_locker.stride,
+            bitmap_data->GetPixelType(),
+            bitmap_locker.ptrDataRoi,
+            compression_option.second.get());
+        this->AddSubBlockCompressed(add_sub_block_info_base, CompressionMode::Zstd0, compressed_data_memory_block, subblock_metadata_xml);
+    }
+    else if (compression_option.first == CompressionMode::Zstd1)
+    {
+        libCZI::ScopedBitmapLockerSP bitmap_locker(bitmap_data);
+        auto compressed_data_memory_block = ZstdCompress::CompressZStd1Alloc(
+            bitmap_data->GetWidth(),
+            bitmap_data->GetHeight(),
+            bitmap_locker.stride,
+            bitmap_data->GetPixelType(),
+            bitmap_locker.ptrDataRoi,
+            compression_option.second.get());
+        this->AddSubBlockCompressed(add_sub_block_info_base, CompressionMode::Zstd1, compressed_data_memory_block, subblock_metadata_xml);
+    }
+    else if (compression_option.first == CompressionMode::JpgXr)
+    {
+        libCZI::ScopedBitmapLockerSP bitmap_locker(bitmap_data);
+        auto compressed_data_memory_block = JxrLibCompress::Compress(
+            bitmap_data->GetPixelType(),
+            bitmap_data->GetWidth(),
+            bitmap_data->GetHeight(),
+            bitmap_locker.stride,
+            bitmap_locker.ptrDataRoi,
+            compression_option.second.get());
+        this->AddSubBlockCompressed(add_sub_block_info_base, CompressionMode::JpgXr, compressed_data_memory_block, subblock_metadata_xml);
+    }
+}
+
+void CziWriter::AddSubBlockCompressed(
+    const libCZI::AddSubBlockInfoBase& add_sub_block_info_base,
+    libCZI::CompressionMode compression_mode,
+    const std::shared_ptr<libCZI::IMemoryBlock>& compressed_data,
+    const std::string& subblock_metadata_xml)
+{
+    AddSubBlockInfoMemPtr addInfo;
+    addInfo.Clear();
+    addInfo.coordinate = add_sub_block_info_base.coordinate;
+    addInfo.mIndexValid = add_sub_block_info_base.mIndexValid;
+    addInfo.mIndex = add_sub_block_info_base.mIndex;
+    addInfo.x = add_sub_block_info_base.x;
+    addInfo.y = add_sub_block_info_base.y;
+    addInfo.logicalWidth = add_sub_block_info_base.logicalWidth;
+    addInfo.logicalHeight = add_sub_block_info_base.logicalHeight;
+    addInfo.physicalWidth = add_sub_block_info_base.physicalWidth;
+    addInfo.physicalHeight = add_sub_block_info_base.physicalHeight;
+    addInfo.PixelType = add_sub_block_info_base.PixelType;
+    addInfo.ptrData = compressed_data->GetPtr();
+    addInfo.dataSize = compressed_data->GetSizeOfData();
+
+    if (!subblock_metadata_xml.empty())
+    {
+        addInfo.ptrSbBlkMetadata = subblock_metadata_xml.c_str();
+        addInfo.sbBlkMetadataSize = subblock_metadata_xml.size();
+    }
+
+    addInfo.SetCompressionMode(compression_mode);
+    writer->SyncAddSubBlock(addInfo);
 }

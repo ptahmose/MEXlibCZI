@@ -35,4 +35,13 @@ void MexFunction_CloseCziWriter_Execute(MatlabArgs* args)
 
     std::shared_ptr<CziWriter> writer = ::Utils::GetWriterOrThrow(id);
     writer->Close();
+    writer.reset();
+
+    VDBGPRINT((CDbg::Level::Trace, "MexFunction_CloseCziWriter_Execute: trying to remove instance with id=%i.", id));
+    b = CziReaderManager::GetInstance().RemoveInstance(id);
+    if (!b)
+    {
+        VDBGPRINT((CDbg::Level::Trace, "MexFunction_CloseCziWriter_Execute: removing instance with id=%i failed.", id));
+        throw invalid_argument("invalid handle specified");
+    }
 }

@@ -113,6 +113,7 @@ void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
 
     std::optional<int> m_index;
     string metadata_xml;
+    libCZI::Utils::CompressionOption compression_option = make_pair(libCZI::CompressionMode::UnCompressed, nullptr);
     if (args->nrhs >= 7)
     {
         int i;
@@ -122,6 +123,12 @@ void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
         }
 
         CArgsUtils::TryGetStringValueOfField(args->prhs[6], "metadata_xml", &metadata_xml);
+
+        string compression_options_text;
+        if (CArgsUtils::TryGetStringValueOfField(args->prhs[6], "compression", &compression_options_text))
+        {
+            compression_option = libCZI::Utils::ParseCompressionOptions(compression_options_text);
+        }
     }
 
     std::shared_ptr<CziWriter> writer = ::Utils::GetWriterOrThrow(id);
@@ -137,9 +144,7 @@ void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
     add_sub_block_info_base.PixelType = pixel_type;
     add_sub_block_info_base.mIndex = m_index.value_or(0);
     add_sub_block_info_base.mIndexValid = m_index.has_value();
-    add_sub_block_info_base.SetCompressionMode(libCZI::CompressionMode::UnCompressed);
 
     auto bitmap_data = Utils::ConvertToBitmapData(array_info, pixel_type);
-
-    writer->AddSubBlock(add_sub_block_info_base, bitmap_data, metadata_xml);
+    writer->AddSubBlock(add_sub_block_info_base, bitmap_data, metadata_xml, compression_option);
 }
