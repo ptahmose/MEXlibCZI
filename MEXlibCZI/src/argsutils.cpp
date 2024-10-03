@@ -527,7 +527,7 @@ using namespace libCZI;
     int int_argument;
     if (CArgsUtils::TryGetInt32(argument, &int_argument))
     {
-        switch (int_argument)
+        switch (static_cast<libCZI::PixelType>(int_argument))
         {
         case libCZI::PixelType::Gray8:
         case libCZI::PixelType::Gray16:
