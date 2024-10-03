@@ -31,3 +31,17 @@ jobs:
           #cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_HEADERS=%MATLAB_HEADER_PATH% -DMEXLIBCZI_LIBS=%MATLAB_LIB_PATH%\microsoft
           cmake .. -A x64 -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release
+      - name: Prepare artifact
+        shell: cmd
+        run: |
+          mkdir -p artifacts
+          name="MEXlibCZI-windows-x64-$(git describe --always)"
+          mkdir -p artifacts/${name}
+          cp build/MEXlibCZI/Release/MEXlibCZI.mexw64 artifacts/${name}/
+          echo "artifactName=${name}" >> "$GITHUB_ENV"
+          echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.artifactPath }}/
+          name: ${{ env.artifactName }}
