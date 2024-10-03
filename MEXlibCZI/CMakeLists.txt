@@ -64,8 +64,6 @@ set(mexoctaveSourceFiles
 						"src/dbgprint.cpp" 
 						"src/func_getdefaultdisplaysettings.cpp" 
 						"src/func_getdefaultdisplaysettings.h" 
-						"src/func_readsubblock.h" 
-						"src/func_readsubblock.cpp" 
 						"src/CziReaderSbBlkStore.h" 
 						"src/CziReaderSbBlkStore.cpp"
 						"src/func_getsubblock.h"
@@ -81,7 +79,7 @@ set(mexoctaveSourceFiles
 add_library (MEXlibCZI SHARED
 			       ${mexoctaveSourceFiles})
 
-set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
+set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 17)
   
 target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
 

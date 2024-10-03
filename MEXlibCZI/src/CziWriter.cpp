@@ -1,6 +1,5 @@
 #include "CziWriter.h"
 #include "inc_libczi.h"
-#include <locale>
 #include "utils.h"
 
 using namespace std;
@@ -19,9 +18,10 @@ void CziWriter::Create(const std::string& utf8_filename, bool overwrite_existing
     this->writer->Create(output_stream, nullptr);
 }
 
-void CziWriter::AddSubBlock(const libCZI::AddSubBlockInfoBase& add_sub_block_info_base, const std::shared_ptr<libCZI::IBitmapData>& bitmap_data)
+void CziWriter::AddSubBlock(const libCZI::AddSubBlockInfoBase& add_sub_block_info_base, const std::shared_ptr<libCZI::IBitmapData>& bitmap_data, const std::string& subblock_metadata_xml)
 {
     libCZI::AddSubBlockInfoStridedBitmap add_sub_block_info_strided_bitmap;
+    add_sub_block_info_strided_bitmap.Clear();
     add_sub_block_info_strided_bitmap.coordinate = add_sub_block_info_base.coordinate;
     add_sub_block_info_strided_bitmap.mIndexValid = add_sub_block_info_base.mIndexValid;
     add_sub_block_info_strided_bitmap.mIndex = add_sub_block_info_base.mIndex;
@@ -34,6 +34,12 @@ void CziWriter::AddSubBlock(const libCZI::AddSubBlockInfoBase& add_sub_block_inf
     add_sub_block_info_strided_bitmap.PixelType = add_sub_block_info_base.PixelType;
     add_sub_block_info_strided_bitmap.pyramid_type = add_sub_block_info_base.pyramid_type;
     add_sub_block_info_strided_bitmap.compressionModeRaw = add_sub_block_info_base.compressionModeRaw;
+
+    if (!subblock_metadata_xml.empty())
+    {
+        add_sub_block_info_strided_bitmap.ptrSbBlkMetadata= subblock_metadata_xml.c_str();
+        add_sub_block_info_strided_bitmap.sbBlkMetadataSize = subblock_metadata_xml.size();
+    }
 
     libCZI::ScopedBitmapLockerSP destination_locker(bitmap_data);
     add_sub_block_info_strided_bitmap.ptrBitmap = destination_locker.ptrDataRoi;

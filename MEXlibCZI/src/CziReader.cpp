@@ -200,7 +200,7 @@ MexArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& 
 
 	auto bitmap = Compositors::ComposeMultiChannel_Bgr24(
 		(int)channelBitmaps.size(),
-		&vecBm[0],
+        vecBm.data(),
 		dsplHlp.GetChannelInfosArray());
 
 	mwSize dims[3] = { bitmap->GetHeight(), bitmap->GetWidth(), 3 };
@@ -323,8 +323,8 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 	ScopedBitmapLocker<IBitmapData*> lckBm{ bitmapData };
 	for (decltype(height) y = 0; y < height; ++y)
 	{
-		const uint8_t* ptrSrc = ((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride;
-		uint8_t* ptrDst = ((uint8_t*)pDst) + y;
+		const uint8_t* ptrSrc = static_cast<const uint8_t*>(lckBm.ptrDataRoi) + y * static_cast<size_t>(lckBm.stride);
+		uint8_t* ptrDst = static_cast<uint8_t*>(pDst) + y;
 		for (decltype(width) x = 0; x < width; ++x)
 		{
 			*ptrDst = *ptrSrc++;
@@ -340,12 +340,12 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 	ScopedBitmapLocker<IBitmapData*> lckBm{ bitmapData };
 	for (decltype(height) y = 0; y < height; ++y)
 	{
-		const uint16_t* ptrSrc = (const uint16_t*)(((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride);
-		uint16_t* ptrDst = (uint16_t*)(((uint8_t*)pDst) + y * 2);
+		const uint16_t* ptrSrc = reinterpret_cast<const uint16_t*>(static_cast<const uint8_t*>(lckBm.ptrDataRoi) + y * static_cast<size_t>(lckBm.stride));
+		uint16_t* ptrDst = reinterpret_cast<uint16_t*>(static_cast<uint8_t*>(pDst) + static_cast<size_t>(y) * 2);
 		for (decltype(width) x = 0; x < width; ++x)
 		{
 			*ptrDst = *ptrSrc++;
-			ptrDst = (uint16_t*)(((uint8_t*)ptrDst) + lineLength);
+			ptrDst = reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(ptrDst) + lineLength);
 		}
 	}
 }
@@ -357,12 +357,12 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 	ScopedBitmapLocker<IBitmapData*> lckBm{ bitmapData };
 	for (decltype(height) y = 0; y < height; ++y)
 	{
-		const float* ptrSrc = (const float*)(((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride);
-		float* ptrDst = (float*)(((uint8_t*)pDst) + y * 4);
+		const float* ptrSrc = reinterpret_cast<const float*>(static_cast<const uint8_t*>(lckBm.ptrDataRoi) + y * static_cast<size_t>(lckBm.stride));
+		float* ptrDst = reinterpret_cast<float*>(static_cast<uint8_t*>(pDst) + static_cast<size_t>(y) * 4);
 		for (decltype(width) x = 0; x < width; ++x)
 		{
 			*ptrDst = *ptrSrc++;
-			ptrDst = (float*)(((uint8_t*)ptrDst) + lineLength);;
+			ptrDst = reinterpret_cast<float*>(reinterpret_cast<uint8_t*>(ptrDst) + lineLength);
 		}
 	}
 }
@@ -374,8 +374,8 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 	ScopedBitmapLocker<IBitmapData*> lckBm{ bitmapData };
 	for (decltype(height) y = 0; y < height; ++y)
 	{
-		const uint8_t* ptrSrc = ((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride;
-		uint8_t* ptrDst = ((uint8_t*)pDst) + y;
+		const uint8_t* ptrSrc = static_cast<const uint8_t*>(lckBm.ptrDataRoi) + y * static_cast<size_t>(lckBm.stride);
+		uint8_t* ptrDst = static_cast<uint8_t*>(pDst) + y;
 		for (decltype(width) x = 0; x < width; ++x)
 		{
 			const uint8_t b = *ptrSrc++;
@@ -397,8 +397,8 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 	ScopedBitmapLocker<IBitmapData*> lckBm{ bitmapData };
 	for (decltype(height) y = 0; y < height; ++y)
 	{
-		const uint16_t* ptrSrc = (const uint16_t*)(((const uint8_t*)lckBm.ptrDataRoi) + y * (size_t)lckBm.stride);
-		uint16_t* ptrDst = (uint16_t*)(((uint8_t*)pDst) + y * (size_t)2);
+		const uint16_t* ptrSrc = reinterpret_cast<const uint16_t*>(static_cast<const uint8_t*>(lckBm.ptrDataRoi) + y * static_cast<size_t>(lckBm.stride));
+		uint16_t* ptrDst = reinterpret_cast<uint16_t*>(static_cast<uint8_t*>(pDst) + y * static_cast<size_t>(2));
 		for (decltype(width) x = 0; x < width; ++x)
 		{
 			const uint16_t b = *ptrSrc++;
@@ -406,9 +406,9 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 			const uint16_t r = *ptrSrc++;
 
 			*ptrDst = r;
-			*((uint16_t*)(((uint8_t*)ptrDst) + planeStride)) = g;
-			*((uint16_t*)(((uint8_t*)ptrDst) + 2 * planeStride)) = b;
-			ptrDst = (uint16_t*)(((uint8_t*)ptrDst) + lineStride);
+			*reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(ptrDst) + planeStride) = g;
+			*reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(ptrDst) + 2 * planeStride) = b;
+			ptrDst = reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(ptrDst) + lineStride);
 		}
 	}
 }
@@ -418,7 +418,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 	vector<string> dimensions;
 	for (auto i = (std::underlying_type<libCZI::DimensionIndex>::type)(libCZI::DimensionIndex::MinDim); i <= (std::underlying_type<libCZI::DimensionIndex>::type)(libCZI::DimensionIndex::MaxDim); ++i)
 	{
-		auto d = (libCZI::DimensionIndex)i;
+		auto d = static_cast<libCZI::DimensionIndex>(i);
 		if (bounds->IsValid(d))
 		{
 			char dimStr[2] = { libCZI::Utils::DimensionToChar(d) ,'\0' };

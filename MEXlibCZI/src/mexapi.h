@@ -29,6 +29,8 @@ public:
 
     std::string MxArrayToUtf8String(const MexArray* pArr);
 
+    const MexArray* MxGetField(const MexArray* pArr, const char* fieldname);
+
     /// Convert to a Matlab allocated UTF8 string - this should be the
     /// preferred way because one cannot guarantee the execution of the d'tor (with std::string)
     /// -> https://www.mathworks.com/help/matlab/matlab_external/automatic-cleanup-of-temporary-arrays.html .
@@ -67,6 +69,11 @@ public:
     /// \param  pArr    The array.
     /// \returns    True if the array is sparse, false otherwise.
     bool MxIsSparse(const MexArray* pArr);
+
+    /// Determine whether the given array is a struct (https://www.mathworks.com/help/matlab/ref/struct.html).
+    /// \param  pArr    The array.
+    /// \returns    True if the array is a struct, false otherwise.
+    bool MxIsStruct(const MexArray* pArr);
 
     void MxFree(void* ptr);
     void MexAtExit(void (*mex_exit_fn)(void));

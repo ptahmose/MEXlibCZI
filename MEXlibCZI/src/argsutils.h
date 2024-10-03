@@ -26,6 +26,7 @@ public:
     static bool TryGetSingle(const MexArray* pArr, size_t index, float* ptr);
 
     static bool IsNumericArrayOfMinSize(const MexArray* pArr, size_t minElementCount);
+    static bool IsStructure(const MexArray* pArr);
 
     static bool TryGetIntRect(const MexArray* pArr, libCZI::IntRect* rect);
 
@@ -43,4 +44,8 @@ public:
     ///
     /// \returns    True if it succeeds; false otherwise.
     static bool TryGetPixelType(const MexArray* argument, libCZI::PixelType* pixel_type);
+
+    static bool TryGetIntValueOfField(const MexArray* argument, const char* field_name, std::int32_t* int_value);
+
+    static bool TryGetStringValueOfField(const MexArray* argument, const char* field_name, std::string* str);
 };

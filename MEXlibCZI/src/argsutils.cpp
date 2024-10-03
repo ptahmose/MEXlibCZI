@@ -354,6 +354,12 @@ using namespace libCZI;
     return numOfElements >= minElementCount;
 }
 
+/*static*/bool CArgsUtils::IsStructure(const MexArray* pArr)
+{
+    auto mexApi = MexApi::GetInstance();
+    return mexApi.MxIsStruct(pArr);
+}
+
 /*static*/bool CArgsUtils::TryGetIntRect(const MexArray* pArr, libCZI::IntRect* rect)
 {
     IntRect r;
@@ -544,4 +550,28 @@ using namespace libCZI;
     }
 
     return false;
+}
+
+/*static*/bool CArgsUtils::TryGetIntValueOfField(const MexArray* argument, const char* field_name, std::int32_t* int_value)
+{
+    auto mexApi = MexApi::GetInstance();
+    const auto field = mexApi.MxGetField(argument, field_name);
+    if (field == nullptr)
+    {
+        return false;
+    }
+
+    return CArgsUtils::TryGetInt32(field, int_value);
+}
+
+/*static*/bool CArgsUtils::TryGetStringValueOfField(const MexArray* argument, const char* field_name, std::string* str)
+{
+    auto mexApi = MexApi::GetInstance();
+    const auto field = mexApi.MxGetField(argument, field_name);
+    if (field == nullptr)
+    {
+        return false;
+    }
+
+    return CArgsUtils::TryGetString(field, str);
 }

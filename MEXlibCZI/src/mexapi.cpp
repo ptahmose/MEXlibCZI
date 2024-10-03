@@ -78,6 +78,11 @@ bool MexApi::MxIsChar(const MexArray* pArr)
     return mxIsChar((const mxArray*)pArr);
 }
 
+bool MexApi::MxIsStruct(const MexArray* pArr)
+{
+    return mxIsStruct((const mxArray*)pArr);
+}
+
 std::string MexApi::MxArrayToUtf8String(const MexArray* pArr)
 {
     std::unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String((const mxArray*)pArr), mxFree);
@@ -197,6 +202,16 @@ void MexApi::GetSizeOfDimensions(const MexArray* pArr, size_t number_of_dimensio
     {
         sizes[i] = ptr_sizes[i];
     }
+}
+
+const MexArray* MexApi::MxGetField(const MexArray* pArr, const char* fieldname)
+{
+    if (!MxIsStruct(pArr))
+    {
+        return nullptr;
+    }
+
+    return (const MexArray*)mxGetField((const mxArray*)pArr, 0, fieldname);
 }
 
 #elif defined(OCTAVEMEXBUILD)
