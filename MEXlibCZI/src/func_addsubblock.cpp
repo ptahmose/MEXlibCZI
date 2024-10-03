@@ -137,6 +137,7 @@ void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
     add_sub_block_info_base.PixelType = pixel_type;
     add_sub_block_info_base.mIndex = m_index.value_or(0);
     add_sub_block_info_base.mIndexValid = m_index.has_value();
+    add_sub_block_info_base.SetCompressionMode(libCZI::CompressionMode::UnCompressed);
 
     auto bitmap_data = Utils::ConvertToBitmapData(array_info, pixel_type);
 
