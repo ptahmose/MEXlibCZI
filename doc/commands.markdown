@@ -9,6 +9,16 @@ The following commands are available in the mex file.
 | [GetScaling](#getscaling) | Retrieve scaling information from the specified document. |
 | [GetMultiChannelScalingTileComposite](#getmultichannelscalingtilecomposite) | Get a multi-channel composite image from the specified axis-aligned ROI with the specified zoom. |
 | [GetSingleChannelScalingTileComposite](#getsinglechannelscalingtilecomposite) | Get a tile-composite for the specified region-of-interest for the specified plane with the specified zoom-factor. |
+| [GetMetadataXml](#getmetadataxml) | Get the metadata of the specified CZI-document as an XML string. |
+| [GetDefaultDisplaySettings](#getdefaultdisplaysettings) |  |
+| [GetSubBlock](#getsubblock) |  |
+| [GetInfoFromSubBlock](#getinfofromsubblock) |  |
+| [GetBitmapFromSubBlock](#getbitmapfromsubblock) |  |
+| [GetMetadataFromSubBlock](#getmetadatafromsubblock) |  |
+| [ReleaseSubBlock](#releasesubblock) |  |
+| [CreateCziWriter](#createcziwriter) |  |
+| [AddSubBlock](#addsubblock) |  |
+| [CloseCziWriter](#closecziwriter) |  |
 
 ## GetVersion
 
@@ -74,3 +84,11 @@ zoom is a number between 1 and 0, and the pixel-size of the resulting image will
 | 4          | number          | The zoom                             |
 
 ![CZIGetInfo sample](pictures/getsinglechannelscalingtilecomposite_sample_.PNG)
+
+## GetMetadataXml
+
+Get the metadata of the specified CZI-document as an XML string.
+
+## Close
+
+Close the document and free the resources.
