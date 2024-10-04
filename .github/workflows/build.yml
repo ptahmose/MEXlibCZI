@@ -1,0 +1,60 @@
+name: Build for Ubuntu-x64 and Windows-x64
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: "Should a release be created?"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+jobs:
+  build:
+    name: Build Binaries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]  # Windows and Linux builds
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2  
+      - name: run build (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release 
+          cmake --build . --config Release
+      - name: run build (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release 
+          cmake --build . --config Release
+      - name: Prepare artifact (Linux)
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          name="MEXlibCZI-linux-x64-$(git describe --always)"
+          mkdir -p artifacts/${name}
+          cp build/MEXlibCZI/MEXlibCZI.mexa64 artifacts/${name}/
+          echo "artifactName=${name}" >> "$GITHUB_ENV"
+          echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
+      - name: Prepare artifact (Windows)
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          name="MEXlibCZI-windows-x64-$(git describe --always)"
+          mkdir -p artifacts/${name}
+          cp build/MEXlibCZI/Release/MEXlibCZI.mexw64 artifacts/${name}/
+          echo "artifactName=${name}" >> "$GITHUB_ENV"
+          echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
