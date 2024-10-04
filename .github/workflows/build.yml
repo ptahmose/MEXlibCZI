@@ -111,24 +111,21 @@ jobs:
       - name: Upload Linux Build to Release
         if: needs.build.outputs.linuxx64_artifact != ''
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/${{ needs.build.outputs.linuxx64_artifact }}
-          asset_name: build-linux.zip
+          asset_path: ./artifacts/${{ needs.build.outputs.linuxx64_artifact }}/${{ needs.build.outputs.linuxx64_artifact }}.mexa64
+          asset_name: "Linux x64"
           asset_content_type: application/zip
-
-      - name: Download Windows Artifacts
-        if: needs.build.outputs.windowsx64_artifact != ''
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.build.outputs.windowsx64_artifact }}  # Name used during artifact upload
-          path: ./artifacts  # Optional, download to a specific folder
 
       - name: Upload Windows Build to Release
         if: needs.build.outputs.windowsx64_artifact != ''
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/${{ needs.build.outputs.windowsx64_artifact }}
-          asset_name: build-windows.zip
+          asset_path: ./artifacts/${{ needs.build.outputs.windowsx64_artifact }}/${{ needs.build.outputs.windowsx64_artifact }}.mexw64
+          asset_name: "Windows x64"
           asset_content_type: application/zip
