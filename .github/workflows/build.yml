@@ -24,8 +24,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]  # Windows and Linux builds
     outputs:
-      linuxx64_artifact: ${{ steps.set_output_step.outputs.linuxx64_build }}
-      windowsx64_artifact: ${{ steps.set_output_step.outputs.windowsx64_build }}
+      linuxx64_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_build }}
+      windowsx64_artifact: ${{ steps.prepare_windows_artifact.outputs.windowsx64_build }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -48,6 +48,7 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release 
           cmake --build . --config Release -j
       - name: Prepare artifact (Linux)
+        id: prepare_linux_artifact
         if: runner.os == 'Linux'
         shell: bash
         run: |
@@ -60,6 +61,7 @@ jobs:
           #echo "::set-output name=linuxx64_build::${name}"
           echo "linuxx64_build=${name}" >> $GITHUB_OUTPUT
       - name: Prepare artifact (Windows)
+        id: prepare_windows_artifact
         if: runner.os == 'Windows'
         shell: bash
         run: |
