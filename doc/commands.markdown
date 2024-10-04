@@ -10,15 +10,15 @@ The following commands are available in the mex file.
 | [GetMultiChannelScalingTileComposite](#getmultichannelscalingtilecomposite) | Get a multi-channel composite image from the specified axis-aligned ROI with the specified zoom. |
 | [GetSingleChannelScalingTileComposite](#getsinglechannelscalingtilecomposite) | Get a tile-composite for the specified region-of-interest for the specified plane with the specified zoom-factor. |
 | [GetMetadataXml](#getmetadataxml) | Get the metadata of the specified CZI-document as an XML string. |
-| [GetDefaultDisplaySettings](#getdefaultdisplaysettings) |  |
-| [GetSubBlock](#getsubblock) |  |
-| [GetInfoFromSubBlock](#getinfofromsubblock) |  |
-| [GetBitmapFromSubBlock](#getbitmapfromsubblock) |  |
-| [GetMetadataFromSubBlock](#getmetadatafromsubblock) |  |
-| [ReleaseSubBlock](#releasesubblock) |  |
-| [CreateCziWriter](#createcziwriter) |  |
-| [AddSubBlock](#addsubblock) |  |
-| [CloseCziWriter](#closecziwriter) |  |
+| [GetDefaultDisplaySettings](#getdefaultdisplaysettings) | Get the display-settings from the CZI-document.  |
+| [GetSubBlock](#getsubblock) | Get a handle to a subblock (and return a handle to it).  |
+| [GetInfoFromSubBlock](#getinfofromsubblock) | Get information about a subblock. |
+| [GetBitmapFromSubBlock](#getbitmapfromsubblock) | Get the bitmap of a subblock.  |
+| [GetMetadataFromSubBlock](#getmetadatafromsubblock) | Get the metadata from a subblock. |
+| [ReleaseSubBlock](#releasesubblock) | Releases a handle for a subblock. |
+| [CreateCziWriter](#createcziwriter) | Creates a writer object (for writing a CZI document) and returns a handle to it. |
+| [AddSubBlock](#addsubblock) | Adds a subblock to the writer object.|
+| [CloseCziWriter](#closecziwriter) | Closes a writer object and finalizes the CZI-document. |
 
 ## GetVersion
 

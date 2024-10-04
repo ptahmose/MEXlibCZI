@@ -55,7 +55,7 @@ MEXlibCZI('CloseCziWriter', h)
 
 
 
-
+cd D:\dev\MyGitHub\MEXlibCZI\out\build\x64-Debug\MEXlibCZI
 
 image1 = imread('D:\OneDrive\jbohl\OneDrive\Bilder\SamplePictures\Chrysanthemum.jpg');
 image2 = imread('D:\OneDrive\jbohl\OneDrive\Bilder\SamplePictures\Desert.jpg');

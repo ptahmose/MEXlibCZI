@@ -4,8 +4,8 @@
 cmake_minimum_required (VERSION 3.11)
 
 set(MEXCZI_MAJOR 0)
-set(MEXCZI_MINOR 1)
-set(MEXCZI_PATCH 5)
+set(MEXCZI_MINOR 2)
+set(MEXCZI_PATCH 0)
 set(MEXCZI_EXT "alpha")
 
 if(WIN32)
@@ -17,7 +17,7 @@ endif(WIN32)
 
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules" ${CMAKE_MODULE_PATH})
 
-project ("MEXCZI")
+project ("MEXlibCZI")
 
 # include RapidJSON -> https://www.jibbow.com/posts/rapidjson-cmake/
 include("${CMAKE_SOURCE_DIR}/modules/rapidJSON.cmake")
