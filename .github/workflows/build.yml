@@ -23,6 +23,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]  # Windows and Linux builds
+    outputs:
+      linuxx64_artifact: ${{ steps.set_output_step.outputs.linuxx64_build }}
+      windowsx64_artifact: ${{ steps.set_output_step.outputs.windowsx64_build }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -54,6 +57,7 @@ jobs:
           cp build/MEXlibCZI/MEXlibCZI.mexa64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
+          echo "::set-output name=linuxx64_build::${name}"
       - name: Prepare artifact (Windows)
         if: runner.os == 'Windows'
         shell: bash
@@ -64,8 +68,46 @@ jobs:
           cp build/MEXlibCZI/Release/MEXlibCZI.mexw64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
+          echo "::set-output name=windowsx64_build::${name}"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           path: ${{ env.artifactPath }}/
           name: ${{ env.artifactName }}
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: inputs.create_release == 'true'  # Only run if release is selected
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: "v1.0.${{ github.run_id }}"
+          release_name: "Release v1.0.${{ github.run_id }}"
+          body: |
+            Release for version v1.0.${{ github.run_id }}
+          draft: true
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux Build to Release
+        if: needs.build.outputs.linux_artifact != ''
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ needs.build.outputs.linuxx64_artifact }}
+          asset_name: build-linux.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows Build to Release
+        if: needs.build.outputs.windows_artifact != ''
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ needs.build.outputs.windowsx64_artifact }}
+          asset_name: build-windows.zip
+          asset_content_type: application/zip
