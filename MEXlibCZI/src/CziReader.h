@@ -51,9 +51,6 @@ private:
     std::shared_ptr<libCZI::IDisplaySettings> GetDisplaySettingsFromCzi();
     const libCZI::ScalingInfo& GetScalingInfoFromCzi();
 
-   /* std::string StatisticsToJson(const libCZI::SubBlockStatistics& statistics);
-    std::string SubblockInfoToJson(const libCZI::SubBlockInfo& subblockInfo);*/
-
     MexArray* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings);
     MexArray* GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom);
 
