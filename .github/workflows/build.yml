@@ -14,7 +14,7 @@ on:
   push: 
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -57,7 +57,8 @@ jobs:
           cp build/MEXlibCZI/MEXlibCZI.mexa64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          echo "::set-output name=linuxx64_build::${name}"
+          #echo "::set-output name=linuxx64_build::${name}"
+          echo "linuxx64_build=${name}" >> $GITHUB_OUTPUT
       - name: Prepare artifact (Windows)
         if: runner.os == 'Windows'
         shell: bash
@@ -68,7 +69,8 @@ jobs:
           cp build/MEXlibCZI/Release/MEXlibCZI.mexw64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          echo "::set-output name=windowsx64_build::${name}"
+          #echo "::set-output name=windowsx64_build::${name}"
+          echo "windowsx64_build=${name}" >> $GITHUB_OUTPUT
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
