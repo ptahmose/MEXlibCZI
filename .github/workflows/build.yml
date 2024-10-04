@@ -100,10 +100,13 @@ jobs:
 
       - name: Download Linux Artifacts
         if: needs.build.outputs.linuxx64_artifact != ''
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.build.outputs.linuxx64_artifact }}  # Name used during artifact upload
+          #name: ${{ needs.build.outputs.linuxx64_artifact }}  # Name used during artifact upload
           path: ./artifacts  # Optional, download to a specific folder
+
+      - name: Display structure of downloaded files
+        run: ls -R ./artifacts
 
       - name: Upload Linux Build to Release
         if: needs.build.outputs.linuxx64_artifact != ''
@@ -116,7 +119,7 @@ jobs:
 
       - name: Download Windows Artifacts
         if: needs.build.outputs.windowsx64_artifact != ''
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.windowsx64_artifact }}  # Name used during artifact upload
           path: ./artifacts  # Optional, download to a specific folder
