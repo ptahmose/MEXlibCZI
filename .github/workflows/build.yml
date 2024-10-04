@@ -13,10 +13,13 @@ on:
           - "false"
   push: 
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build Binaries
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]  # Windows and Linux builds
