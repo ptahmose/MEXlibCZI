@@ -187,11 +187,11 @@ Adds a subblock to the writer object.
 
 The following options are available (for argument #6):
 
-| Option         | type |Description |
-| :-----         | :--- | :--- |
+| Option         | type    | Description |
+| :-----         | :---    | :--- |
 | "M"            | integer | The value of the M-index |
 | "metadata_xml" | string  | XML metadata to be written to the subblock |
-| "compression"  | string  | A string describing the compression to be used for the bitmap |
+| "compression"  | string  | A string describing the compression to be used for the bitmap. The syntax is as defined [here](https://zeiss.github.io/libczi/classlib_c_z_i_1_1_utils.html#a4cb9b660d182e59a218f58d42bd04025). |
 
 ![AddSubBlock example](pictures/addsubblock_sample.png)
 
