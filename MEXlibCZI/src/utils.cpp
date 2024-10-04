@@ -1,11 +1,15 @@
 #include "utils.h"
 #include <codecvt>
 #include <locale>
+#include <limits>
 #include <cstdarg> 
 #include "CziReaderManager.h"
 #include "CziWriterManager.h"
 #include "mexapi.h"
 #include "dbgprint.h"
+#if _WIN32
+#include <Windows.h>
+#endif
 
 using namespace std;
 
@@ -58,9 +62,28 @@ using namespace std;
 
 /*static*/std::wstring Utils::convertUtf8ToWchar_t(const char* sz)
 {
+#if _WIN32
+    // Get the size of the wide char string we need.
+    int len = MultiByteToWideChar(CP_UTF8, 0, sz, -1, nullptr, 0);
+    if (len == 0)
+    {
+        return L"";
+    }
+
+    // Create a wstring to hold the result.
+    std::wstring conv(len, 0);
+
+    // Perform the actual conversion.
+    MultiByteToWideChar(CP_UTF8, 0, sz, -1, conv.data(), len);
+
+    // Remove the extra null terminator added by MultiByteToWideChar
+    conv.resize(len - 1);
+    return conv;
+#else
     std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8conv;
     std::wstring conv = utf8conv.from_bytes(sz);
     return conv;
+#endif
 }
 
 /*static*/std::shared_ptr<CziReader> Utils::GetReaderOrThrow(int id)
@@ -191,6 +214,11 @@ public:
         throw invalid_argument("array must be at most 3-dimensional");
     }
 
+    if (array_info.dimensions[1] > (numeric_limits<uint32_t>::max)() || array_info.dimensions[0] > (numeric_limits<uint32_t>::max)())
+    {
+        throw invalid_argument("array dimensions are too large");
+    }
+
     static constexpr struct ConversionInfo
     {
         mxClassID mx_class;
@@ -210,7 +238,7 @@ public:
     {
         if (conversionInfo.mx_class == array_info.class_id && conversionInfo.has_3rd_dimension == has_3rd_dimension)
         {
-            auto bitmapData = make_shared<Bitmap>(pixel_type, array_info.dimensions[1], array_info.dimensions[0]);
+            auto bitmapData = make_shared<Bitmap>(pixel_type, static_cast<std::uint32_t>(array_info.dimensions[1]), static_cast<std::uint32_t>(array_info.dimensions[0]));
             conversionInfo.conversion_function(array_info, bitmapData.get());
             return bitmapData;
         }

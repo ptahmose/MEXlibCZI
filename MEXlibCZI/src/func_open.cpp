@@ -34,9 +34,10 @@ void MexFunction_Open_Execute(MatlabArgs* args)
         VDBGPRINT((CDbg::Level::Trace, "MexFunction_Open_Execute: attempt to open file \"%s\".", filename.get()));
         reader->Open(filename.get());
     }
-    catch (exception& excp)
+    catch (exception& exception)
     {
-        VDBGPRINT((CDbg::Level::Warn, "MexFunction_Open_Execute: Open failed -> %s.", excp.what()));
+        (void)exception;    // suppress "unreferenced local variable" warning
+        VDBGPRINT((CDbg::Level::Warn, "MexFunction_Open_Execute: Open failed -> %s.", exception.what()));
         CziReaderManager::GetInstance().RemoveInstance(id);
         throw;
     }

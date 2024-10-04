@@ -5,7 +5,7 @@ ExternalProject_Add(
     rapidjson
     PREFIX "vendor/rapidjson"
     GIT_REPOSITORY "https://github.com/Tencent/rapidjson.git"
-    GIT_TAG f54b0e47a08782a6131cc3d60f94d038fa6e0a51
+    GIT_TAG 815e6e7e7e14be44a6c15d9aefed232ff064cad0
     TIMEOUT 10
     CMAKE_ARGS
         -DRAPIDJSON_BUILD_TESTS=OFF

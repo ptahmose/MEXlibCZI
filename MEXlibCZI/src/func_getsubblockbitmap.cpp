@@ -52,9 +52,10 @@ void MexFunction_GetSubBlockBitmap_Execute(MatlabArgs* args)
         auto* out = reader->GetSubBlockImage(blkNo);
         args->plhs[0] = out;
     }
-    catch (exception& excp)
+    catch (exception& exception)
     {
-        VDBGPRINT((CDbg::Level::Warn, "MexFunction_GetSubBlockBitmap_Execute: GetSubBlockImage failed -> %s.", excp.what()));
+        (void)exception;    // suppress "unreferenced local variable" warning
+        VDBGPRINT((CDbg::Level::Warn, "MexFunction_GetSubBlockBitmap_Execute: GetSubBlockImage failed -> %s.", exception.what()));
         throw;
     }
 }

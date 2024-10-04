@@ -74,6 +74,7 @@ set(mexoctaveSourceFiles
 						"src/func_addsubblock.cpp"
 						"src/func_closecziwriter.h"
 						"src/func_closecziwriter.cpp"
+						"src/include_rapidjson.h"
 )
 
 add_library (MEXlibCZI SHARED

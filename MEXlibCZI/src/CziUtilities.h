@@ -1,8 +1,10 @@
+#pragma once
+
 #include "inc_libczi.h"
 #include <bitset>
 #include <tuple>
 
-#include <rapidjson/document.h>
+#include "include_rapidjson.h"
 
 struct ChannelDisplaySettingsValidity
 {

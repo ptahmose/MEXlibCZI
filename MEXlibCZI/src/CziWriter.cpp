@@ -66,7 +66,7 @@ void CziWriter::AddSubBlockUncompressed(
     if (!subblock_metadata_xml.empty())
     {
         add_sub_block_info_strided_bitmap.ptrSbBlkMetadata = subblock_metadata_xml.c_str();
-        add_sub_block_info_strided_bitmap.sbBlkMetadataSize = subblock_metadata_xml.size();
+        add_sub_block_info_strided_bitmap.sbBlkMetadataSize = static_cast<std::uint32_t>(subblock_metadata_xml.size());
     }
 
     libCZI::ScopedBitmapLockerSP bitmap_locker(bitmap_data);
@@ -139,12 +139,12 @@ void CziWriter::AddSubBlockCompressed(
     addInfo.physicalHeight = add_sub_block_info_base.physicalHeight;
     addInfo.PixelType = add_sub_block_info_base.PixelType;
     addInfo.ptrData = compressed_data->GetPtr();
-    addInfo.dataSize = compressed_data->GetSizeOfData();
+    addInfo.dataSize = static_cast<uint32_t>(compressed_data->GetSizeOfData());
 
     if (!subblock_metadata_xml.empty())
     {
         addInfo.ptrSbBlkMetadata = subblock_metadata_xml.c_str();
-        addInfo.sbBlkMetadataSize = subblock_metadata_xml.size();
+        addInfo.sbBlkMetadataSize = static_cast<uint32_t>(subblock_metadata_xml.size());
     }
 
     addInfo.SetCompressionMode(compression_mode);
