@@ -95,14 +95,16 @@ jobs:
       - name: Script to prepare release
         shell: bash
         run: |
-          mexlibczi_version=$(bash scripts/get_version.sh)
+          cd scripts
+          mexlibczi_version=$(bash get_version.sh)
+          cd ..
           git_version=$(git describe --always)
           echo "releaseName=version ${mexlibczi_version} (${git_version})" >> "$GITHUB_ENV"
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ env.artifactPath }}
+          name: ${{ env.releaseName }}
           files: |
             ./artifacts/${{ needs.build.outputs.linuxx64_artifact }}/MEXlibCZI.mexa64
             ./artifacts/${{ needs.build.outputs.windowsx64_artifact }}/MEXlibCZI.mexw64
