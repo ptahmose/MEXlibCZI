@@ -42,6 +42,7 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release 
           cmake --build . --config Release
       - name: Prepare artifact (Linux)
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           mkdir -p artifacts
@@ -51,6 +52,7 @@ jobs:
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
       - name: Prepare artifact (Windows)
+        if: runner.os == 'Windows'
         shell: bash
         run: |
           mkdir -p artifacts
@@ -59,3 +61,8 @@ jobs:
           cp build/MEXlibCZI/Release/MEXlibCZI.mexw64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.artifactPath }}/
+          name: ${{ env.artifactName }}
