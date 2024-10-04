@@ -2,7 +2,8 @@
 #include <bitset>
 #include <tuple>
 
-#include <rapidjson/document.h>
+//#include <rapidjson/rapidjson.h>
+#include "include_rapidjson.h"
 
 struct ChannelDisplaySettingsValidity
 {

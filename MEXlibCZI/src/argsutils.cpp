@@ -398,11 +398,11 @@ using namespace libCZI;
     {
         planeCoordinate = CDimCoordinate::Parse(argStr.c_str());
     }
-    catch (libCZI::LibCZIStringParseException& libExcp)
+    catch (libCZI::LibCZIStringParseException&)
     {
         return false;
     }
-    catch (exception& excp)
+    catch (exception&)
     {
         return false;
     }

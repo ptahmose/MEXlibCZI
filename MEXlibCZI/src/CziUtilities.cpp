@@ -1,5 +1,6 @@
 #include "CziUtilities.h"
-#include <rapidjson/document.h>
+//#include <rapidjson/document.h>
+#include "include_rapidjson.h"
 #include "utils.h"
 
 using namespace libCZI;

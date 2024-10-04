@@ -1,7 +1,7 @@
 #include "func_open.h"
 #include "libraryInfo.h"
 #include "CziWriterManager.h"
-#include <vector>
+#include <limits>
 #include <memory>
 #include <optional>
 
@@ -131,6 +131,11 @@ void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
         }
     }
 
+    if (array_info.dimensions[1] > (numeric_limits<int>::max)() || array_info.dimensions[0] > (numeric_limits<int>::max)())
+    {
+        throw invalid_argument("Array dimensions are too large");
+    }
+
     std::shared_ptr<CziWriter> writer = ::Utils::GetWriterOrThrow(id);
     libCZI::AddSubBlockInfoBase add_sub_block_info_base;
     add_sub_block_info_base.Clear();
@@ -139,8 +144,8 @@ void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
     add_sub_block_info_base.y = rect.y;
     add_sub_block_info_base.logicalWidth = rect.w;
     add_sub_block_info_base.logicalHeight = rect.h;
-    add_sub_block_info_base.physicalWidth = array_info.dimensions[1];
-    add_sub_block_info_base.physicalHeight = array_info.dimensions[0];
+    add_sub_block_info_base.physicalWidth = static_cast<int>(array_info.dimensions[1]);
+    add_sub_block_info_base.physicalHeight = static_cast<int>(array_info.dimensions[0]);
     add_sub_block_info_base.PixelType = pixel_type;
     add_sub_block_info_base.mIndex = m_index.value_or(0);
     add_sub_block_info_base.mIndexValid = m_index.has_value();
