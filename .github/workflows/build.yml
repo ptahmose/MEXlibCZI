@@ -100,11 +100,13 @@ jobs:
           cd ..
           git_version=$(git describe --always)
           echo "releaseName=version ${mexlibczi_version} (${git_version})" >> "$GITHUB_ENV"
+          echo "tagName=v${mexlibczi_version}" >> "$GITHUB_ENV"
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ env.releaseName }}
+          tag_name: ${{ env.tagName }}
           files: |
             ./artifacts/${{ needs.build.outputs.linuxx64_artifact }}/MEXlibCZI.mexa64
             ./artifacts/${{ needs.build.outputs.windowsx64_artifact }}/MEXlibCZI.mexw64
