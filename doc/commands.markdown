@@ -10,6 +10,7 @@ The following commands are available in the mex file.
 | [GetMultiChannelScalingTileComposite](#getmultichannelscalingtilecomposite) | Get a multi-channel composite image from the specified axis-aligned ROI with the specified zoom. |
 | [GetSingleChannelScalingTileComposite](#getsinglechannelscalingtilecomposite) | Get a tile-composite for the specified region-of-interest for the specified plane with the specified zoom-factor. |
 | [GetMetadataXml](#getmetadataxml) | Get the metadata of the specified CZI-document as an XML string. |
+| [Close](#close) | Close the document and free the resources. |
 | [GetDefaultDisplaySettings](#getdefaultdisplaysettings) | Get the display-settings from the CZI-document.  |
 | [GetSubBlock](#getsubblock) | Get a handle to a subblock (and return a handle to it).  |
 | [GetInfoFromSubBlock](#getinfofromsubblock) | Get information about a subblock. |
@@ -89,6 +90,113 @@ zoom is a number between 1 and 0, and the pixel-size of the resulting image will
 
 Get the metadata of the specified CZI-document as an XML string.
 
+![GetMetadataXML example](pictures/getmetadataxml_sample.png)
+
 ## Close
 
-Close the document and free the resources.
+Close the document and free the resources. The handle is no longer valid.
+
+![Close example](pictures/close_sample.png)
+
+## GetDefaultDisplaySettings
+
+Get the display-settings from the CZI-document. The function returns a struct.
+
+![GetDefaultDisplaySettings example](pictures/getdefaultdisplaysettings_sample.png)
+
+## GetSubBlock
+
+Get a handle to a subblock (and return a handle to it).
+
+| argument # | type            | comment                              |
+| :--------- | :-------------- | :----------------------------------- |
+| 1          | integer         | The handle (as returned from "Open") |
+| 2          | integer         | The subblock number                  |
+
+![GetSubBlock example](pictures/getsubblock_sample.png)
+
+## GetInfoFromSubBlock
+
+Get information about a subblock. The function returns a struct.
+
+| argument # | type            | comment                                              |
+| :--------- | :-------------- | :--------------------------------------------------- |
+| 1          | integer         | The handle (as returned from "Open")                 |
+| 2          | integer         | The subblock handle (as returned from "GetSubBlock"  |
+
+![GetInfoFromSubBlock example](pictures/getinfofromsubblock_sample.png)
+
+## GetBitmapFromSubBlock
+
+Get the bitmap from the specified subblock. The subblock is decompressed (if necessary) and the bitmap is returned.
+
+| argument # | type            | comment                                              |
+| :--------- | :-------------- | :--------------------------------------------------- |
+| 1          | integer         | The handle (as returned from "Open")                 |
+| 2          | integer         | The subblock handle (as returned from "GetSubBlock"  |
+
+![GetBitmapFromSubBlock example](pictures/getbitmapfromsubblock_sample.png)
+
+## GetMetadataFromSubBlock
+
+Get the XML-metadata from the specified subblock. 
+
+| argument # | type            | comment                                              |
+| :--------- | :-------------- | :--------------------------------------------------- |
+| 1          | integer         | The handle (as returned from "Open")                 |
+| 2          | integer         | The subblock handle (as returned from "GetSubBlock"  |
+
+
+![GetMetadataFromSubBlock example](pictures/getmetadatafromsubblock_sample.png)
+
+## ReleaseSubBlock
+
+Releases a subblock handle. The handle is no longer valid, and the resources are freed.
+
+## CreateCziWriter
+
+Creates a writer object (for writing a CZI document) and returns a handle to it.
+
+| argument # | type              | comment                                              |
+| :--------- | :---------------- | :--------------------------------------------------- |
+| 1          | string            | The filename.                                        |
+| 2          | string (optional) | Options for creating the file.                       |
+
+For the argument 2, the following options are available:
+
+| Option | Description |
+| --- | --- |
+| "overwrite" or 'x' | Overwrite the file if it exists. |
+
+The function returns a handle to the writer object.
+
+![CreateCziWriter example](pictures/createcziwriter_sample.png)
+
+## AddSubBlock
+
+Adds a subblock to the writer object.
+
+| argument # | type              | comment                                              |
+| :--------- | :---------------- | :--------------------------------------------------- |
+| 1          | integer           | The handle (as returned from "CreateCziWriter")      |
+| 2          | string            | The coordinate of the subblock (in a string represenation).     |
+| 3          | array of numbers  | The coordinates of the logical ROI |
+| 4          | string            | The pixel type|
+| 5          | 2d or 3d array of numbers  | The bitmap to be written into the subblock |
+| 6          | struct (optional) | property bag with options for the operation |
+
+The following options are available (for argument #6):
+
+| Option         | type |Description |
+| :-----         | :--- | :--- |
+| "M"            | integer | The value of the M-index |
+| "metadata_xml" | string  | XML metadata to be written to the subblock |
+| "compression"  | string  | A string describing the compression to be used for the bitmap |
+
+![AddSubBlock example](pictures/addsubblock_sample.png)
+
+![AddSubBlock example](pictures/addsubblock_sample_2.png)
+
+## CloseCziWriter
+
+Closes a writer object and finalizes the CZI-document.

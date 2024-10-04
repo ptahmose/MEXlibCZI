@@ -1,8 +1,9 @@
 #include "func_open.h"
 #include "libraryInfo.h"
-#include "CziReaderManager.h"
 #include <vector>
 #include <memory>
+
+#include "CziWriterManager.h"
 #include "dbgprint.h"
 #include "mexapi.h"
 #include "utils.h"
@@ -38,7 +39,7 @@ void MexFunction_CloseCziWriter_Execute(MatlabArgs* args)
     writer.reset();
 
     VDBGPRINT((CDbg::Level::Trace, "MexFunction_CloseCziWriter_Execute: trying to remove instance with id=%i.", id));
-    b = CziReaderManager::GetInstance().RemoveInstance(id);
+    b = CziWriterManager::GetInstance().RemoveInstance(id);
     if (!b)
     {
         VDBGPRINT((CDbg::Level::Trace, "MexFunction_CloseCziWriter_Execute: removing instance with id=%i failed.", id));
