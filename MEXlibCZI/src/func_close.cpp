@@ -1,6 +1,6 @@
 #include "func_close.h"
 #include "libraryInfo.h"
-#include "CziInstanceManager.h"
+#include "CziReaderManager.h"
 #include <vector>
 #include <memory>
 #include "argsutils.h"

@@ -30,12 +30,16 @@ set(mexoctaveSourceFiles
 						"src/func_open.cpp" 
 						"src/func_getsubblockbitmap.h" 
 						"src/func_getsubblockbitmap.cpp"
-						"src/CziInstanceManager.h" 
-						"src/CziInstanceManager.cpp" 
-						"src/CziReader.h" 
+						"src/CziReaderManager.h" 
+						"src/CziReaderManager.cpp" 
+						"src/CziWriterManager.h"
+						"src/CziWriterManager.cpp"
+						"src/CziReader.h"
 						"src/CziReader.cpp"
+						"src/CziWriter.h"
+						"src/CziWriter.cpp"
 						"src/argsutils.h"
-						"src/argutils.cpp" 
+						"src/argsutils.cpp" 
 						"src/func_getmultichannelscalingtilecomposite.h" 
 						"src/func_getmultichannelscalingtilecomposite.cpp"
 						"src/CziUtilities.h" 
@@ -60,17 +64,22 @@ set(mexoctaveSourceFiles
 						"src/dbgprint.cpp" 
 						"src/func_getdefaultdisplaysettings.cpp" 
 						"src/func_getdefaultdisplaysettings.h" 
-						"src/func_readsubblock.h" 
-						"src/func_readsubblock.cpp" 
 						"src/CziReaderSbBlkStore.h" 
 						"src/CziReaderSbBlkStore.cpp"
 						"src/func_getsubblock.h"
-						"src/func_getsubblock.cpp")
+						"src/func_getsubblock.cpp"
+						"src/func_createcziwriter.h"
+						"src/func_createcziwriter.cpp"
+						"src/func_addsubblock.h"
+						"src/func_addsubblock.cpp"
+						"src/func_closecziwriter.h"
+						"src/func_closecziwriter.cpp"
+)
 
 add_library (MEXlibCZI SHARED
 			       ${mexoctaveSourceFiles})
 
-set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 11)
+set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 17)
   
 target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
 

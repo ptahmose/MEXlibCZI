@@ -78,6 +78,11 @@ bool MexApi::MxIsChar(const MexArray* pArr)
     return mxIsChar((const mxArray*)pArr);
 }
 
+bool MexApi::MxIsStruct(const MexArray* pArr)
+{
+    return mxIsStruct((const mxArray*)pArr);
+}
+
 std::string MexApi::MxArrayToUtf8String(const MexArray* pArr)
 {
     std::unique_ptr<char, void(*)(void*)> upArgStr(mxArrayToUTF8String((const mxArray*)pArr), mxFree);
@@ -170,9 +175,43 @@ mxClassID MexApi::MxGetClassID(const MexArray* pArr)
     return mxGetClassID((const mxArray*)pArr);
 }
 
+bool MexApi::MxIsNumeric(const MexArray* pArr)
+{
+    return mxIsNumeric((const mxArray*)pArr);
+}
+
+bool MexApi::MxIsSparse(const MexArray* pArr)
+{
+    return mxIsSparse((const mxArray*)pArr);
+}
+
 size_t MexApi::MxGetNumberOfElements(const MexArray* pArr)
 {
     return mxGetNumberOfElements((const mxArray*)pArr);
+}
+
+size_t MexApi::MxGetNumberOfDimensions(const MexArray* pArr)
+{
+    return mxGetNumberOfDimensions((const mxArray*)pArr);
+}
+
+void MexApi::GetSizeOfDimensions(const MexArray* pArr, size_t number_of_dimension, size_t* sizes)
+{
+    const auto ptr_sizes = mxGetDimensions((const mxArray*)pArr);
+    for (size_t i = 0; i < number_of_dimension; ++i)
+    {
+        sizes[i] = ptr_sizes[i];
+    }
+}
+
+const MexArray* MexApi::MxGetField(const MexArray* pArr, const char* fieldname)
+{
+    if (!MxIsStruct(pArr))
+    {
+        return nullptr;
+    }
+
+    return (const MexArray*)mxGetField((const mxArray*)pArr, 0, fieldname);
 }
 
 #elif defined(OCTAVEMEXBUILD)

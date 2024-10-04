@@ -1,6 +1,6 @@
 #include "func_open.h"
 #include "libraryInfo.h"
-#include "CziInstanceManager.h"
+#include "CziReaderManager.h"
 #include <vector>
 #include <memory>
 #include "dbgprint.h"
@@ -25,7 +25,7 @@ void MexFunction_Open_CheckArguments(MatlabArgs* args)
 
 void MexFunction_Open_Execute(MatlabArgs* args)
 {
-    auto filename = MexApi::GetInstance().UpMxArrayToMatlabAllocatedUtf8String(args->prhs[1]);
+    const auto filename = MexApi::GetInstance().UpMxArrayToMatlabAllocatedUtf8String(args->prhs[1]);
 
     int id = CziReaderManager::GetInstance().CreateNewInstance();
     auto reader = CziReaderManager::GetInstance().GetInstance(id);

@@ -3,25 +3,25 @@
 #include <atomic>
 #include <unordered_map>
 #include <memory>
-#include "CziReader.h"
+#include "CziWriter.h"
 #include <mutex>
 
-/// This is the manager of "CZIReader"-objects. They are created by the manager and are accessed
+/// This is the manager of "CZIWriter"-objects. They are created by the manager and are accessed
 /// by a handle.
-class CziReaderManager
+class CziWriterManager
 {
 private:
     std::atomic<int> instanceCounter;
     mutable std::mutex mutex;
-    std::unordered_map<int, std::shared_ptr<CziReader>> map;
-    CziReaderManager() : instanceCounter{ 1 } {};
+    std::unordered_map<int, std::shared_ptr<CziWriter>> map;
+    CziWriterManager() : instanceCounter{ 1 } {}
 
-    static CziReaderManager instance;
+    static CziWriterManager instance;
 public:
 
     /// Gets the (one and only) instance.
     /// \returns The instance.
-    static CziReaderManager& GetInstance();
+    static CziWriterManager& GetInstance();
 
     /// Removes the instance described by the specified id.
     /// \param id The identifier.
@@ -36,7 +36,7 @@ public:
     /// If the specified key is not present, then an out_of_range-exception is thrown.
     /// \param id The identifier.
     /// \returns The instance.
-    std::shared_ptr<CziReader> GetInstance(int id);
+    std::shared_ptr<CziWriter> GetInstance(int id);
 
     /// Removes all instances, and return how many instances were destroyed.
     /// \returns The number of instances that had to be destroyed.

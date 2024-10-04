@@ -3,7 +3,7 @@
 #include "libraryInfo.h"
 #include <vector>
 #include "argsutils.h"
-#include "CziInstanceManager.h"
+#include "CziReaderManager.h"
 #include "utils.h"
 
 using namespace std;

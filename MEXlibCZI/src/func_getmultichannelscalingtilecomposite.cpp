@@ -1,5 +1,5 @@
 #include "func_getmultichannelscalingtilecomposite.h"
-#include "CziInstanceManager.h"
+#include "CziReaderManager.h"
 #include <vector>
 #include <memory>
 #include "argsutils.h"
@@ -23,7 +23,7 @@ void MexFunction_GetMultiChannelScalingTileComposite_CheckArguments(MatlabArgs* 
 
     if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[1], 1))
     {
-        throw invalid_argument("2nd argument must be an integer");
+        throw invalid_argument("1st argument must be an integer");
     }
 
     if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[2], 4))
