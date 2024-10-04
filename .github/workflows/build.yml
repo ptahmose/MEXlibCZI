@@ -38,7 +38,7 @@ jobs:
           mkdir build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release 
-          cmake --build . --config Release
+          cmake --build . --config Release -j
       - name: run build (Windows)
         if: runner.os == 'Windows'
         shell: bash
@@ -46,7 +46,7 @@ jobs:
           mkdir build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release 
-          cmake --build . --config Release
+          cmake --build . --config Release -j
       - name: Prepare artifact (Linux)
         if: runner.os == 'Linux'
         shell: bash
@@ -85,7 +85,7 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: actions/create-release@v2
         with:
           tag_name: "v1.0.${{ github.run_id }}"
           release_name: "Release v1.0.${{ github.run_id }}"
@@ -97,8 +97,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Linux Build to Release
-        if: needs.build.outputs.linux_artifact != ''
-        uses: actions/upload-release-asset@v1
+        if: needs.build.outputs.linuxx64_artifact != ''
+        uses: actions/upload-release-asset@v2
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ needs.build.outputs.linuxx64_artifact }}
@@ -106,8 +106,8 @@ jobs:
           asset_content_type: application/zip
 
       - name: Upload Windows Build to Release
-        if: needs.build.outputs.windows_artifact != ''
-        uses: actions/upload-release-asset@v1
+        if: needs.build.outputs.windowsx64_artifact != ''
+        uses: actions/upload-release-asset@v2
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ needs.build.outputs.windowsx64_artifact }}
