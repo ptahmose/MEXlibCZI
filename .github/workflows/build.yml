@@ -96,20 +96,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download Linux Artifact
+        if: needs.build.outputs.linuxx64_artifact != ''
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ needs.build.outputs.linuxx64_artifact }}  # Name used during artifact upload
+          path: ./artifacts  # Optional, download to a specific folder
+
       - name: Upload Linux Build to Release
         if: needs.build.outputs.linuxx64_artifact != ''
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ needs.build.outputs.linuxx64_artifact }}
+          asset_path: ./artifacts/${{ needs.build.outputs.linuxx64_artifact }}
           asset_name: build-linux.zip
           asset_content_type: application/zip
+
+      - name: Download Linux Artifact
+        if: needs.build.outputs.windowsx64_artifact != ''
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ needs.build.outputs.windowsx64_artifact }}  # Name used during artifact upload
+          path: ./artifacts  # Optional, download to a specific folder
 
       - name: Upload Windows Build to Release
         if: needs.build.outputs.windowsx64_artifact != ''
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ needs.build.outputs.windowsx64_artifact }}
+          asset_path: ./artifacts/${{ needs.build.outputs.windowsx64_artifact }}
           asset_name: build-windows.zip
           asset_content_type: application/zip
