@@ -93,8 +93,9 @@ jobs:
         with:
           path: ./artifacts  # download to a specific folder
       - name: Script to prepare release
+        shell: bash
         run: |
-          mexlibczi_version=$(scripts/get_version.sh)
+          mexlibczi_version=$(bash scripts/get_version.sh)
           git_version=$(git describe --always)
           echo "releaseName=version ${mexlibczi_version} (${git_version})" >> "$GITHUB_ENV"
 
