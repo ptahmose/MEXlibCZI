@@ -85,55 +85,25 @@ jobs:
     needs: build
     if: inputs.create_release == 'true'  # Only run if release is selected
     steps:
-#      - name: Create Release
-#        id: create_release
-#        uses: actions/create-release@v1
-#        with:
-#          tag_name: "v1.0.${{ github.run_id }}"
-#          release_name: "Release v1.0.${{ github.run_id }}"
-#          body: |
-#            Release for version v1.0.${{ github.run_id }}
-#          draft: true
-#          prerelease: true
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: Check out repository
+        uses: actions/checkout@v4
       - name: Download All Artifacts
         if: needs.build.outputs.linuxx64_artifact != '' || needs.build.outputs.windowsx64_artifact != ''
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts  # download to a specific folder
-
-      - name: Display structure of downloaded files
-        run: ls -R ./artifacts
+      - name: Script to prepare release
+        run: |
+          mexlibczi_version=$(scripts/get_version.sh)
+          git_version=$(git describe --always)
+          echo "releaseName=version ${mexlibczi_version} (${git_version})" >> "$GITHUB_ENV"
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          name: ${{ env.artifactPath }}
           files: |
             ./artifacts/${{ needs.build.outputs.linuxx64_artifact }}/MEXlibCZI.mexa64
             ./artifacts/${{ needs.build.outputs.windowsx64_artifact }}/MEXlibCZI.mexw64
-          draft: true
           prerelease: true
 
-#      - name: Upload Linux Build to Release
-#        if: needs.build.outputs.linuxx64_artifact != ''
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./artifacts/${{ needs.build.outputs.linuxx64_artifact }}/MEXlibCZI.mexa64
-#          asset_name: "Linux x64"
-#          asset_content_type: application/zip
-#
-#      - name: Upload Windows Build to Release
-#        if: needs.build.outputs.windowsx64_artifact != ''
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./artifacts/${{ needs.build.outputs.windowsx64_artifact }}/MEXlibCZI.mexw64
-#          asset_name: "Windows x64"
-#          asset_content_type: application/zip
