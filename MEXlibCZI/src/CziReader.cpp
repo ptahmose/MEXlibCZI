@@ -32,7 +32,7 @@ MexArray* CziReader::GetScalingAsMatlabStruct()
 {
     static const char* fieldNames[] = { "scaleX", "scaleY", "scaleZ" };
 
-    static const mwSize dims[2] = { 1, 1 };
+    static const size_t dims[2] = { 1, 1 };
     auto mexApi = MexApi::GetInstance();
     auto* s = mexApi.MxCreateStructArray(
         2,
@@ -201,7 +201,7 @@ MexArray* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& 
         vecBm.data(),
         dsplHlp.GetChannelInfosArray());
 
-    mwSize dims[3] = { bitmap->GetHeight(), bitmap->GetWidth(), 3 };
+    size_t dims[3] = { bitmap->GetHeight(), bitmap->GetWidth(), 3 };
     auto mexApi = MexApi::GetInstance();
     //auto* arr = mxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
     auto* arr = mexApi.MxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
@@ -219,7 +219,7 @@ MexArray* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(cons
     const auto sizeResult = accessor->CalcSize(roi, zoom);
     RgbFloatColor color{ 0,0,0 };
 
-    mwSize dims[3] = { sizeResult.h, sizeResult.w, 3 };
+    size_t dims[3] = { sizeResult.h, sizeResult.w, 3 };
     //auto* arr = mxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
     auto* arr = MexApi::GetInstance().MxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
     return arr;

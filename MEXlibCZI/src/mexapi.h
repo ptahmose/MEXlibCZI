@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../include_matlabheaders.h"
 #include <cstdint>
 #include <memory>
 #include <string>
+
+#include "../include_matlabheaders.h"
 
 class MexArray;
 
@@ -90,7 +91,10 @@ public:
     );
 };
 
-#if defined(HAVE_OCTAVE)
+
+
+
+#if defined(OCTAVEBUILD)
 
 inline double* mxGetDoubles(const mxArray* pArr)
 {
@@ -145,5 +149,6 @@ inline char* mxArrayToUTF8String(const mxArray* pArr)
 {
     return mxArrayToString(pArr);
 }
+
 
 #endif

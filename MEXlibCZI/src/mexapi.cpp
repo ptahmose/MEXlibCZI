@@ -11,7 +11,6 @@ using namespace std;
     return MexApi::instance;
 }
 
-#if defined(MATLABMEXBUILD)
 
 double* MexApi::MxGetDoubles(const MexArray* pArr)
 {
@@ -50,7 +49,7 @@ std::int32_t* MexApi::MxGetInt32s(const MexArray* pArr)
 
 bool* MexApi::MxGetLogicals(const MexArray* pArr)
 {
-    return mxGetLogicals((const mxArray*)pArr);
+    return (bool*)mxGetLogicals((const mxArray*)pArr);
 }
 
 std::uint32_t* MexApi::MxGetUint32s(const MexArray* pArr)
@@ -134,7 +133,7 @@ MexArray* MexApi::MxCreateNumericMatrix(size_t m, size_t n, mxClassID classid, m
 
 MexArray* MexApi::MxCreateNumericArray(size_t ndim, const size_t* dims, mxClassID classid, mxComplexity flag)
 {
-    return (MexArray*)mxCreateNumericArray(ndim, dims, classid, flag);
+    return (MexArray*)mxCreateNumericArray(ndim, (const mwSize*)dims, classid, flag);
 }
 
 void MexApi::MxSetFieldByNumber(MexArray* pa, size_t i, int fieldnum, MexArray* value)
@@ -144,7 +143,7 @@ void MexApi::MxSetFieldByNumber(MexArray* pa, size_t i, int fieldnum, MexArray* 
 
 MexArray* MexApi::MxCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** fieldnames)
 {
-    return (MexArray*)mxCreateStructArray(ndim, dims, nfields, fieldnames);
+    return (MexArray*)mxCreateStructArray(ndim, (const mwSize*)dims, nfields, fieldnames);
 }
 
 
@@ -214,56 +213,3 @@ const MexArray* MexApi::MxGetField(const MexArray* pArr, const char* fieldname)
     return (const MexArray*)mxGetField((const mxArray*)pArr, 0, fieldname);
 }
 
-#elif defined(OCTAVEMEXBUILD)
-
-double* MexApi::MxGetDoubles(const mxArray* pArr)
-{
-    return (double*)mxGetData(pArr);
-}
-
-float* MexApi::MxGetSingles(const mxArray* pArr)
-{
-    return (float*)mxGetData(pArr);
-}
-
-std::int8_t* MexApi::MxGetInt8s(const mxArray* pArr)
-{
-    return (int8_T*)mxGetData(pArr);
-}
-
-std::uint8_t* MexApi::MxGetUint8s(const mxArray* pArr)
-{
-    return (uint8_T*)mxGetData(pArr);
-}
-
-std::int16_t* MexApi::MxGetInt16s(const mxArray* pArr)
-{
-    return (int16_T*)mxGetData(pArr);
-}
-
-std::uint16_t* MexApi::MxGetUint16s(const mxArray* pArr)
-{
-    return (uint16_T*)mxGetData(pArr);
-}
-
-std::int32_t* MexApi::MxGetInt32s(const mxArray* pArr)
-{
-    return (int32_T*)mxGetData(pArr);
-}
-
-std::uint32_t* MexApi::MxGetUint32s(const mxArray* pArr)
-{
-    return (uint32_T*)mxGetData(pArr);
-}
-
-std::int64_t* MexApi::MxGetInt64s(const mxArray* pArr)
-{
-    return (int64_T*)mxGetData(pArr);
-}
-
-std::uint64_t* MexApi::MxGetUint64s(const mxArray* pArr)
-{
-    return (uint64_T*)mxGetData(pArr);
-}
-
-#endif

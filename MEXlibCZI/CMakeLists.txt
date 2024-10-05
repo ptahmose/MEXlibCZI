@@ -77,36 +77,65 @@ set(mexoctaveSourceFiles
 						"src/include_rapidjson.h"
 )
 
-add_library (MEXlibCZI SHARED
-			       ${mexoctaveSourceFiles})
+if(MEXLIBCZI_BUILD_MATLABMEX)
+	add_library (MEXlibCZI SHARED
+							 ${mexoctaveSourceFiles})
 
-set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 17)
+	set_target_properties(MEXlibCZI PROPERTIES CXX_STANDARD 17)
   
-target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
+	target_include_directories(MEXlibCZI PRIVATE ${Matlab_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
 
-target_include_directories(MEXlibCZI PRIVATE  ${CMAKE_CURRENT_BINARY_DIR})  # this is necessary so that we can find "wllczi_Config.h" which we created above
-target_include_directories(MEXlibCZI PRIVATE ${LIBCZI_INCLUDE_DIR})
-target_link_libraries(MEXlibCZI PRIVATE ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY})
-target_link_libraries(MEXlibCZI PRIVATE libCZIStatic JxrDecodeStatic)
+	target_include_directories(MEXlibCZI PRIVATE  ${CMAKE_CURRENT_BINARY_DIR})  # this is necessary so that we can find "wllczi_Config.h" which we created above
+	target_include_directories(MEXlibCZI PRIVATE ${LIBCZI_INCLUDE_DIR})
+	target_link_libraries(MEXlibCZI PRIVATE ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY})
+	target_link_libraries(MEXlibCZI PRIVATE libCZIStatic JxrDecodeStatic)
 
-if(WIN32)
- set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mexw64")
-elseif(UNIX)
- set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mexa64")
- target_link_options(MEXlibCZI PRIVATE -static-libgcc -static-libstdc++ )
- set_target_properties(MEXlibCZI PROPERTIES PREFIX "") # otherwise "lib" is prepended
+	if(WIN32)
+	 set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mexw64")
+	elseif(UNIX)
+	 set_target_properties(MEXlibCZI PROPERTIES SUFFIX ".mexa64")
+	 target_link_options(MEXlibCZI PRIVATE -static-libgcc -static-libstdc++ )
+	 set_target_properties(MEXlibCZI PROPERTIES PREFIX "") # otherwise "lib" is prepended
+	endif()
+
+	SET_TARGET_PROPERTIES (MEXlibCZI PROPERTIES DEFINE_SYMBOL "MATLABMEXBUILD")
+
+	# this definition is necessary so that "mexFunction" is exported
+	target_compile_definitions(MEXlibCZI PRIVATE MW_NEEDS_VERSION_H=1)
+
+	if(WIN32)
+	 target_compile_definitions(MEXlibCZI PRIVATE _WIN32API=1)
+	endif()
 endif()
-
-SET_TARGET_PROPERTIES (MEXlibCZI PROPERTIES DEFINE_SYMBOL "MATLABMEXBUILD")
-
-# this definition is necessary so that "mexFunction" is exported
-target_compile_definitions(MEXlibCZI PRIVATE MW_NEEDS_VERSION_H=1)
-
-if(WIN32)
- target_compile_definitions(MEXlibCZI PRIVATE _WIN32API=1)
-endif()
-
 #------------------------------------------------------------------------------------------
+if(MEXLIBCZI_BUILD_OCTAVEOCT)
+	add_library (OctlibCZI SHARED
+							 ${mexoctaveSourceFiles})
+
+	set_target_properties(OctlibCZI PROPERTIES CXX_STANDARD 17)
+	target_include_directories(OctlibCZI PRIVATE ${OCTAVE_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIR})
+
+	target_include_directories(OctlibCZI PRIVATE  ${CMAKE_CURRENT_BINARY_DIR})  # this is necessary so that we can find "wllczi_Config.h" which we created above
+	target_include_directories(OctlibCZI PRIVATE ${LIBCZI_INCLUDE_DIR}) 
+	target_include_directories(OctlibCZI PRIVATE "D:/SW/octave-9.2.0-w64/mingw64/include/octave-9.2.0/octave")
+	target_include_directories(OctlibCZI PRIVATE "/d/SW/octave-9.2.0-w64/mingw64/include/octave-9.2.0/octave")
+	target_link_libraries(OctlibCZI PRIVATE libCZIStatic JxrDecodeStatic)
+	SET_TARGET_PROPERTIES(OctlibCZI PROPERTIES DEFINE_SYMBOL "OCTAVEBUILD")
+	#target_link_libraries(OctlibCZI PRIVATE ${OCTAVE_OCTINTERP_LIBRARY} )
+	target_link_libraries(OctlibCZI PRIVATE "/d/SW/octave-9.2.0-w64/mingw64/lib/octave/9.2.0/liboctinterp.dll.a")
+	message(STATUS "OCTAVE_OCTINTERP_LIBRARY: " ${OCTAVE_OCTINTERP_LIBRARY})
+	set_target_properties(OctlibCZI PROPERTIES PREFIX "") # otherwise "lib" is prepended
+	
+	if(WIN32)
+	 target_compile_definitions(OctlibCZI PRIVATE _WIN32API=1)
+	endif()
+
+	target_link_libraries(OctlibCZI  PUBLIC pthread)
+
+	set_target_properties(OctlibCZI PROPERTIES SUFFIX ".mex")
+endif()
+
+
 
 #[[ 
 add_library (OctlibCZI SHARED

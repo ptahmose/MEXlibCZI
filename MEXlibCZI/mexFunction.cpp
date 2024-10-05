@@ -29,7 +29,7 @@ static void Initialize()
      therefore no cleanup happens here).
   - here it is stated that the same happens if pressing "Ctrl-C" -> https://www.mathworks.com/help/matlab/matlab_external/automatic-cleanup-of-temporary-arrays.html
  */
-void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+extern "C" void  __declspec(dllexport) mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
     if (!gIsInitialized)
     {

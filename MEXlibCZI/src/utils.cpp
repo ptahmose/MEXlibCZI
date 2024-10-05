@@ -249,7 +249,7 @@ public:
 
 // ----------------------------------------------------------------------------
 
-/*static*/mwSize MexUtils::Dims_1_by_1[2] = { 1, 1 };
+/*static*/size_t MexUtils::Dims_1_by_1[2] = { 1, 1 };
 
 /*static*/MexArray* MexUtils::FloatTo1x1Matrix(float v)
 {
