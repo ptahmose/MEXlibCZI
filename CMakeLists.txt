@@ -59,3 +59,6 @@ message("########################################")
 ]]
 
 add_subdirectory ("MEXlibCZI")
+
+add_subdirectory("lib")
+add_subdirectory("MatlabMex")
