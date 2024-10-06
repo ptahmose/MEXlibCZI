@@ -12,8 +12,10 @@
 #include "functions/func_close.h"
 #include "functions/func_getdefaultdisplaysettings.h"
 #include "functions/func_getsubblock.h"
+#include "functions/func_createcziwriter.h"
+#include "functions/func_addsubblock.h"
+#include "functions/func_closecziwriter.h"
 /*
-#include "src/func_createcziwriter.h"
 #include "src/func_addsubblock.h"
 #include "src/func_closecziwriter.h"
 */
@@ -35,11 +37,10 @@
     {u8"GetBitmapFromSubBlock", {MexFunction_GetBitmapFromSubBlock_CheckArguments,MexFunction_GetBitmapFromSubBlock_Execute}},
     {u8"GetMetadataFromSubBlock", {MexFunction_GetMetadataFromSubBlock_CheckArguments,MexFunction_GetMetadataFromSubBlock_Execute}},
     {u8"ReleaseSubBlock", {MexFunction_ReleaseSubBlock_CheckArguments,MexFunction_ReleaseSubBlock_Execute}},
-    /*
     {u8"CreateCziWriter", {MexFunction_CreateCziWriter_CheckArguments, MexFunction_CreateCziWriter_Execute}},
     {u8"AddSubBlock", {MexFunction_AddSubBlock_CheckArguments, MexFunction_AddSubBlock_Execute}},
     {u8"CloseCziWriter", {MexFunction_CloseCziWriter_CheckArguments, MexFunction_CloseCziWriter_Execute}},
-    */
+    /* */
 };
 
 /*static*/CMexFunctions CMexFunctions::instance;

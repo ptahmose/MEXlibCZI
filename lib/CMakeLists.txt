@@ -1,6 +1,6 @@
 set (libSourceFiles
-			include/function.h
-			src/function.cpp
+			"include/function.h"
+			"src/function.cpp"
 			"src/mexFunctions.h" 
 			"src/errorcodes.h" 
 			"src/errorcodes.cpp" 
@@ -45,8 +45,16 @@ set (libSourceFiles
 			"src/functions/func_getsinglechannelscalingtilecomposite.cpp"
 			"src/functions/func_close.cpp" 
 			"src/functions/func_close.h"
-
- "src/functions/func_getdefaultdisplaysettings.cpp" "src/functions/func_getdefaultdisplaysettings.h" "src/functions/func_getsubblock.cpp" "src/functions/func_getsubblock.h")
+			"src/functions/func_getdefaultdisplaysettings.cpp" 
+			"src/functions/func_getdefaultdisplaysettings.h" 
+			"src/functions/func_getsubblock.cpp" 
+			"src/functions/func_getsubblock.h" 
+			"src/functions/func_createcziwriter.cpp" 
+			"src/functions/func_createcziwriter.h" 
+			"src/functions/func_addsubblock.cpp" 
+			"src/functions/func_addsubblock.h" 
+			"src/functions/func_closecziwriter.cpp" 
+			"src/functions/func_closecziwriter.h")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
  set(lib_ENABLE_LOGGING 1)
