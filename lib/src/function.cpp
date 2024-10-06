@@ -5,6 +5,9 @@
 #include <exception>
 #include <sstream>
 
+#include "implementation/CziWriterManager.h"
+#include "implementation/CziReaderManager.h"
+
 using namespace mexlibCZI;
 using namespace std;
 
@@ -78,4 +81,10 @@ void mexlibCZI::mexFunction(int nlhs, Parameter* plhs[], int nrhs, const Paramet
         app_functions->pfn_ReportErrorAndRaiseSignal(errorId, errorText);
         //mexApi.MexErrMsgIdAndTxt(errorId, errorText);
     }
+}
+
+void mexlibCZI::OnShutdown()
+{
+    CziReaderManager::GetInstance().RemoveAllInstances();
+    CziWriterManager::GetInstance().RemoveAllInstances();
 }

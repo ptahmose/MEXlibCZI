@@ -15,10 +15,6 @@
 #include "functions/func_createcziwriter.h"
 #include "functions/func_addsubblock.h"
 #include "functions/func_closecziwriter.h"
-/*
-#include "src/func_addsubblock.h"
-#include "src/func_closecziwriter.h"
-*/
 
 /*static*/const CMexFunctions::MexFuncItem CMexFunctions::funcItems[] =
 {
