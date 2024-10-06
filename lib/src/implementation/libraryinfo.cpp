@@ -1,7 +1,7 @@
 #include "libraryInfo.h"
 #include "inc_libczi.h"
 #include <sstream>
-//#include <mexlibczi_Config.h>
+#include <lib_config.h>
 
 using namespace std;
 
@@ -44,11 +44,11 @@ using namespace libCZI;
     if (key == CLibraryInfo::KeyVersionString)
     {
         stringstream ss;
-      /*  ss << MEXLIBCZI_VERSION_MAJOR << "." << MEXLIBCZI_VERSION_MINOR << "." << MEXLIBCZI_VERSION_PATCH;
-        if (strlen(MEXLIBCZI_VERSION_EXT) > 0)
+        ss << LIB_VERSION_MAJOR << "." << LIB_VERSION_MINOR << "." << LIB_VERSION_PATCH;
+        if (strlen(LIB_VERSION_EXT) > 0)
         {
-            ss << "-" << MEXLIBCZI_VERSION_EXT;
-        } */
+            ss << "-" << LIB_VERSION_EXT;
+        } 
 
         value = ss.str();
         return true;
