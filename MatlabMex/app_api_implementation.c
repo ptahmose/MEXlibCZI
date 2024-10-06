@@ -175,43 +175,6 @@ mxClassID AppExtensionClassIdToMxClassId(enum AppExtensionClassId class_id)
 Parameter* matlabCreateNumericMatrixReal(size_t m, size_t n, enum AppExtensionClassId class_id)
 {
     mxClassID mx_class_id = AppExtensionClassIdToMxClassId(class_id);
-    //switch (class_id)
-    //{
-    //case AppExtensionClassId_Uint8:
-    //    mx_class_id = mxUINT8_CLASS;
-    //    break;
-    //case AppExtensionClassId_Int8:
-    //    mx_class_id = mxINT8_CLASS;
-    //    break;
-    //case AppExtensionClassId_Uint16:
-    //    mx_class_id = mxUINT16_CLASS;
-    //    break;
-    //case AppExtensionClassId_Int16:
-    //    mx_class_id = mxINT16_CLASS;
-    //    break;
-    //case AppExtensionClassId_Uint32:
-    //    mx_class_id = mxUINT32_CLASS;
-    //    break;
-    //case AppExtensionClassId_Int32:
-    //    mx_class_id = mxINT32_CLASS;
-    //    break;
-    //case AppExtensionClassId_Uint64:
-    //    mx_class_id = mxUINT64_CLASS;
-    //    break;
-    //case AppExtensionClassId_Int64:
-    //    mx_class_id = mxINT64_CLASS;
-    //    break;
-    //case AppExtensionClassId_Double:
-    //    mx_class_id = mxDOUBLE_CLASS;
-    //    break;
-    //case AppExtensionClassId_Single:
-    //    mx_class_id = mxSINGLE_CLASS;
-    //    break;
-    //default:
-    //    mx_class_id = mxUNKNOWN_CLASS;
-    //    break;
-    //}
-
     return (Parameter*)mxCreateNumericMatrix(m, n, mx_class_id, mxREAL);
 }
 
@@ -279,43 +242,6 @@ Parameter* matlabGetField(const Parameter* parameter, const char* field_name)
 Parameter* matlabCreateNumericArrayReal(size_t ndim, const size_t* dims, enum AppExtensionClassId class_id)
 {
     mxClassID mx_class_id = AppExtensionClassIdToMxClassId(class_id);
-    /*switch (class_id)
-    {
-    case AppExtensionClassId_Uint8:
-        mx_class_id = mxUINT8_CLASS;
-        break;
-    case AppExtensionClassId_Int8:
-        mx_class_id = mxINT8_CLASS;
-        break;
-    case AppExtensionClassId_Uint16:
-        mx_class_id = mxUINT16_CLASS;
-        break;
-    case AppExtensionClassId_Int16:
-        mx_class_id = mxINT16_CLASS;
-        break;
-    case AppExtensionClassId_Uint32:
-        mx_class_id = mxUINT32_CLASS;
-        break;
-    case AppExtensionClassId_Int32:
-        mx_class_id = mxINT32_CLASS;
-        break;
-    case AppExtensionClassId_Uint64:
-        mx_class_id = mxUINT64_CLASS;
-        break;
-    case AppExtensionClassId_Int64:
-        mx_class_id = mxINT64_CLASS;
-        break;
-    case AppExtensionClassId_Double:
-        mx_class_id = mxDOUBLE_CLASS;
-        break;
-    case AppExtensionClassId_Single:
-        mx_class_id = mxSINGLE_CLASS;
-        break;
-    default:
-        mx_class_id = mxUNKNOWN_CLASS;
-        break;
-    }*/
-
     return (Parameter*)mxCreateNumericArray(ndim, dims, mx_class_id, mxREAL);
 }
 
