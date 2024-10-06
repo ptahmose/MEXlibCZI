@@ -1,0 +1,13 @@
+#pragma once
+
+#define LIB_ENABLELOGGING  @lib_ENABLE_LOGGING@
+
+#define LIB_LOGLEVEL       @lib_LOGLEVEL@
+
+#define LIB_VERSION_MAJOR  @lib_VERSION_MAJOR@
+
+#define LIB_VERSION_MINOR  @lib_VERSION_MINOR@
+
+#define LIB_VERSION_PATCH  @lib_VERSION_PATCH@
+
+#define LIB_VERSION_EXT   "@lib_VERSION_EXT@"
