@@ -40,7 +40,13 @@ set (libSourceFiles
 			"src/functions/func_getmetadataxml.cpp" 
 			"src/functions/func_getmetadataxml.h" 
 			"src/functions/func_getscaling.cpp" 
-			"src/functions/func_getscaling.h")
+			"src/functions/func_getscaling.h"
+			"src/functions/func_getsinglechannelscalingtilecomposite.h"
+			"src/functions/func_getsinglechannelscalingtilecomposite.cpp"
+			"src/functions/func_close.cpp" 
+			"src/functions/func_close.h"
+
+ "src/functions/func_getdefaultdisplaysettings.cpp" "src/functions/func_getdefaultdisplaysettings.h" "src/functions/func_getsubblock.cpp" "src/functions/func_getsubblock.h")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
  set(lib_ENABLE_LOGGING 1)

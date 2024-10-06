@@ -8,12 +8,11 @@
 #include "functions/func_getinfo.h"
 #include "functions/func_getscaling.h"
 #include "functions/func_getmetadataxml.h"
+#include "functions/func_getsinglechannelscalingtilecomposite.h"
+#include "functions/func_close.h"
+#include "functions/func_getdefaultdisplaysettings.h"
+#include "functions/func_getsubblock.h"
 /*
-#include "src/func_close.h"
-#include "src/func_getmultichannelscalingtilecomposite.h"
-#include "src/func_getsinglechannelscalingtilecomposite.h"
-#include "src/func_getdefaultdisplaysettings.h"
-#include "src/func_getsubblock.h"
 #include "src/func_createcziwriter.h"
 #include "src/func_addsubblock.h"
 #include "src/func_closecziwriter.h"
@@ -28,7 +27,6 @@
     {u8"GetInfo", {MexFunction_GetInfo_CheckArguments,MexFunction_GetInfo_Execute}},
     {u8"GetScaling", {MexFunction_GetScaling_CheckArguments,MexFunction_GetScaling_Execute}},
     {u8"GetMetadataXml", {MexFunction_GetMetadataXml_CheckArguments,MexFunction_GetMetadataXml_Execute}},
-    /*
     {u8"GetSingleChannelScalingTileComposite", {MexFunction_GetSingleChannelScalingTileComposite_CheckArguments,MexFunction_GetSingleChannelScalingTileComposite_Execute}},
     {u8"Close", {MexFunction_Close_CheckArguments,MexFunction_Close_Execute}},
     {u8"GetDefaultDisplaySettings", {MexFunction_GetDefaultDisplaySettings_CheckArguments,MexFunction_GetDefaultDisplaySettings_Execute}},
@@ -37,7 +35,7 @@
     {u8"GetBitmapFromSubBlock", {MexFunction_GetBitmapFromSubBlock_CheckArguments,MexFunction_GetBitmapFromSubBlock_Execute}},
     {u8"GetMetadataFromSubBlock", {MexFunction_GetMetadataFromSubBlock_CheckArguments,MexFunction_GetMetadataFromSubBlock_Execute}},
     {u8"ReleaseSubBlock", {MexFunction_ReleaseSubBlock_CheckArguments,MexFunction_ReleaseSubBlock_Execute}},
-
+    /*
     {u8"CreateCziWriter", {MexFunction_CreateCziWriter_CheckArguments, MexFunction_CreateCziWriter_Execute}},
     {u8"AddSubBlock", {MexFunction_AddSubBlock_CheckArguments, MexFunction_AddSubBlock_Execute}},
     {u8"CloseCziWriter", {MexFunction_CloseCziWriter_CheckArguments, MexFunction_CloseCziWriter_Execute}},
