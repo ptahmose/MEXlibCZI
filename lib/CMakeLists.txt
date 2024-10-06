@@ -30,7 +30,17 @@ set (libSourceFiles
 			"src/implementation/CziWriterManager.cpp" 
 			"src/implementation/CziWriterManager.h" 
 			"src/functions/func_open.cpp" 
-			"src/functions/func_open.h" "src/functions/func_getsubblockbitmap.cpp" "src/functions/func_getsubblockbitmap.h")
+			"src/functions/func_open.h" 
+			"src/functions/func_getsubblockbitmap.cpp" 
+			"src/functions/func_getsubblockbitmap.h" 
+			"src/functions/func_getmultichannelscalingtilecomposite.cpp" 
+			"src/functions/func_getmultichannelscalingtilecomposite.h" 
+			"src/functions/func_getinfo.cpp" 
+			"src/functions/func_getinfo.h" 
+			"src/functions/func_getmetadataxml.cpp" 
+			"src/functions/func_getmetadataxml.h" 
+			"src/functions/func_getscaling.cpp" 
+			"src/functions/func_getscaling.h")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
  set(lib_ENABLE_LOGGING 1)
@@ -44,7 +54,7 @@ set(lib_LOGLEVEL 1)
 set(lib_VERSION_MAJOR	${MEXCZI_MAJOR})
 set(lib_VERSION_MINOR	${MEXCZI_MINOR})
 set(lib_VERSION_PATCH	${MEXCZI_PATCH})
-set(lib_VERSION_EXT    ${MEXCZI_EXT})
+set(lib_VERSION_EXT   ${MEXCZI_EXT})
 
 configure_file (
   "${CMAKE_CURRENT_SOURCE_DIR}/lib_config.h.in"
