@@ -88,3 +88,7 @@ void mexlibCZI::OnShutdown()
     CziReaderManager::GetInstance().RemoveAllInstances();
     CziWriterManager::GetInstance().RemoveAllInstances();
 }
+
+void mexlibCZI::OnInitialize()
+{
+}

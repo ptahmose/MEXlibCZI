@@ -1,7 +1,5 @@
 #include "func_close.h"
-//#include "libraryInfo.h"
 #include "../implementation/CziReaderManager.h"
-#include <vector>
 #include <stdexcept>
 #include "../implementation/argsutils.h"
 #include "../implementation/dbgprint.h"
