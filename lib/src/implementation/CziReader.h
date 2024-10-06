@@ -31,10 +31,10 @@ public:
 
     Parameter* GetDefaultDisplaySettingsAsMxArray(IAppExtensionFunctions* app_functions);
 
-    Parameter* GetSubBlockImage(int sbBlkNo);
+    Parameter* GetSubBlockImage(int sbBlkNo, IAppExtensionFunctions* app_functions);
     Parameter* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson, IAppExtensionFunctions* app_functions);
-    Parameter* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom);
-    Parameter* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor);
+    Parameter* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, IAppExtensionFunctions* app_functions);
+    Parameter* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor, IAppExtensionFunctions* app_functions);
 
     std::array<double, 3>   GetScaling();
     Parameter* GetScalingAsMatlabStruct(IAppExtensionFunctions* app_functions);
@@ -55,7 +55,7 @@ private:
     Parameter* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings, IAppExtensionFunctions* app_functions);
     Parameter* GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom, IAppExtensionFunctions* app_functions);
 
-    static Parameter* ConvertToMxArray(libCZI::IBitmapData* bitmapData);
+    static Parameter* ConvertToMxArray(libCZI::IBitmapData* bitmapData, IAppExtensionFunctions* app_functions);
     static Parameter* ConvertToMatlabStruct(const std::map<int, libCZI::BoundingBoxes>& boundingBoxMap);
     static Parameter* ConvertToMatlabStruct(const libCZI::IntRect& rect);
     static Parameter* ConvertToMatlabStruct(const libCZI::IntSize& size);

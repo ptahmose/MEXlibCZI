@@ -125,7 +125,7 @@ Parameter* CziReader::GetDefaultDisplaySettingsAsMxArray(IAppExtensionFunctions*
     return CziReader::ConvertToMatlabStruct(*displaySettings, app_functions);
 }
 
-Parameter* CziReader::GetSubBlockImage(int sbBlkNo)
+Parameter* CziReader::GetSubBlockImage(int sbBlkNo, IAppExtensionFunctions* app_functions)
 {
     auto sbBlk = this->reader->ReadSubBlock(sbBlkNo);
     if (!sbBlk)
@@ -136,7 +136,7 @@ Parameter* CziReader::GetSubBlockImage(int sbBlkNo)
     }
 
     auto bm = sbBlk->CreateBitmap();
-    return ConvertToMxArray(bm.get());
+    return ConvertToMxArray(bm.get(), app_functions);
 }
 
 Parameter* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson, IAppExtensionFunctions* app_functions)
@@ -169,7 +169,7 @@ Parameter* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect&
     // we need to deal with the pathological case that all channels are disabled
     if (activeChannels.empty())
     {
-        return CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(roi, zoom);
+        return CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(roi, zoom, app_functions);
     }
 
     IntSize sizeResult;
@@ -234,13 +234,13 @@ Parameter* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(con
     return arr;
 }
 
-Parameter* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom)
+Parameter* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, IAppExtensionFunctions* app_functions)
 {
     const RgbFloatColor backgndCol{ 0,0,0 };
-    return this->GetSingleChannelScalingTileComposite(roi, planeCoordinate, zoom, backgndCol);
+    return this->GetSingleChannelScalingTileComposite(roi, planeCoordinate, zoom, backgndCol, app_functions);
 }
 
-Parameter* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor)
+Parameter* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor, IAppExtensionFunctions* app_functions)
 {
     auto scsta = this->reader->CreateSingleChannelScalingTileAccessor();
     libCZI::IntSize size = scsta->CalcSize(roi, zoom);
@@ -263,7 +263,7 @@ Parameter* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect
     accessorGetOptions.backGroundColor = backgroundColor;
     auto bitmap = scsta->Get(pixeltype, roi, planeCoordinate, zoom, &accessorGetOptions);
 
-    auto* mxarray = ConvertToMxArray(bitmap.get());
+    auto* mxarray = ConvertToMxArray(bitmap.get(), app_functions);
     return mxarray;
 }
 
@@ -273,30 +273,33 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return this->displaySettingsFromCzi;
 }
 
-/*static*/Parameter* CziReader::ConvertToMxArray(libCZI::IBitmapData* bitmapData)
+/*static*/Parameter* CziReader::ConvertToMxArray(libCZI::IBitmapData* bitmapData, IAppExtensionFunctions* app_functions)
 {
-    auto mexApi = MexApi::GetInstance();
+    //auto mexApi = MexApi::GetInstance();
     switch (bitmapData->GetPixelType())
     {
     case PixelType::Gray8:
         {
-            auto* arr = mexApi.MxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxUINT8_CLASS, mxREAL);
-            CziReader::CopyTransposeGray8(bitmapData, mexApi.MxGetData(arr), 1 * static_cast<size_t>(bitmapData->GetHeight()));
+            //auto* arr = mexApi.MxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxUINT8_CLASS, mxREAL);
+            auto* arr = app_functions->pfn_CreateNumericMatrixReal(bitmapData->GetHeight(), bitmapData->GetWidth(), AppExtensionClassId_Uint8);
+            CziReader::CopyTransposeGray8(bitmapData, app_functions->pfn_GetData(arr)/*mexApi.MxGetData(arr)*/, 1 * static_cast<size_t>(bitmapData->GetHeight()));
             return arr;
         }
     case PixelType::Gray16:
         {
-            auto* arr = mexApi.MxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxUINT16_CLASS, mxREAL);
-            CziReader::CopyTransposeGray16(bitmapData, mexApi.MxGetData(arr), 2 * static_cast<size_t>(bitmapData->GetHeight()));
+            //auto* arr = mexApi.MxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxUINT16_CLASS, mxREAL);
+            auto* arr = app_functions->pfn_CreateNumericMatrixReal(bitmapData->GetHeight(), bitmapData->GetWidth(), AppExtensionClassId_Uint16);
+            CziReader::CopyTransposeGray16(bitmapData, app_functions->pfn_GetData(arr)/*mexApi.MxGetData(arr)*/, 2 * static_cast<size_t>(bitmapData->GetHeight()));
             return arr;
         }
     case PixelType::Bgr24:
         {
             size_t dims[3] = { bitmapData->GetHeight(), bitmapData->GetWidth(), 3 };
-            auto* arr = mexApi.MxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
+            //auto* arr = mexApi.MxCreateNumericArray(3, dims, mxUINT8_CLASS, mxREAL);
+            auto* arr = app_functions->pfn_CreateNumericArrayReal(3, dims, AppExtensionClassId_Uint8);
             CziReader::CopyTransposeInterleavedToPlanarBgr24(
                 bitmapData,
-                mexApi.MxGetData(arr),
+                app_functions->pfn_GetData(arr),//mexApi.MxGetData(arr),
                 static_cast<size_t>(bitmapData->GetHeight()),
                 static_cast<size_t>(bitmapData->GetWidth()) * static_cast<size_t>(bitmapData->GetHeight()));
             return arr;
@@ -304,18 +307,20 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     case PixelType::Bgr48:
         {
             size_t dims[3] = { bitmapData->GetHeight(), bitmapData->GetWidth() ,3 };
-            auto* arr = mexApi.MxCreateNumericArray(3, dims, mxUINT16_CLASS, mxREAL);
+            //auto* arr = mexApi.MxCreateNumericArray(3, dims, mxUINT16_CLASS, mxREAL);
+            auto* arr = app_functions->pfn_CreateNumericArrayReal(3, dims, AppExtensionClassId_Uint16);
             CziReader::CopyTransposeInterleavedToPlanarBgr48(
                 bitmapData,
-                mexApi.MxGetData(arr),
+                app_functions->pfn_GetData(arr),//mexApi.MxGetData(arr),
                 static_cast<size_t>(bitmapData->GetHeight()) * 2,
                 static_cast<size_t>(bitmapData->GetWidth()) * static_cast<size_t>(bitmapData->GetHeight()) * 2);
             return arr;
         }
     case PixelType::Gray32Float:
         {
-            auto* arr = mexApi.MxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxSINGLE_CLASS, mxREAL);
-            CziReader::CopyTransposeGrayFloat(bitmapData, mexApi.MxGetData(arr), 4 * static_cast<size_t>(bitmapData->GetHeight()));
+            //auto* arr = mexApi.MxCreateNumericMatrix(bitmapData->GetHeight(), bitmapData->GetWidth(), mxSINGLE_CLASS, mxREAL);
+            auto* arr = app_functions->pfn_CreateNumericMatrixReal(bitmapData->GetHeight(), bitmapData->GetWidth(), AppExtensionClassId_Single);
+            CziReader::CopyTransposeGrayFloat(bitmapData, app_functions->pfn_GetData(arr)/*mexApi.MxGetData(arr)*/, 4 * static_cast<size_t>(bitmapData->GetHeight()));
             return arr;
         }
     default:

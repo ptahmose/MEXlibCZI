@@ -86,7 +86,7 @@ struct IAppExtensionFunctions
 
     Parameter* (*pfn_GetField)(const Parameter* parameter, const char* field_name);
 
-    Parameter* (*pfn_CreateNumericArrayReal)(size_t ndim, const size_t* dims, enum AppExtensionClassId class_id); //*
+    Parameter* (*pfn_CreateNumericArrayReal)(size_t ndim, const size_t* dims, enum AppExtensionClassId class_id); 
 };
 
 #ifdef __cplusplus
