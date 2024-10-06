@@ -39,13 +39,13 @@ public:
     std::array<double, 3>   GetScaling();
     Parameter* GetScalingAsMatlabStruct(IAppExtensionFunctions* app_functions);
 
-    Parameter* ReadSubBlock(int no);
-    Parameter* GetInfoFromSubBlock(int subBlkHandle);
-    Parameter* GetMetadataFromSubBlock(int subBlkHandle);
-    Parameter* GetBitmapFromSubBlock(int subBlkHandle);
+    Parameter* ReadSubBlock(int no, IAppExtensionFunctions* app_functions);
+    Parameter* GetInfoFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
+    Parameter* GetMetadataFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
+    Parameter* GetBitmapFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
     bool    ReleaseSubBlock(int subBlkHandle);
 private:
-    static Parameter* ConvertToMatlabStruct(const libCZI::IDimBounds* bounds);
+    static Parameter* ConvertToMatlabStruct(const libCZI::IDimBounds* bounds, IAppExtensionFunctions* app_functions);
 
     /// Initializes the members "displaySettingsFromCzi" and "scalingInfoFromCzi".
     void InitializeInfoFromCzi();
@@ -56,11 +56,11 @@ private:
     Parameter* GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom, IAppExtensionFunctions* app_functions);
 
     static Parameter* ConvertToMxArray(libCZI::IBitmapData* bitmapData, IAppExtensionFunctions* app_functions);
-    static Parameter* ConvertToMatlabStruct(const std::map<int, libCZI::BoundingBoxes>& boundingBoxMap);
-    static Parameter* ConvertToMatlabStruct(const libCZI::IntRect& rect);
-    static Parameter* ConvertToMatlabStruct(const libCZI::IntSize& size);
+    static Parameter* ConvertToMatlabStruct(const std::map<int, libCZI::BoundingBoxes>& boundingBoxMap, IAppExtensionFunctions* app_functions);
+    static Parameter* ConvertToMatlabStruct(const libCZI::IntRect& rect, IAppExtensionFunctions* app_functions);
+    static Parameter* ConvertToMatlabStruct(const libCZI::IntSize& size, IAppExtensionFunctions* app_functions);
     static Parameter* ConvertToMatlabStruct(const libCZI::IDisplaySettings& ds, IAppExtensionFunctions* app_functions);
-    static Parameter* ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo);
+    static Parameter* ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo, IAppExtensionFunctions* app_functions);
 
     static void CopyTransposeGray8(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);
     static void CopyTransposeGray16(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);

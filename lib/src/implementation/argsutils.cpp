@@ -6,6 +6,19 @@
 using namespace std;
 using namespace libCZI;
 
+/*static*/std::string CArgsUtils::GetAsUtf8String(const Parameter* pArr, IAppExtensionFunctions* app_functions)
+{
+    if (!app_functions->pfn_IsChar(pArr))
+    {
+        return string();
+    }
+
+    char* utf8_char_array = app_functions->pfn_ConvertToUTF8String(pArr);
+    string argStr{ utf8_char_array };
+    app_functions->pfn_Free(utf8_char_array);
+    return argStr;
+}
+
 /*static*/bool CArgsUtils::TryGetInt32(const Parameter* pArr, std::int32_t* ptr, IAppExtensionFunctions* app_functions)
 {
     //const mxClassID id = MexApi::GetInstance().MxGetClassID(pArr);
@@ -211,7 +224,7 @@ using namespace libCZI;
         break;
     case AppExtensionClassId_Int64:
         {
-//            auto* pi64 = MexApi::GetInstance().MxGetInt64s(pArr);
+            //            auto* pi64 = MexApi::GetInstance().MxGetInt64s(pArr);
             auto* pi64 = app_functions->pfn_GetInt64s(pArr);
             int64_t v = *(pi64 + index);
             if (v > static_cast<int64_t>(numeric_limits<int>::max()) || v < static_cast<int64_t>(numeric_limits<int>::min()))
@@ -291,7 +304,7 @@ using namespace libCZI;
         break;
     case AppExtensionClassId_Uint8:
         {
-//            auto* const pui8 = MexApi::GetInstance().MxGetUint8s(pArr);
+            //            auto* const pui8 = MexApi::GetInstance().MxGetUint8s(pArr);
             auto* const pui8 = app_functions->pfn_GetUint8s(pArr);
             rv = *(pui8 + index);
         }

@@ -46,9 +46,9 @@ Parameter* CziReader::GetScalingAsMatlabStruct(IAppExtensionFunctions* app_funct
     //mexApi.MxSetFieldByNumber(s, 0, 1, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleYValid() ? scaling.scaleY : numeric_limits<double>::quiet_NaN()));
     //mexApi.MxSetFieldByNumber(s, 0, 2, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleZValid() ? scaling.scaleZ : numeric_limits<double>::quiet_NaN()));
 
-    app_functions->pfn_SetFieldByNumber(s, 0, 0, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleXValid() ? scaling.scaleX : numeric_limits<double>::quiet_NaN()));
-    app_functions->pfn_SetFieldByNumber(s, 0, 1, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleYValid() ? scaling.scaleY : numeric_limits<double>::quiet_NaN()));
-    app_functions->pfn_SetFieldByNumber(s, 0, 2, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleZValid() ? scaling.scaleZ : numeric_limits<double>::quiet_NaN()));
+    app_functions->pfn_SetFieldByNumber(s, 0, 0, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleXValid() ? scaling.scaleX : numeric_limits<double>::quiet_NaN(), app_functions));
+    app_functions->pfn_SetFieldByNumber(s, 0, 1, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleYValid() ? scaling.scaleY : numeric_limits<double>::quiet_NaN(), app_functions));
+    app_functions->pfn_SetFieldByNumber(s, 0, 2, MexUtils::DoubleTo1x1Matrix(scaling.IsScaleZValid() ? scaling.scaleZ : numeric_limits<double>::quiet_NaN(), app_functions));
     return s;
 }
 
@@ -85,16 +85,16 @@ Parameter* CziReader::GetInfo(IAppExtensionFunctions* app_functions)
         (sizeof(fieldNames) / sizeof(fieldNames[0])) - (statistics.IsMIndexValid() ? 0 : 2),
         fieldNames);
 
-    app_functions->pfn_SetFieldByNumber(s, 0, 0, MexUtils::Int32To1x1Matrix(statistics.subBlockCount));
-    app_functions->pfn_SetFieldByNumber(s, 0, 1, CziReader::ConvertToMatlabStruct(statistics.boundingBox));
-    app_functions->pfn_SetFieldByNumber(s, 0, 2, CziReader::ConvertToMatlabStruct(statistics.boundingBoxLayer0Only));
-    app_functions->pfn_SetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(&statistics.dimBounds));
-    app_functions->pfn_SetFieldByNumber(s, 0, 4, CziReader::ConvertToMatlabStruct(statistics.sceneBoundingBoxes));
+    app_functions->pfn_SetFieldByNumber(s, 0, 0, MexUtils::Int32To1x1Matrix(statistics.subBlockCount, app_functions));
+    app_functions->pfn_SetFieldByNumber(s, 0, 1, CziReader::ConvertToMatlabStruct(statistics.boundingBox, app_functions));
+    app_functions->pfn_SetFieldByNumber(s, 0, 2, CziReader::ConvertToMatlabStruct(statistics.boundingBoxLayer0Only, app_functions));
+    app_functions->pfn_SetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(&statistics.dimBounds, app_functions));
+    app_functions->pfn_SetFieldByNumber(s, 0, 4, CziReader::ConvertToMatlabStruct(statistics.sceneBoundingBoxes, app_functions));
 
     if (statistics.IsMIndexValid())
     {
-        app_functions->pfn_SetFieldByNumber(s, 0, 5, MexUtils::Int32To1x1Matrix(statistics.minMindex));
-        app_functions->pfn_SetFieldByNumber(s, 0, 6, MexUtils::Int32To1x1Matrix(statistics.maxMindex));
+        app_functions->pfn_SetFieldByNumber(s, 0, 5, MexUtils::Int32To1x1Matrix(statistics.minMindex, app_functions));
+        app_functions->pfn_SetFieldByNumber(s, 0, 6, MexUtils::Int32To1x1Matrix(statistics.maxMindex, app_functions));
     }
 
     return s;
@@ -425,7 +425,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     }
 }
 
-/*static*/Parameter* CziReader::ConvertToMatlabStruct(const libCZI::IDimBounds* bounds)
+/*static*/Parameter* CziReader::ConvertToMatlabStruct(const libCZI::IDimBounds* bounds, IAppExtensionFunctions* app_functions)
 {
     vector<string> dimensions;
     for (auto i = (std::underlying_type<libCZI::DimensionIndex>::type)(libCZI::DimensionIndex::MinDim); i <= (std::underlying_type<libCZI::DimensionIndex>::type)(libCZI::DimensionIndex::MaxDim); ++i)
@@ -446,47 +446,57 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     }
 
     size_t dims[2] = { 1, 1 };
-    auto mexApi = MexApi::GetInstance();
-    auto* s = mexApi.MxCreateStructArray(2, dims, (int)fieldNames.size(), &fieldNames[0]);
+    //auto mexApi = MexApi::GetInstance();
+    //auto* s = mexApi.MxCreateStructArray(2, dims, (int)fieldNames.size(), &fieldNames[0]);
+    auto* s = app_functions->pfn_CreateStructArray(2, dims, (int)fieldNames.size(), &fieldNames[0]);
 
     for (int i = 0; i < dimensions.size(); ++i)
     {
         int startIndex, size;
         bounds->TryGetInterval(libCZI::Utils::CharToDimension(dimensions[i][0]), &startIndex, &size);
-        auto* no = mexApi.MxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
-        int* ptr = mexApi.MxGetInt32s(no);
+        //auto* no = mexApi.MxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
+        auto* no = app_functions->pfn_CreateNumericMatrixReal(1, 2, AppExtensionClassId_Int32);
+        //int* ptr = mexApi.MxGetInt32s(no);
+        int* ptr = app_functions->pfn_GetInt32s(no);
         *ptr = startIndex;
         *(ptr + 1) = size;
-        mexApi.MxSetFieldByNumber(s, 0, i, no);
+        //mexApi.MxSetFieldByNumber(s, 0, i, no);
+        app_functions->pfn_SetFieldByNumber(s, 0, i, no);
     }
 
     return s;
 }
 
-/*static*/Parameter* CziReader::ConvertToMatlabStruct(const std::map<int, BoundingBoxes>& boundingBoxMap)
+/*static*/Parameter* CziReader::ConvertToMatlabStruct(const std::map<int, BoundingBoxes>& boundingBoxMap, IAppExtensionFunctions* app_functions)
 {
     static const char* fieldNames[] = { "sceneIndex", "boundingBox", "boundingBoxLayer0" };
     size_t dims[2] = { 1, boundingBoxMap.size() };
-    auto mexApi = MexApi::GetInstance();
-    auto* s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
+    //auto mexApi = MexApi::GetInstance();
+    //auto* s = mexApi.MxCreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
+    auto* s = app_functions->pfn_CreateStructArray(2, dims, sizeof(fieldNames) / sizeof(fieldNames[0]), fieldNames);
 
     int i = 0;
     for (auto it = boundingBoxMap.cbegin(); it != boundingBoxMap.cend(); ++it)
     {
-        mexApi.MxSetFieldByNumber(s, i, 0, MexUtils::Int32To1x1Matrix(it->first));
+        /*mexApi.MxSetFieldByNumber(s, i, 0, MexUtils::Int32To1x1Matrix(it->first));
         mexApi.MxSetFieldByNumber(s, i, 1, CziReader::ConvertToMatlabStruct(it->second.boundingBox));
-        mexApi.MxSetFieldByNumber(s, i, 2, CziReader::ConvertToMatlabStruct(it->second.boundingBoxLayer0));
+        mexApi.MxSetFieldByNumber(s, i, 2, CziReader::ConvertToMatlabStruct(it->second.boundingBoxLayer0));*/
+        app_functions->pfn_SetFieldByNumber(s, i, 0, MexUtils::Int32To1x1Matrix(it->first, app_functions));
+        app_functions->pfn_SetFieldByNumber(s, i, 1, CziReader::ConvertToMatlabStruct(it->second.boundingBox, app_functions));
+        app_functions->pfn_SetFieldByNumber(s, i, 2, CziReader::ConvertToMatlabStruct(it->second.boundingBoxLayer0, app_functions));
         ++i;
     }
 
     return s;
 }
 
-/*static*/ Parameter* CziReader::ConvertToMatlabStruct(const libCZI::IntRect& rect)
+/*static*/ Parameter* CziReader::ConvertToMatlabStruct(const libCZI::IntRect& rect, IAppExtensionFunctions* app_functions)
 {
-    auto mexApi = MexApi::GetInstance();
-    auto* m = mexApi.MxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
-    int* ptr = mexApi.MxGetInt32s(m);
+    //auto mexApi = MexApi::GetInstance();
+    //auto* m = mexApi.MxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
+    auto* m = app_functions->pfn_CreateNumericMatrixReal(1, 4, AppExtensionClassId_Int32);
+    //int* ptr = mexApi.MxGetInt32s(m);
+    int* ptr = app_functions->pfn_GetInt32s(m);
     ptr[0] = rect.x;
     ptr[1] = rect.y;
     ptr[2] = rect.w;
@@ -494,11 +504,13 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return m;
 }
 
-/*static*/ Parameter* CziReader::ConvertToMatlabStruct(const libCZI::IntSize& size)
+/*static*/ Parameter* CziReader::ConvertToMatlabStruct(const libCZI::IntSize& size, IAppExtensionFunctions* app_functions)
 {
-    auto mexApi = MexApi::GetInstance();
-    auto* m = mexApi.MxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
-    int* ptr = mexApi.MxGetInt32s(m);
+    //auto mexApi = MexApi::GetInstance();
+    //auto* m = mexApi.MxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
+    auto* m = app_functions->pfn_CreateNumericMatrixReal(1, 2, AppExtensionClassId_Int32);
+    //int* ptr = mexApi.MxGetInt32s(m);
+    int* ptr = app_functions->pfn_GetInt32s(m);
     ptr[0] = size.w;
     ptr[1] = size.h;
     return m;
@@ -543,11 +555,11 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     {
         auto chDs = ds.GetChannelDisplaySettings(it);
         //mexApi.MxSetFieldByNumber(s, i, 0, MexUtils::Int32To1x1Matrix(it));
-        app_functions->pfn_SetFieldByNumber(s, i, 0, MexUtils::Int32To1x1Matrix(it));
+        app_functions->pfn_SetFieldByNumber(s, i, 0, MexUtils::Int32To1x1Matrix(it, app_functions));
         //mexApi.MxSetFieldByNumber(s, i, 1, MexUtils::BooleanTo1x1Matrix(chDs->GetIsEnabled()));
-        app_functions->pfn_SetFieldByNumber(s, i, 1, MexUtils::BooleanTo1x1Matrix(chDs->GetIsEnabled()));
+        app_functions->pfn_SetFieldByNumber(s, i, 1, MexUtils::BooleanTo1x1Matrix(chDs->GetIsEnabled(), app_functions));
         //mexApi.MxSetFieldByNumber(s, i, 2, MexUtils::DoubleTo1x1Matrix(chDs->GetWeight()));
-        app_functions->pfn_SetFieldByNumber(s, i, 2, MexUtils::DoubleTo1x1Matrix(chDs->GetWeight()));
+        app_functions->pfn_SetFieldByNumber(s, i, 2, MexUtils::DoubleTo1x1Matrix(chDs->GetWeight(), app_functions));
 
         Rgb8Color tintingColor;
         if (chDs->TryGetTintingColorRgb8(&tintingColor))
@@ -574,7 +586,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
         float blackPoint, whitePoint;
         chDs->GetBlackWhitePoint(&blackPoint, &whitePoint);
         //mexApi.MxSetFieldByNumber(s, i, 5, MexUtils::DoublesAsNx1Matrix(2, static_cast<double>(blackPoint), static_cast<double>(whitePoint)));
-        app_functions->pfn_SetFieldByNumber(s, i, 5, MexUtils::DoublesAsNx1Matrix(2, static_cast<double>(blackPoint), static_cast<double>(whitePoint)));
+        app_functions->pfn_SetFieldByNumber(s, i, 5, MexUtils::DoublesAsNx1Matrix(app_functions, 2, static_cast<double>(blackPoint), static_cast<double>(whitePoint)));
 
         switch (chDs->GetGradationCurveMode())
         {
@@ -588,7 +600,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
             float gamma;
             chDs->TryGetGamma(&gamma);
             //mexApi.MxSetFieldByNumber(s, i, 7, MexUtils::DoubleTo1x1Matrix(gamma));
-            app_functions->pfn_SetFieldByNumber(s, i, 7, MexUtils::DoubleTo1x1Matrix(gamma));
+            app_functions->pfn_SetFieldByNumber(s, i, 7, MexUtils::DoubleTo1x1Matrix(gamma, app_functions));
             break;
         case IDisplaySettings::GradationCurveMode::Spline:
             //mexApi.MxSetFieldByNumber(s, i, 6, mexApi.MxCreateString(gradationcurveSpline));
@@ -615,7 +627,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return s;
 }
 
-Parameter* CziReader::ReadSubBlock(int no)
+Parameter* CziReader::ReadSubBlock(int no, IAppExtensionFunctions* app_functions)
 {
     auto sbBlk = this->reader->ReadSubBlock(no);
     if (!sbBlk)
@@ -626,10 +638,10 @@ Parameter* CziReader::ReadSubBlock(int no)
     }
 
     int32_t h = this->sbBlkStore.AddSubBlock(sbBlk);
-    return MexUtils::Int32To1x1Matrix(h);
+    return MexUtils::Int32To1x1Matrix(h, app_functions);
 }
 
-Parameter* CziReader::GetInfoFromSubBlock(int subBlkHandle)
+Parameter* CziReader::GetInfoFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions)
 {
     auto sbBlk = this->sbBlkStore.GetForHandle(subBlkHandle);
     if (!sbBlk)
@@ -640,10 +652,10 @@ Parameter* CziReader::GetInfoFromSubBlock(int subBlkHandle)
     }
 
     const auto& sbInfo = sbBlk->GetSubBlockInfo();
-    return CziReader::ConvertToMatlabStruct(sbInfo);
+    return CziReader::ConvertToMatlabStruct(sbInfo, app_functions);
 }
 
-Parameter* CziReader::GetMetadataFromSubBlock(int subBlkHandle)
+Parameter* CziReader::GetMetadataFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions)
 {
     auto sbBlk = this->sbBlkStore.GetForHandle(subBlkHandle);
     if (!sbBlk)
@@ -653,19 +665,21 @@ Parameter* CziReader::GetMetadataFromSubBlock(int subBlkHandle)
         throw invalid_argument(ss.str());
     }
 
-    auto mexApi = MexApi::GetInstance();
+    //auto mexApi = MexApi::GetInstance();
     size_t sizeData;
     auto ptrData = sbBlk->GetRawData(ISubBlock::MemBlkType::Metadata, &sizeData);
     if (!ptrData)
     {
-        return mexApi.MxCreateString("");
+        return app_functions->pfn_CreateString("");
+        //return mexApi.MxCreateString("");
     }
 
     string metadataXml(static_cast<const char*>(ptrData.get()), sizeData);
-    return mexApi.MxCreateString(metadataXml.c_str());
+    //return mexApi.MxCreateString(metadataXml.c_str());
+    return app_functions->pfn_CreateString(metadataXml.c_str());
 }
 
-Parameter* CziReader::GetBitmapFromSubBlock(int subBlkHandle)
+Parameter* CziReader::GetBitmapFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions)
 {
     auto sbBlk = this->sbBlkStore.GetForHandle(subBlkHandle);
     if (!sbBlk)
@@ -676,7 +690,7 @@ Parameter* CziReader::GetBitmapFromSubBlock(int subBlkHandle)
     }
 
     auto bm = sbBlk->CreateBitmap();
-    return ConvertToMxArray(bm.get());
+    return ConvertToMxArray(bm.get(), app_functions);
 }
 
 bool CziReader::ReleaseSubBlock(int subBlkHandle)
@@ -684,25 +698,35 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
     return this->sbBlkStore.RemoveSubBlock(subBlkHandle);
 }
 
-/*static*/Parameter* CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo)
+/*static*/Parameter* CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo, IAppExtensionFunctions* app_functions)
 {
-    auto mexApi = MexApi::GetInstance();
+    //auto mexApi = MexApi::GetInstance();
     array<const char*, 7> fieldNames = { "Mode", "Pixeltype", "Coordinate", "LogicalRect", "PhysicalSize", "MIndex", "Zoom" };
-    auto s = mexApi.MxCreateStructArray(
+    //auto s = mexApi.MxCreateStructArray(
+    auto s = app_functions->pfn_CreateStructArray(
         2,
         MexUtils::Dims_1_by_1,
         static_cast<int>(fieldNames.size()),
         fieldNames.data());
-    mexApi.MxSetFieldByNumber(s, 0, 0, mexApi.MxCreateString(libCZI::Utils::CompressionModeToInformalString(sbBlkInfo.GetCompressionMode())));
+    /*mexApi.MxSetFieldByNumber(s, 0, 0, mexApi.MxCreateString(libCZI::Utils::CompressionModeToInformalString(sbBlkInfo.GetCompressionMode())));
     mexApi.MxSetFieldByNumber(s, 0, 1, mexApi.MxCreateString(libCZI::Utils::PixelTypeToInformalString(sbBlkInfo.pixelType)));
     mexApi.MxSetFieldByNumber(s, 0, 2, mexApi.MxCreateString(libCZI::Utils::DimCoordinateToString(&sbBlkInfo.coordinate).c_str()));
     mexApi.MxSetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(sbBlkInfo.logicalRect));
-    mexApi.MxSetFieldByNumber(s, 0, 4, CziReader::ConvertToMatlabStruct(sbBlkInfo.physicalSize));
+    mexApi.MxSetFieldByNumber(s, 0, 4, CziReader::ConvertToMatlabStruct(sbBlkInfo.physicalSize));*/
+
+    app_functions->pfn_SetFieldByNumber(s, 0, 0, app_functions->pfn_CreateString(libCZI::Utils::CompressionModeToInformalString(sbBlkInfo.GetCompressionMode())));
+    app_functions->pfn_SetFieldByNumber(s, 0, 1, app_functions->pfn_CreateString(libCZI::Utils::PixelTypeToInformalString(sbBlkInfo.pixelType)));
+    app_functions->pfn_SetFieldByNumber(s, 0, 2, app_functions->pfn_CreateString(libCZI::Utils::DimCoordinateToString(&sbBlkInfo.coordinate).c_str()));
+    app_functions->pfn_SetFieldByNumber(s, 0, 3, CziReader::ConvertToMatlabStruct(sbBlkInfo.logicalRect, app_functions));
+    app_functions->pfn_SetFieldByNumber(s, 0, 4, CziReader::ConvertToMatlabStruct(sbBlkInfo.physicalSize, app_functions));
+
     if (sbBlkInfo.mIndex != std::numeric_limits<int>::max() && sbBlkInfo.mIndex != std::numeric_limits<int>::min())
     {
-        mexApi.MxSetFieldByNumber(s, 0, 5, MexUtils::Int32To1x1Matrix(sbBlkInfo.mIndex));
+        //mexApi.MxSetFieldByNumber(s, 0, 5, MexUtils::Int32To1x1Matrix(sbBlkInfo.mIndex));
+        app_functions->pfn_SetFieldByNumber(s, 0, 5, MexUtils::Int32To1x1Matrix(sbBlkInfo.mIndex, app_functions));
     }
 
-    mexApi.MxSetFieldByNumber(s, 0, 6, MexUtils::DoubleTo1x1Matrix(sbBlkInfo.GetZoom()));
+    //mexApi.MxSetFieldByNumber(s, 0, 6, MexUtils::DoubleTo1x1Matrix(sbBlkInfo.GetZoom()));
+    app_functions->pfn_SetFieldByNumber(s, 0, 6, MexUtils::DoubleTo1x1Matrix(sbBlkInfo.GetZoom(), app_functions));
     return s;
 }

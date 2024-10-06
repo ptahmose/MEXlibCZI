@@ -27,13 +27,13 @@ class MexUtils
 {
 public:
     static size_t Dims_1_by_1[2];
-    static Parameter* FloatTo1x1Matrix(float v);
-    static Parameter* DoubleTo1x1Matrix(double v);
-    static Parameter* Int32To1x1Matrix(int v);
-    static Parameter* BooleanTo1x1Matrix(bool b);
-    static Parameter* DoublesAsNx1Matrix(int count, ...);
+    static Parameter* FloatTo1x1Matrix(float v, IAppExtensionFunctions* app_functions);
+    static Parameter* DoubleTo1x1Matrix(double v, IAppExtensionFunctions* app_functions);
+    static Parameter* Int32To1x1Matrix(int v, IAppExtensionFunctions* app_functions);
+    static Parameter* BooleanTo1x1Matrix(bool b, IAppExtensionFunctions* app_functions);
+    static Parameter* DoublesAsNx1Matrix(IAppExtensionFunctions* app_functions, int count, ...);
 private:
-    static double CoerceValueDbl(double d);
+    static double CoerceValueDbl(double d, IAppExtensionFunctions* app_functions);
 };
 
 class Bitmap : public libCZI::IBitmapData

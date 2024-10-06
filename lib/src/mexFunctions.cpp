@@ -1,12 +1,11 @@
 #include "mexFunctions.h"
-#include <string>
 #include <cstring>
 
 #include "functions/func_getversion.h"
+#include "functions/func_open.h"
+#include "functions/func_getsubblockbitmap.h"
 /*
 #include "src/func_close.h"
-#include "src/func_open.h"
-#include "src/func_getsubblockbitmap.h"
 #include "src/func_getmultichannelscalingtilecomposite.h"
 #include "src/func_getinfo.h"
 #include "src/func_getmetadataxml.h"
@@ -22,9 +21,9 @@
 /*static*/const CMexFunctions::MexFuncItem CMexFunctions::funcItems[] =
 {
     {u8"GetVersion", {MexFunction_GetVersion_CheckArguments,MexFunction_GetVersion_Execute}},
-    /*
     {u8"Open", {MexFunction_Open_CheckArguments,MexFunction_Open_Execute}},
     {u8"GetSubBlockBitmap", {MexFunction_GetSubBlockBitmap_CheckArguments,MexFunction_GetSubBlockBitmap_Execute}},
+    /*
     {u8"GetMultiChannelScalingTileComposite", {MexFunction_GetMultiChannelScalingTileComposite_CheckArguments,MexFunction_GetMultiChannelScalingTileComposite_Execute}},
     {u8"GetInfo", {MexFunction_GetInfo_CheckArguments,MexFunction_GetInfo_Execute}},
     {u8"GetScaling", {MexFunction_GetScaling_CheckArguments,MexFunction_GetScaling_Execute}},

@@ -12,6 +12,16 @@ bool matlabMexIsNanOrInfSingle(float value)
     return mxIsNaN(value) || mxIsInf(value);
 }
 
+double matlabMaxGetInfinityDouble(void)
+{
+    return mxGetInf();
+}
+
+double matlabMaxGetNaNDouble(void)
+{
+    return mxGetNaN();
+}
+
 void* matlabMexGetData(const Parameter* parameter)
 {
     return mxGetData((const mxArray*)parameter);
@@ -65,6 +75,11 @@ double* matlabMexGetDoubles(const Parameter* parameter)
 float* matlabMexGetSingles(const Parameter* parameter)
 {
     return mxGetSingles((const mxArray*)parameter);
+}
+
+bool* matlabMexGetLogicals(const Parameter* parameter)
+{
+    return mxGetLogicals((const mxArray*)parameter);
 }
 
 bool matlabMexIsNumeric(const Parameter* parameter)
@@ -126,45 +141,76 @@ void matlabFree(void* ptr)
     mxFree(ptr);
 }
 
-Parameter* matlabCreateNumericMatrixReal(size_t m, size_t n, enum AppExtensionClassId class_id)
+mxClassID AppExtensionClassIdToMxClassId(enum AppExtensionClassId class_id)
 {
-    mxClassID mx_class_id;
     switch (class_id)
     {
     case AppExtensionClassId_Uint8:
-        mx_class_id = mxUINT8_CLASS;
-        break;
+        return mxUINT8_CLASS;
     case AppExtensionClassId_Int8:
-        mx_class_id = mxINT8_CLASS;
-        break;
+        return mxINT8_CLASS;
     case AppExtensionClassId_Uint16:
-        mx_class_id = mxUINT16_CLASS;
-        break;
+        return mxUINT16_CLASS;
     case AppExtensionClassId_Int16:
-        mx_class_id = mxINT16_CLASS;
-        break;
+        return mxINT16_CLASS;
     case AppExtensionClassId_Uint32:
-        mx_class_id = mxUINT32_CLASS;
-        break;
+        return mxUINT32_CLASS;
     case AppExtensionClassId_Int32:
-        mx_class_id = mxINT32_CLASS;
-        break;
+        return mxINT32_CLASS;
     case AppExtensionClassId_Uint64:
-        mx_class_id = mxUINT64_CLASS;
-        break;
+        return mxUINT64_CLASS;
     case AppExtensionClassId_Int64:
-        mx_class_id = mxINT64_CLASS;
-        break;
+        return mxINT64_CLASS;
     case AppExtensionClassId_Double:
-        mx_class_id = mxDOUBLE_CLASS;
-        break;
+        return mxDOUBLE_CLASS;
     case AppExtensionClassId_Single:
-        mx_class_id = mxSINGLE_CLASS;
-        break;
+        return mxSINGLE_CLASS;
+    case AppExtensionClassId_Logical:
+        return mxLOGICAL_CLASS;
     default:
-        mx_class_id = mxUNKNOWN_CLASS;
-        break;
+        return mxUNKNOWN_CLASS;
     }
+}
+
+Parameter* matlabCreateNumericMatrixReal(size_t m, size_t n, enum AppExtensionClassId class_id)
+{
+    mxClassID mx_class_id = AppExtensionClassIdToMxClassId(class_id);
+    //switch (class_id)
+    //{
+    //case AppExtensionClassId_Uint8:
+    //    mx_class_id = mxUINT8_CLASS;
+    //    break;
+    //case AppExtensionClassId_Int8:
+    //    mx_class_id = mxINT8_CLASS;
+    //    break;
+    //case AppExtensionClassId_Uint16:
+    //    mx_class_id = mxUINT16_CLASS;
+    //    break;
+    //case AppExtensionClassId_Int16:
+    //    mx_class_id = mxINT16_CLASS;
+    //    break;
+    //case AppExtensionClassId_Uint32:
+    //    mx_class_id = mxUINT32_CLASS;
+    //    break;
+    //case AppExtensionClassId_Int32:
+    //    mx_class_id = mxINT32_CLASS;
+    //    break;
+    //case AppExtensionClassId_Uint64:
+    //    mx_class_id = mxUINT64_CLASS;
+    //    break;
+    //case AppExtensionClassId_Int64:
+    //    mx_class_id = mxINT64_CLASS;
+    //    break;
+    //case AppExtensionClassId_Double:
+    //    mx_class_id = mxDOUBLE_CLASS;
+    //    break;
+    //case AppExtensionClassId_Single:
+    //    mx_class_id = mxSINGLE_CLASS;
+    //    break;
+    //default:
+    //    mx_class_id = mxUNKNOWN_CLASS;
+    //    break;
+    //}
 
     return (Parameter*)mxCreateNumericMatrix(m, n, mx_class_id, mxREAL);
 }
@@ -194,6 +240,8 @@ enum AppExtensionClassId matlabGetClassId(const Parameter* parameter)
         return AppExtensionClassId_Double;
     case mxSINGLE_CLASS:
         return AppExtensionClassId_Single;
+    case mxLOGICAL_CLASS:
+        return AppExtensionClassId_Logical;
     default:
         return AppExtensionClassId_Unknown;
     }
@@ -230,8 +278,8 @@ Parameter* matlabGetField(const Parameter* parameter, const char* field_name)
 
 Parameter* matlabCreateNumericArrayReal(size_t ndim, const size_t* dims, enum AppExtensionClassId class_id)
 {
-    mxClassID mx_class_id;
-    switch (class_id)
+    mxClassID mx_class_id = AppExtensionClassIdToMxClassId(class_id);
+    /*switch (class_id)
     {
     case AppExtensionClassId_Uint8:
         mx_class_id = mxUINT8_CLASS;
@@ -266,7 +314,7 @@ Parameter* matlabCreateNumericArrayReal(size_t ndim, const size_t* dims, enum Ap
     default:
         mx_class_id = mxUNKNOWN_CLASS;
         break;
-    }
+    }*/
 
     return (Parameter*)mxCreateNumericArray(ndim, dims, mx_class_id, mxREAL);
 }
@@ -275,6 +323,8 @@ struct IAppExtensionFunctions g_appExtensionFunctions =
 {
     .pfn_IsNanOrInfDouble = matlabMexIsNanOrInfDouble,
     .pfn_IsNanOrInfSingle = matlabMexIsNanOrInfSingle,
+    .pfn_GetInfDouble = matlabMaxGetInfinityDouble,
+    .pfn_GetNaNDouble = matlabMaxGetNaNDouble,
     .pfn_GetData = matlabMexGetData,
     .pfn_GetUint8s = matlabMexGetUint8s,
     .pfn_GetInt8s = matlabMexGetInt8s,
@@ -286,6 +336,7 @@ struct IAppExtensionFunctions g_appExtensionFunctions =
     .pfn_GetInt64s = matlabMexGetInt64s,
     .pfn_GetDoubles = matlabMexGetDoubles,
     .pfn_GetSingles = matlabMexGetSingles,
+    .pfn_GetLogicals = matlabMexGetLogicals,
     .pfn_IsNumeric = matlabMexIsNumeric,
     .pfn_IsChar = matlabMexIsChar,
     .pfn_IsSparse = matlabMexIsSparse,

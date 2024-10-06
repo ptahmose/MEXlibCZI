@@ -19,6 +19,7 @@ public:
         void* data;
     };
 
+    static std::string GetAsUtf8String(const Parameter* pArr, IAppExtensionFunctions* app_functions);   
 
     static bool TryGetInt32(const Parameter* pArr, std::int32_t* ptr, IAppExtensionFunctions* app_functions);
     static bool TryGetInt32(const Parameter* pArr, size_t index, std::int32_t* ptr, IAppExtensionFunctions* app_functions);

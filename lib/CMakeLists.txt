@@ -16,14 +16,21 @@ set (libSourceFiles
 			"src/implementation/CziReader.cpp"
 			"src/implementation/dbgprint.h"
 			"src/implementation/dbgprint.cpp"
-		 "src/implementation/CziReaderSbBlkStore.cpp" 
-		 "src/implementation/CziReaderSbBlkStore.h" 
-		 "src/implementation/CziUtilities.cpp" 
-		 "src/implementation/CziUtilities.h"
-		 "src/implementation/include_rapidjson.h"
-		 "src/implementation/argsutils.h"
+			"src/implementation/CziReaderSbBlkStore.cpp" 
+			"src/implementation/CziReaderSbBlkStore.h" 
+			"src/implementation/CziUtilities.cpp" 
+			"src/implementation/CziUtilities.h"
+			"src/implementation/include_rapidjson.h"
+			"src/implementation/argsutils.h"
 			"src/implementation/argsutils.cpp"
- "src/implementation/CziWriter.cpp" "src/implementation/CziWriter.h")
+			"src/implementation/CziWriter.cpp" 
+			"src/implementation/CziWriter.h"
+			"src/implementation/utils.cpp" 
+			"src/implementation/utils.h"
+			"src/implementation/CziWriterManager.cpp" 
+			"src/implementation/CziWriterManager.h" 
+			"src/functions/func_open.cpp" 
+			"src/functions/func_open.h" "src/functions/func_getsubblockbitmap.cpp" "src/functions/func_getsubblockbitmap.h")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
  set(lib_ENABLE_LOGGING 1)

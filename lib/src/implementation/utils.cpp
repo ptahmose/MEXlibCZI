@@ -5,7 +5,8 @@
 #include <cstdarg> 
 #include "CziReaderManager.h"
 #include "CziWriterManager.h"
-#include "mexapi.h"
+//#include "mexapi.h"
+#include <app_api.h>
 #include "dbgprint.h"
 #if _WIN32
 #include <Windows.h>
@@ -29,10 +30,13 @@ using namespace std;
 
 /*static*/bool Utils::icasecmp(const std::string& l, const std::string& r)
 {
-    return l.size() == r.size()
-        && equal(l.cbegin(), l.cend(), r.cbegin(),
+    return
+        l.size() == r.size() &&
+        equal(l.cbegin(), l.cend(), r.cbegin(),
             [](std::string::value_type l1, std::string::value_type r1)
-            { return toupper(l1) == toupper(r1); });
+            {
+                return toupper(l1) == toupper(r1);
+            });
 }
 
 /*static*/std::uint8_t Utils::HexCharToInt(char c)
@@ -221,16 +225,16 @@ public:
 
     static constexpr struct ConversionInfo
     {
-        mxClassID mx_class;
+        AppExtensionClassId mx_class;
         bool has_3rd_dimension; // whether the 3rd dimension is present and has size 3
         libCZI::PixelType pixel_type;
         void(*conversion_function)(const CArgsUtils::ArrayInfo&, libCZI::IBitmapData*);
     } kConversionTable[] =
     {
-        { mxUINT8_CLASS, false, libCZI::PixelType::Gray8 , Converters::Convert_UINT8_to_Gray8},
-        { mxUINT8_CLASS, true, libCZI::PixelType::Bgr24, Converters::Convert_UINT8_3d_to_Bgr24 },
-        { mxUINT16_CLASS, false, libCZI::PixelType::Gray16, Converters::Convert_UINT16_to_Gray16 },
-        { mxUINT16_CLASS, true, libCZI::PixelType::Bgr48, Converters::Convert_UINT16_3d_to_Bgr48 },
+        { AppExtensionClassId_Uint8, false, libCZI::PixelType::Gray8 , Converters::Convert_UINT8_to_Gray8},
+        { AppExtensionClassId_Uint8, true, libCZI::PixelType::Bgr24, Converters::Convert_UINT8_3d_to_Bgr24 },
+        { AppExtensionClassId_Uint16, false, libCZI::PixelType::Gray16, Converters::Convert_UINT16_to_Gray16 },
+        { AppExtensionClassId_Uint16, true, libCZI::PixelType::Bgr48, Converters::Convert_UINT16_3d_to_Bgr48 },
     };
 
     const bool has_3rd_dimension = array_info.number_of_dimensions == 3;
@@ -249,33 +253,39 @@ public:
 
 // ----------------------------------------------------------------------------
 
-/*static*/mwSize MexUtils::Dims_1_by_1[2] = { 1, 1 };
+/*static*/size_t MexUtils::Dims_1_by_1[2] = { 1, 1 };
 
-/*static*/MexArray* MexUtils::FloatTo1x1Matrix(float v)
+/*static*/Parameter* MexUtils::FloatTo1x1Matrix(float v, IAppExtensionFunctions* app_functions)
 {
-    auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
-    float* ptr = MexApi::GetInstance().MxGetSingles(m);
+    //auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
+    auto m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Single);
+    //float* ptr = MexApi::GetInstance().MxGetSingles(m);
+    float* ptr = app_functions->pfn_GetSingles(m);
     *ptr = v;
     return m;
 }
 
-/*static*/MexArray* MexUtils::DoubleTo1x1Matrix(double v)
+/*static*/Parameter* MexUtils::DoubleTo1x1Matrix(double v, IAppExtensionFunctions* app_functions)
 {
-    auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
-    double* ptr = MexApi::GetInstance().MxGetDoubles(m);
-    *ptr = MexUtils::CoerceValueDbl(v);
+    //auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+    auto m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Double);
+    //double* ptr = MexApi::GetInstance().MxGetDoubles(m);
+    double* ptr = app_functions->pfn_GetDoubles(m);
+    *ptr = MexUtils::CoerceValueDbl(v, app_functions);
     return m;
 }
 
-/*static*/MexArray* MexUtils::DoublesAsNx1Matrix(int count, ...)
+/*static*/Parameter* MexUtils::DoublesAsNx1Matrix(IAppExtensionFunctions* app_functions, int count,  ...)
 {
-    auto m = MexApi::GetInstance().MxCreateNumericMatrix(count, 1, mxDOUBLE_CLASS, mxREAL);
-    double* ptr = MexApi::GetInstance().MxGetDoubles(m);
+    //auto m = MexApi::GetInstance().MxCreateNumericMatrix(count, 1, mxDOUBLE_CLASS, mxREAL);
+    auto m = app_functions->pfn_CreateNumericMatrixReal(count, 1, AppExtensionClassId_Double);
+    //double* ptr = MexApi::GetInstance().MxGetDoubles(m);
+    double* ptr = app_functions->pfn_GetDoubles(m);
     va_list list;
     va_start(list, count);
     for (int arg = 0; arg < count; ++arg)
     {
-        *ptr++ = MexUtils::CoerceValueDbl(va_arg(list, double));
+        *ptr++ = MexUtils::CoerceValueDbl(va_arg(list, double), app_functions);
     }
 
     // Cleanup the va_list when we're done.
@@ -284,31 +294,37 @@ public:
     return m;
 }
 
-/*static*/MexArray* MexUtils::Int32To1x1Matrix(int v)
+/*static*/Parameter* MexUtils::Int32To1x1Matrix(int v, IAppExtensionFunctions* app_functions)
 {
-    auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    int* ptr = MexApi::GetInstance().MxGetInt32s(m);
+    //auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+    auto* m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Int32);
+    //int* ptr = MexApi::GetInstance().MxGetInt32s(m);
+    int* ptr = app_functions->pfn_GetInt32s(m);
     *ptr = v;
     return m;
 }
 
-/*static*/MexArray* MexUtils::BooleanTo1x1Matrix(bool b)
+/*static*/Parameter* MexUtils::BooleanTo1x1Matrix(bool b, IAppExtensionFunctions* app_functions)
 {
-    auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxLOGICAL_CLASS, mxREAL);
-    bool* ptr = MexApi::GetInstance().MxGetLogicals(m);
+    //auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxLOGICAL_CLASS, mxREAL);
+    auto* m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Logical);
+    //bool* ptr = MexApi::GetInstance().MxGetLogicals(m);
+    bool* ptr = app_functions->pfn_GetLogicals(m);
     *ptr = b;
     return m;
 }
 
-/*static*/double MexUtils::CoerceValueDbl(double d)
+/*static*/double MexUtils::CoerceValueDbl(double d, IAppExtensionFunctions* app_functions)
 {
     if (isnan(d))
     {
-        return MexApi::GetInstance().GetDblNan();
+        //return MexApi::GetInstance().GetDblNan();
+        return app_functions->pfn_GetNaNDouble();
     }
     else if (isinf(d))
     {
-        return MexApi::GetInstance().GetDblInf();
+        //return MexApi::GetInstance().GetDblInf();
+        return app_functions->pfn_GetInfDouble();
     }
     else
     {
