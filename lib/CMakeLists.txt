@@ -89,3 +89,7 @@ target_include_directories(lib PRIVATE  ${CMAKE_CURRENT_BINARY_DIR})  # this is 
 if(WIN32)
  target_compile_definitions(lib PRIVATE _WIN32API=1)
 endif()
+if(UNIX)
+  # Enable PIC for the static library
+	set_target_properties(lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
