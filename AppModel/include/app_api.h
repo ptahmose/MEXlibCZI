@@ -6,6 +6,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
     typedef void* Parameter;
 
@@ -85,9 +86,9 @@ extern "C" {
 
         enum AppExtensionClassId(*pfn_GetClassId)(const Parameter* parameter);
 
-        size_t(*pfn_GetNumberOfElements)(const Parameter* parameter);
+        size_t (*pfn_GetNumberOfElements)(const Parameter* parameter);
 
-        size_t(*pfn_GetNumberOfDimensions)(const Parameter* parameter);
+        size_t (*pfn_GetNumberOfDimensions)(const Parameter* parameter);
 
         void (*pfn_GetSizeOfDimensions)(const Parameter* parameter, size_t number_of_dimension, size_t* sizes);
 

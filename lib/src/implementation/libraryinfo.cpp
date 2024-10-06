@@ -1,4 +1,4 @@
-#include "libraryInfo.h"
+#include "libraryinfo.h"
 #include "inc_libczi.h"
 #include <sstream>
 #include <lib_config.h>
