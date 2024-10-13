@@ -3,7 +3,7 @@ set(octaveOctSourceFiles
 )
 
 add_library (OctaveOct SHARED
-			       ${octaveOctSourceFiles})
+			       ${octaveOctSourceFiles} "octavelibczi.c")
 
 target_compile_features(OctaveOct PRIVATE c_std_11)
 set_target_properties(OctaveOct PROPERTIES CXX_STANDARD 17)

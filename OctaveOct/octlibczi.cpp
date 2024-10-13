@@ -1,6 +1,7 @@
-#include <octave/oct.h>
+#include <octave/mex.h>
 #include "../AppModel/include/app_api.h"
 #include <array>
+
 
 bool octaveOctIsNanOrInfDouble(double value)
 {
@@ -107,20 +108,51 @@ Parameter* octaveOctCreateString(const char* string)
     return (Parameter*)new octave_value(string);
 }
 
-void matlabReportErrorAndRaiseSignal(const char* identifier, const char* message)
+void octaveOctErrorAndRaiseSignal(const char* identifier, const char* message)
 {
-    mexErrMsgIdAndTxt(identifier, message);
+    const char* fname = "octlibczi";
+    std::size_t len = strlen(fname) + 2 + strlen(message) + 1;
+    OCTAVE_LOCAL_BUFFER(char, tmpfmt, len);
+    sprintf(tmpfmt, "%s: %s", fname, message);
+   // va_list args;
+    //va_start(args, message);
+    //verror_with_id(identifier, tmpfmt, args);
+    error_with_id(identifier, tmpfmt);  
+    //va_end(args);
+    // TODO(JBL): look into this
 }
 
-char* matlabStrDupHostAllocated(const char* string)
+char* octaveOctStrDupHostAllocated(const char* string)
 {
     size_t len = strlen(string);
-    char* msz = (char*)mxMalloc(len + 1);
+    char* msz = (char*)std::malloc(len + 1);
     memcpy(msz, string, len);
     msz[len] = '\0';
     return msz;
+    // TODO(JBL): look into this
 }
 
+Parameter* octaveOctCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** field_names)
+{
+    return (Parameter*)mxCreateStructArray(ndim, dims, nfields, field_names);
+}
+
+void matlabSetFieldByNumber(Parameter* pa, size_t i, int fieldnum, Parameter* value)
+{
+    mxSetFieldByNumber((mxArray*)pa, i, fieldnum, (mxArray*)value);
+}
+
+char* octaveOctConvertToUTF8String(const Parameter* parameter)
+{
+    return mxArrayToUTF8String((const mxArray*)parameter);
+    // TODO(JBL): look into this
+}
+
+void octaveOctFree(void* ptr)
+{
+    //mxFree(ptr);
+    std::free(ptr);
+}
 
 static struct IAppExtensionFunctions g_appExtensionFunctions =
 {
