@@ -62,3 +62,9 @@ add_subdirectory ("MEXlibCZI")
 
 add_subdirectory("lib")
 add_subdirectory("MatlabMex")
+
+##set(OCTAVE_CONFIGEXECUTABLE_PATHHINT "D:/SW/octave-9.2.0-w64/mingw64/bin")
+set(OCTAVE_CONFIGEXECUTABLE_PATHHINT "/d/SW/octave-9.2.0-w64/mingw64/bin/")
+find_package(Octave)
+
+add_subdirectory("OctaveOct")

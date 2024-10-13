@@ -12,12 +12,12 @@ bool matlabMexIsNanOrInfSingle(float value)
     return mxIsNaN(value) || mxIsInf(value);
 }
 
-double matlabMaxGetInfinityDouble(void)
+double matlabMexGetInfinityDouble(void)
 {
     return mxGetInf();
 }
 
-double matlabMaxGetNaNDouble(void)
+double matlabMexGetNaNDouble(void)
 {
     return mxGetNaN();
 }
@@ -249,8 +249,8 @@ struct IAppExtensionFunctions g_appExtensionFunctions =
 {
     .pfn_IsNanOrInfDouble = matlabMexIsNanOrInfDouble,
     .pfn_IsNanOrInfSingle = matlabMexIsNanOrInfSingle,
-    .pfn_GetInfDouble = matlabMaxGetInfinityDouble,
-    .pfn_GetNaNDouble = matlabMaxGetNaNDouble,
+    .pfn_GetInfDouble = matlabMexGetInfinityDouble,
+    .pfn_GetNaNDouble = matlabMexGetNaNDouble,
     .pfn_GetData = matlabMexGetData,
     .pfn_GetUint8s = matlabMexGetUint8s,
     .pfn_GetInt8s = matlabMexGetInt8s,
