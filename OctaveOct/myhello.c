@@ -316,6 +316,7 @@ static void Initialize()
     pfn_mexFunction = (void(__cdecl*)(int, Parameter*[], int, const Parameter*[], struct IAppExtensionFunctions*))GetProcAddress(hModule, "mexFunction");
 
     pfn_OnInitialize();
+    mexAtExit(pfn_OnShutdown);
 }
 
 /*
