@@ -6,7 +6,7 @@
 using namespace std;
 using namespace libCZI;
 
-/*static*/std::string CArgsUtils::GetAsUtf8String(const Parameter* pArr, IAppExtensionFunctions* app_functions)
+/*static*/std::string CArgsUtils::GetAsUtf8String(const Parameter pArr, IAppExtensionFunctions* app_functions)
 {
     if (!app_functions->pfn_IsChar(pArr))
     {
@@ -19,7 +19,7 @@ using namespace libCZI;
     return argStr;
 }
 
-/*static*/bool CArgsUtils::TryGetInt32(const Parameter* pArr, std::int32_t* ptr, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetInt32(const Parameter pArr, std::int32_t* ptr, IAppExtensionFunctions* app_functions)
 {
     //const mxClassID id = MexApi::GetInstance().MxGetClassID(pArr);
     const AppExtensionClassId id = app_functions->pfn_GetClassId(pArr);
@@ -135,7 +135,7 @@ using namespace libCZI;
     return true;
 }
 
-/*static*/bool CArgsUtils::TryGetInt32(const Parameter* pArr, size_t index, std::int32_t* ptr, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetInt32(const Parameter pArr, size_t index, std::int32_t* ptr, IAppExtensionFunctions* app_functions)
 {
     //size_t numOfElements = MexApi::GetInstance().MxGetNumberOfElements(pArr);
     size_t numOfElements = app_functions->pfn_GetNumberOfElements(pArr);
@@ -260,12 +260,12 @@ using namespace libCZI;
     return true;
 }
 
-/*static*/bool CArgsUtils::TryGetSingle(const Parameter* pArr, float* ptr, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetSingle(const Parameter pArr, float* ptr, IAppExtensionFunctions* app_functions)
 {
     return CArgsUtils::TryGetSingle(pArr, 0, ptr, app_functions);
 }
 
-/*static*/bool CArgsUtils::TryGetSingle(const Parameter* pArr, size_t index, float* ptr, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetSingle(const Parameter pArr, size_t index, float* ptr, IAppExtensionFunctions* app_functions)
 {
     //size_t numOfElements = MexApi::GetInstance().MxGetNumberOfElements(pArr);
     size_t numOfElements = app_functions->pfn_GetNumberOfElements(pArr);
@@ -380,7 +380,7 @@ using namespace libCZI;
     return true;
 }
 
-/*static*/bool CArgsUtils::IsNumericArrayOfMinSize(const Parameter* pArr, size_t minElementCount, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::IsNumericArrayOfMinSize(const Parameter pArr, size_t minElementCount, IAppExtensionFunctions* app_functions)
 {
     //auto mexApi = MexApi::GetInstance();
     //const mxClassID id = mexApi.MxGetClassID(pArr);
@@ -404,14 +404,14 @@ using namespace libCZI;
     return numOfElements >= minElementCount;
 }
 
-/*static*/bool CArgsUtils::IsStructure(const Parameter* pArr, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::IsStructure(const Parameter pArr, IAppExtensionFunctions* app_functions)
 {
     return app_functions->pfn_IsStruct(pArr);
     /*auto mexApi = MexApi::GetInstance();
     return mexApi.MxIsStruct(pArr);*/
 }
 
-/*static*/bool CArgsUtils::TryGetIntRect(const Parameter* pArr, libCZI::IntRect* rect, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetIntRect(const Parameter pArr, libCZI::IntRect* rect, IAppExtensionFunctions* app_functions)
 {
     IntRect r;
     r.Invalidate();
@@ -436,7 +436,7 @@ using namespace libCZI;
     return true;
 }
 
-/*static*/bool CArgsUtils::TryGetDimCoordinate(const Parameter* pArr, libCZI::CDimCoordinate* coord, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetDimCoordinate(const Parameter pArr, libCZI::CDimCoordinate* coord, IAppExtensionFunctions* app_functions)
 {
     string argStr;
     if (!CArgsUtils::TryGetString(pArr, &argStr, app_functions))
@@ -466,7 +466,7 @@ using namespace libCZI;
     return true;
 }
 
-/*static*/bool CArgsUtils::TryGetString(const Parameter* pArr, std::string* str, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetString(const Parameter pArr, std::string* str, IAppExtensionFunctions* app_functions)
 {
     //auto mexApi = MexApi::GetInstance();
     //if (!mexApi.MxIsChar(pArr))
@@ -486,7 +486,7 @@ using namespace libCZI;
     return true;
 }
 
-/*static*/bool CArgsUtils::TryGetArrayInfo(const Parameter* pArr, ArrayInfo* array_info, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetArrayInfo(const Parameter pArr, ArrayInfo* array_info, IAppExtensionFunctions* app_functions)
 {
     //auto mexApi = MexApi::GetInstance();
     //if (!mexApi.MxIsNumeric(pArr))
@@ -559,7 +559,7 @@ using namespace libCZI;
     return true;*/
 }
 
-/*static*/bool CArgsUtils::TryGetPixelType(const Parameter* argument, libCZI::PixelType* pixel_type, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetPixelType(const Parameter argument, libCZI::PixelType* pixel_type, IAppExtensionFunctions* app_functions)
 {
     string string_argument;
     if (CArgsUtils::TryGetString(argument, &string_argument, app_functions))
@@ -612,7 +612,7 @@ using namespace libCZI;
     return false;
 }
 
-/*static*/bool CArgsUtils::TryGetIntValueOfField(const Parameter* argument, const char* field_name, std::int32_t* int_value, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetIntValueOfField(const Parameter argument, const char* field_name, std::int32_t* int_value, IAppExtensionFunctions* app_functions)
 {
     //auto mexApi = MexApi::GetInstance();
     //const auto field = mexApi.MxGetField(argument, field_name);
@@ -625,7 +625,7 @@ using namespace libCZI;
     return CArgsUtils::TryGetInt32(field, int_value, app_functions);
 }
 
-/*static*/bool CArgsUtils::TryGetStringValueOfField(const Parameter* argument, const char* field_name, std::string* str, IAppExtensionFunctions* app_functions)
+/*static*/bool CArgsUtils::TryGetStringValueOfField(const Parameter argument, const char* field_name, std::string* str, IAppExtensionFunctions* app_functions)
 {
     /*auto mexApi = MexApi::GetInstance();
     const auto field = mexApi.MxGetField(argument, field_name);*/

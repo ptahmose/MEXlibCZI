@@ -25,42 +25,42 @@ public:
 
     void Open(const std::string& utf8_filename);
 
-    Parameter* GetInfo(IAppExtensionFunctions* app_functions);
+    Parameter GetInfo(IAppExtensionFunctions* app_functions);
     std::string GetMetadataXml();
-    Parameter* GetMetadataXmlAsMxArray(IAppExtensionFunctions* app_functions);
+    Parameter GetMetadataXmlAsMxArray(IAppExtensionFunctions* app_functions);
 
-    Parameter* GetDefaultDisplaySettingsAsMxArray(IAppExtensionFunctions* app_functions);
+    Parameter GetDefaultDisplaySettingsAsMxArray(IAppExtensionFunctions* app_functions);
 
-    Parameter* GetSubBlockImage(int sbBlkNo, IAppExtensionFunctions* app_functions);
-    Parameter* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson, IAppExtensionFunctions* app_functions);
-    Parameter* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, IAppExtensionFunctions* app_functions);
-    Parameter* GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor, IAppExtensionFunctions* app_functions);
+    Parameter GetSubBlockImage(int sbBlkNo, IAppExtensionFunctions* app_functions);
+    Parameter GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson, IAppExtensionFunctions* app_functions);
+    Parameter GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, IAppExtensionFunctions* app_functions);
+    Parameter GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor, IAppExtensionFunctions* app_functions);
 
     std::array<double, 3>   GetScaling();
-    Parameter* GetScalingAsMatlabStruct(IAppExtensionFunctions* app_functions);
+    Parameter GetScalingAsMatlabStruct(IAppExtensionFunctions* app_functions);
 
-    Parameter* ReadSubBlock(int no, IAppExtensionFunctions* app_functions);
-    Parameter* GetInfoFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
-    Parameter* GetMetadataFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
-    Parameter* GetBitmapFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
+    Parameter ReadSubBlock(int no, IAppExtensionFunctions* app_functions);
+    Parameter GetInfoFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
+    Parameter GetMetadataFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
+    Parameter GetBitmapFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
     bool    ReleaseSubBlock(int subBlkHandle);
 private:
-    static Parameter* ConvertToMatlabStruct(const libCZI::IDimBounds* bounds, IAppExtensionFunctions* app_functions);
+    static Parameter ConvertToMatlabStruct(const libCZI::IDimBounds* bounds, IAppExtensionFunctions* app_functions);
 
     /// Initializes the members "displaySettingsFromCzi" and "scalingInfoFromCzi".
     void InitializeInfoFromCzi();
     std::shared_ptr<libCZI::IDisplaySettings> GetDisplaySettingsFromCzi();
     const libCZI::ScalingInfo& GetScalingInfoFromCzi();
 
-    Parameter* GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings, IAppExtensionFunctions* app_functions);
-    Parameter* GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom, IAppExtensionFunctions* app_functions);
+    Parameter GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings, IAppExtensionFunctions* app_functions);
+    Parameter GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom, IAppExtensionFunctions* app_functions);
 
-    static Parameter* ConvertToMxArray(libCZI::IBitmapData* bitmapData, IAppExtensionFunctions* app_functions);
-    static Parameter* ConvertToMatlabStruct(const std::map<int, libCZI::BoundingBoxes>& boundingBoxMap, IAppExtensionFunctions* app_functions);
-    static Parameter* ConvertToMatlabStruct(const libCZI::IntRect& rect, IAppExtensionFunctions* app_functions);
-    static Parameter* ConvertToMatlabStruct(const libCZI::IntSize& size, IAppExtensionFunctions* app_functions);
-    static Parameter* ConvertToMatlabStruct(const libCZI::IDisplaySettings& ds, IAppExtensionFunctions* app_functions);
-    static Parameter* ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo, IAppExtensionFunctions* app_functions);
+    static Parameter ConvertToMxArray(libCZI::IBitmapData* bitmapData, IAppExtensionFunctions* app_functions);
+    static Parameter ConvertToMatlabStruct(const std::map<int, libCZI::BoundingBoxes>& boundingBoxMap, IAppExtensionFunctions* app_functions);
+    static Parameter ConvertToMatlabStruct(const libCZI::IntRect& rect, IAppExtensionFunctions* app_functions);
+    static Parameter ConvertToMatlabStruct(const libCZI::IntSize& size, IAppExtensionFunctions* app_functions);
+    static Parameter ConvertToMatlabStruct(const libCZI::IDisplaySettings& ds, IAppExtensionFunctions* app_functions);
+    static Parameter ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo, IAppExtensionFunctions* app_functions);
 
     static void CopyTransposeGray8(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);
     static void CopyTransposeGray16(libCZI::IBitmapData* bitmapData, void* pDst, size_t lineLength);

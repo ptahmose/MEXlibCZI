@@ -32,7 +32,7 @@ void MexFunction_GetVersion_Execute(MatlabArgs* args)
     }
 
     static constexpr size_t _1_by_1[2] = { 1, 1 };
-    auto* s = args->app_functions->pfn_CreateStructArray(
+    Parameter s = args->app_functions->pfn_CreateStructArray(
         2,
         _1_by_1,
         static_cast<int>(keys.size()),

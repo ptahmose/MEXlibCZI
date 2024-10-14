@@ -18,5 +18,5 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
         gIsInitialized = true;
     }
 
-    mexlibCZI::mexFunction(nlhs, reinterpret_cast<Parameter**>(plhs), nrhs, reinterpret_cast<const Parameter**>(prhs), &g_appExtensionFunctions);
+    mexlibCZI::mexFunction(nlhs, reinterpret_cast<Parameter*>(plhs), nrhs, (const Parameter*)prhs, &g_appExtensionFunctions);
 }

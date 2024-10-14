@@ -11,7 +11,7 @@
 using namespace mexlibCZI;
 using namespace std;
 
-void mexlibCZI::mexFunction(int nlhs, Parameter* plhs[], int nrhs, const Parameter* prhs[], IAppExtensionFunctions* app_functions)
+void mexlibCZI::mexFunction(int nlhs, Parameter plhs[], int nrhs, const Parameter prhs[], IAppExtensionFunctions* app_functions)
 {
     if (nrhs < 1)
     {

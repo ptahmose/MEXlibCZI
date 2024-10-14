@@ -24,89 +24,89 @@ static double matlabMexGetNaNDouble(void)
     return mxGetNaN();
 }
 
-static void* matlabMexGetData(const Parameter* parameter)
+static void* matlabMexGetData(const Parameter parameter)
 {
     return mxGetData((const mxArray*)parameter);
 }
 
-static uint8_t* matlabMexGetUint8s(const Parameter* parameter)
+static uint8_t* matlabMexGetUint8s(const Parameter parameter)
 {
     return mxGetUint8s((const mxArray*)parameter);
 }
 
-static int8_t* matlabMexGetInt8s(const Parameter* parameter)
+static int8_t* matlabMexGetInt8s(const Parameter parameter)
 {
     return mxGetInt8s((const mxArray*)parameter);
 }
 
-static uint16_t* matlabMexGetUint16s(const Parameter* parameter)
+static uint16_t* matlabMexGetUint16s(const Parameter parameter)
 {
     return mxGetUint16s((const mxArray*)parameter);
 }
 
-static int16_t* matlabMexGetInt16s(const Parameter* parameter)
+static int16_t* matlabMexGetInt16s(const Parameter parameter)
 {
     return mxGetInt16s((const mxArray*)parameter);
 }
 
-static uint32_t* matlabMexGetUint32s(const Parameter* parameter)
+static uint32_t* matlabMexGetUint32s(const Parameter parameter)
 {
     return mxGetUint32s((const mxArray*)parameter);
 }
 
-static int32_t* matlabMexGetInt32s(const Parameter* parameter)
+static int32_t* matlabMexGetInt32s(const Parameter parameter)
 {
     return mxGetInt32s((const mxArray*)parameter);
 }
 
-static uint64_t* matlabMexGetUint64s(const Parameter* parameter)
+static uint64_t* matlabMexGetUint64s(const Parameter parameter)
 {
     return mxGetUint64s((const mxArray*)parameter);
 }
 
-static int64_t* matlabMexGetInt64s(const Parameter* parameter)
+static int64_t* matlabMexGetInt64s(const Parameter parameter)
 {
     return mxGetInt64s((const mxArray*)parameter);
 }
 
-static double* matlabMexGetDoubles(const Parameter* parameter)
+static double* matlabMexGetDoubles(const Parameter parameter)
 {
     return mxGetDoubles((const mxArray*)parameter);
 }
 
-static float* matlabMexGetSingles(const Parameter* parameter)
+static float* matlabMexGetSingles(const Parameter parameter)
 {
     return mxGetSingles((const mxArray*)parameter);
 }
 
-static bool* matlabMexGetLogicals(const Parameter* parameter)
+static bool* matlabMexGetLogicals(const Parameter parameter)
 {
     return (bool*)mxGetLogicals((const mxArray*)parameter);
 }
 
-static bool matlabMexIsNumeric(const Parameter* parameter)
+static bool matlabMexIsNumeric(const Parameter parameter)
 {
     return mxIsNumeric((const mxArray*)parameter);
 }
 
-static bool matlabMexIsChar(const Parameter* parameter)
+static bool matlabMexIsChar(const Parameter parameter)
 {
     return mxIsChar((const mxArray*)parameter);
 }
 
-static bool matlabMexIsSparse(const Parameter* parameter)
+static bool matlabMexIsSparse(const Parameter parameter)
 {
     return mxIsSparse((const mxArray*)parameter);
 }
 
-static bool matlabMexIsStruct(const Parameter* parameter)
+static bool matlabMexIsStruct(const Parameter parameter)
 {
     return mxIsStruct((const mxArray*)parameter);
 }
 
-static Parameter* matlabMexCreateString(const char* string)
+static Parameter matlabMexCreateString(const char* string)
 {
-    return (Parameter*)mxCreateString(string);
+    return (Parameter)mxCreateString(string);
 }
 
 static void matlabReportErrorAndRaiseSignal(const char* identifier, const char* message)
@@ -123,17 +123,17 @@ static char* matlabStrDupHostAllocated(const char* string)
     return msz;
 }
 
-static Parameter* matlabCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** field_names)
+static Parameter matlabCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** field_names)
 {
-    return (Parameter*)mxCreateStructArray(ndim, dims, nfields, field_names);
+    return (Parameter)mxCreateStructArray(ndim, dims, nfields, field_names);
 }
 
-static void matlabSetFieldByNumber(Parameter* pa, size_t i, int fieldnum, Parameter* value)
+static void matlabSetFieldByNumber(Parameter pa, size_t i, int fieldnum, Parameter value)
 {
     mxSetFieldByNumber((mxArray*)pa, i, fieldnum, (mxArray*)value);
 }
 
-static char* matlabConvertToUTF8String(const Parameter* parameter)
+static char* matlabConvertToUTF8String(const Parameter parameter)
 {
     //return mxArrayToUTF8String((const mxArray*)parameter);
     return mxArrayToString((const mxArray*)parameter);
@@ -175,13 +175,13 @@ static mxClassID AppExtensionClassIdToMxClassId(enum AppExtensionClassId class_i
     }
 }
 
-static Parameter* matlabCreateNumericMatrixReal(size_t m, size_t n, enum AppExtensionClassId class_id)
+static Parameter matlabCreateNumericMatrixReal(size_t m, size_t n, enum AppExtensionClassId class_id)
 {
     mxClassID mx_class_id = AppExtensionClassIdToMxClassId(class_id);
-    return (Parameter*)mxCreateNumericMatrix(m, n, mx_class_id, mxREAL);
+    return (Parameter)mxCreateNumericMatrix(m, n, mx_class_id, mxREAL);
 }
 
-static enum AppExtensionClassId matlabGetClassId(const Parameter* parameter)
+static enum AppExtensionClassId matlabGetClassId(const Parameter parameter)
 {
     mxClassID mx_class_id = mxGetClassID((const mxArray*)parameter);
     switch (mx_class_id)
@@ -213,17 +213,17 @@ static enum AppExtensionClassId matlabGetClassId(const Parameter* parameter)
     }
 }
 
-static size_t matlabGetNumberOfElements(const Parameter* parameter)
+static size_t matlabGetNumberOfElements(const Parameter parameter)
 {
     return mxGetNumberOfElements((const mxArray*)parameter);
 }
 
-static size_t matlabGetNumberOfDimensions(const Parameter* parameter)
+static size_t matlabGetNumberOfDimensions(const Parameter parameter)
 {
     return mxGetNumberOfDimensions((const mxArray*)parameter);
 }
 
-static void matlabGetSizeOfDimensions(const Parameter* parameter, size_t number_of_dimension, size_t* sizes)
+static void matlabGetSizeOfDimensions(const Parameter parameter, size_t number_of_dimension, size_t* sizes)
 {
     const size_t* ptr_sizes = mxGetDimensions((const mxArray*)parameter);
     for (size_t i = 0; i < number_of_dimension; ++i)
@@ -232,20 +232,20 @@ static void matlabGetSizeOfDimensions(const Parameter* parameter, size_t number_
     }
 }
 
-static Parameter* matlabGetField(const Parameter* parameter, const char* field_name)
+static Parameter matlabGetField(const Parameter parameter, const char* field_name)
 {
     if (!matlabMexIsStruct(parameter))
     {
         return NULL;
     }
 
-    return (Parameter*)mxGetField((const mxArray*)parameter, 0, field_name);
+    return (Parameter)mxGetField((const mxArray*)parameter, 0, field_name);
 }
 
-static Parameter* matlabCreateNumericArrayReal(size_t ndim, const size_t* dims, enum AppExtensionClassId class_id)
+static Parameter matlabCreateNumericArrayReal(size_t ndim, const size_t* dims, enum AppExtensionClassId class_id)
 {
     mxClassID mx_class_id = AppExtensionClassIdToMxClassId(class_id);
-    return (Parameter*)mxCreateNumericArray(ndim, dims, mx_class_id, mxREAL);
+    return (Parameter)mxCreateNumericArray(ndim, dims, mx_class_id, mxREAL);
 }
 
 static struct IAppExtensionFunctions g_appExtensionFunctions =
@@ -306,14 +306,14 @@ static bool gIsInitialized = false;
 
 static void(*pfn_OnShutdown)(void);
 static void(*pfn_OnInitialize)(void);
-static void(*pfn_mexFunction)(int nlhs, Parameter* plhs[], int nrhs, const Parameter* prhs[], struct IAppExtensionFunctions* app_functions);
+static void(*pfn_mexFunction)(int nlhs, Parameter plhs[], int nrhs, const Parameter prhs[], struct IAppExtensionFunctions* app_functions);
 
 static void Initialize()
 {
     HMODULE hModule = LoadLibraryW(L"libmexlibczi.dll");
     pfn_OnInitialize = (void(__cdecl*)())GetProcAddress(hModule, "OnInitialize");
     pfn_OnShutdown = (void(__cdecl*)())GetProcAddress(hModule, "OnShutdown");
-    pfn_mexFunction = (void(__cdecl*)(int, Parameter * [], int, const Parameter * [], struct IAppExtensionFunctions*))GetProcAddress(hModule, "mexFunction");
+    pfn_mexFunction = (void(__cdecl*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))GetProcAddress(hModule, "mexFunction");
 
     pfn_OnInitialize();
     mexAtExit(pfn_OnShutdown);
@@ -344,5 +344,5 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     }
 
 
-    pfn_mexFunction(nlhs, (Parameter**)(plhs), nrhs, (const Parameter**)(prhs), &g_appExtensionFunctions);
+    pfn_mexFunction(nlhs, (Parameter*)(plhs), nrhs, (const Parameter*)(prhs), &g_appExtensionFunctions);
 }

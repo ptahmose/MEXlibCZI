@@ -5,9 +5,9 @@
 struct MatlabArgs
 {
     int nlhs;
-    /*mxArray*/Parameter** plhs;
+    /*mxArray*/Parameter* plhs;
     int nrhs;
-    const /*mxArray*/Parameter** prhs;
+    const /*mxArray*/Parameter* prhs;
     IAppExtensionFunctions* app_functions;
 };
 

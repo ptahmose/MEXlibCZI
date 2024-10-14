@@ -29,14 +29,14 @@ std::array<double, 3> CziReader::GetScaling()
     };
 }
 
-Parameter* CziReader::GetScalingAsMatlabStruct(IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetScalingAsMatlabStruct(IAppExtensionFunctions* app_functions)
 {
     static const char* fieldNames[] = { "scaleX", "scaleY", "scaleZ" };
 
     static const size_t dims[2] = { 1, 1 };
     //auto mexApi = MexApi::GetInstance();
     //auto* s = mexApi.MxCreateStructArray(
-    auto* s = app_functions->pfn_CreateStructArray(
+    Parameter s = app_functions->pfn_CreateStructArray(
         2,
         dims,
         sizeof(fieldNames) / sizeof(fieldNames[0]),
@@ -72,7 +72,7 @@ void CziReader::InitializeInfoFromCzi()
         });
 }
 
-Parameter* CziReader::GetInfo(IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetInfo(IAppExtensionFunctions* app_functions)
 {
     auto statistics = this->reader->GetStatistics();
 
@@ -112,20 +112,20 @@ std::string CziReader::GetMetadataXml()
     return m->GetXml();
 }
 
-Parameter* CziReader::GetMetadataXmlAsMxArray(IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetMetadataXmlAsMxArray(IAppExtensionFunctions* app_functions)
 {
     //auto s = MexApi::GetInstance().MxCreateString(this->GetMetadataXml().c_str());
     auto s = app_functions->pfn_CreateString(this->GetMetadataXml().c_str());
     return s;
 }
 
-Parameter* CziReader::GetDefaultDisplaySettingsAsMxArray(IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetDefaultDisplaySettingsAsMxArray(IAppExtensionFunctions* app_functions)
 {
     const auto displaySettings = this->GetDisplaySettingsFromCzi();
     return CziReader::ConvertToMatlabStruct(*displaySettings, app_functions);
 }
 
-Parameter* CziReader::GetSubBlockImage(int sbBlkNo, IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetSubBlockImage(int sbBlkNo, IAppExtensionFunctions* app_functions)
 {
     auto sbBlk = this->reader->ReadSubBlock(sbBlkNo);
     if (!sbBlk)
@@ -139,7 +139,7 @@ Parameter* CziReader::GetSubBlockImage(int sbBlkNo, IAppExtensionFunctions* app_
     return ConvertToMxArray(bm.get(), app_functions);
 }
 
-Parameter* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson, IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const char* displaySettingsJson, IAppExtensionFunctions* app_functions)
 {
     if (displaySettingsJson == nullptr || *displaySettingsJson == '\0')
     {
@@ -162,7 +162,7 @@ Parameter* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect&
     }
 }
 
-Parameter* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings, IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::IDisplaySettings* displaySettings, IAppExtensionFunctions* app_functions)
 {
     std::vector<int> activeChannels = libCZI::CDisplaySettingsHelper::GetActiveChannels(displaySettings);
 
@@ -221,7 +221,7 @@ Parameter* CziReader::GetMultiChannelScalingTileComposite(const libCZI::IntRect&
     return arr;
 }
 
-Parameter* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom, IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(const libCZI::IntRect& roi, float zoom, IAppExtensionFunctions* app_functions)
 {
     auto accessor = reader->CreateSingleChannelScalingTileAccessor();
     const auto sizeResult = accessor->CalcSize(roi, zoom);
@@ -234,13 +234,13 @@ Parameter* CziReader::GetMultiChannelScalingTileCompositeAllChannelsDisabled(con
     return arr;
 }
 
-Parameter* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, IAppExtensionFunctions* app_functions)
 {
     const RgbFloatColor backgndCol{ 0,0,0 };
     return this->GetSingleChannelScalingTileComposite(roi, planeCoordinate, zoom, backgndCol, app_functions);
 }
 
-Parameter* CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor, IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect& roi, const libCZI::IDimCoordinate* planeCoordinate, float zoom, const libCZI::RgbFloatColor& backgroundColor, IAppExtensionFunctions* app_functions)
 {
     auto scsta = this->reader->CreateSingleChannelScalingTileAccessor();
     libCZI::IntSize size = scsta->CalcSize(roi, zoom);
@@ -273,7 +273,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return this->displaySettingsFromCzi;
 }
 
-/*static*/Parameter* CziReader::ConvertToMxArray(libCZI::IBitmapData* bitmapData, IAppExtensionFunctions* app_functions)
+/*static*/Parameter CziReader::ConvertToMxArray(libCZI::IBitmapData* bitmapData, IAppExtensionFunctions* app_functions)
 {
     //auto mexApi = MexApi::GetInstance();
     switch (bitmapData->GetPixelType())
@@ -425,7 +425,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     }
 }
 
-/*static*/Parameter* CziReader::ConvertToMatlabStruct(const libCZI::IDimBounds* bounds, IAppExtensionFunctions* app_functions)
+/*static*/Parameter CziReader::ConvertToMatlabStruct(const libCZI::IDimBounds* bounds, IAppExtensionFunctions* app_functions)
 {
     vector<string> dimensions;
     for (auto i = (std::underlying_type<libCZI::DimensionIndex>::type)(libCZI::DimensionIndex::MinDim); i <= (std::underlying_type<libCZI::DimensionIndex>::type)(libCZI::DimensionIndex::MaxDim); ++i)
@@ -467,7 +467,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return s;
 }
 
-/*static*/Parameter* CziReader::ConvertToMatlabStruct(const std::map<int, BoundingBoxes>& boundingBoxMap, IAppExtensionFunctions* app_functions)
+/*static*/Parameter CziReader::ConvertToMatlabStruct(const std::map<int, BoundingBoxes>& boundingBoxMap, IAppExtensionFunctions* app_functions)
 {
     static const char* fieldNames[] = { "sceneIndex", "boundingBox", "boundingBoxLayer0" };
     size_t dims[2] = { 1, boundingBoxMap.size() };
@@ -490,7 +490,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return s;
 }
 
-/*static*/ Parameter* CziReader::ConvertToMatlabStruct(const libCZI::IntRect& rect, IAppExtensionFunctions* app_functions)
+/*static*/ Parameter CziReader::ConvertToMatlabStruct(const libCZI::IntRect& rect, IAppExtensionFunctions* app_functions)
 {
     //auto mexApi = MexApi::GetInstance();
     //auto* m = mexApi.MxCreateNumericMatrix(1, 4, mxINT32_CLASS, mxREAL);
@@ -504,7 +504,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return m;
 }
 
-/*static*/ Parameter* CziReader::ConvertToMatlabStruct(const libCZI::IntSize& size, IAppExtensionFunctions* app_functions)
+/*static*/ Parameter CziReader::ConvertToMatlabStruct(const libCZI::IntSize& size, IAppExtensionFunctions* app_functions)
 {
     //auto mexApi = MexApi::GetInstance();
     //auto* m = mexApi.MxCreateNumericMatrix(1, 2, mxINT32_CLASS, mxREAL);
@@ -516,7 +516,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return m;
 }
 
-/*static*/ Parameter* CziReader::ConvertToMatlabStruct(const libCZI::IDisplaySettings& ds, IAppExtensionFunctions* app_functions)
+/*static*/ Parameter CziReader::ConvertToMatlabStruct(const libCZI::IDisplaySettings& ds, IAppExtensionFunctions* app_functions)
 {
     static const char* tintingModesNone = "none";
     static const char* tintingModesColor = "color";
@@ -627,7 +627,7 @@ std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
     return s;
 }
 
-Parameter* CziReader::ReadSubBlock(int no, IAppExtensionFunctions* app_functions)
+Parameter CziReader::ReadSubBlock(int no, IAppExtensionFunctions* app_functions)
 {
     auto sbBlk = this->reader->ReadSubBlock(no);
     if (!sbBlk)
@@ -641,7 +641,7 @@ Parameter* CziReader::ReadSubBlock(int no, IAppExtensionFunctions* app_functions
     return MexUtils::Int32To1x1Matrix(h, app_functions);
 }
 
-Parameter* CziReader::GetInfoFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetInfoFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions)
 {
     auto sbBlk = this->sbBlkStore.GetForHandle(subBlkHandle);
     if (!sbBlk)
@@ -655,7 +655,7 @@ Parameter* CziReader::GetInfoFromSubBlock(int subBlkHandle, IAppExtensionFunctio
     return CziReader::ConvertToMatlabStruct(sbInfo, app_functions);
 }
 
-Parameter* CziReader::GetMetadataFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetMetadataFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions)
 {
     auto sbBlk = this->sbBlkStore.GetForHandle(subBlkHandle);
     if (!sbBlk)
@@ -679,7 +679,7 @@ Parameter* CziReader::GetMetadataFromSubBlock(int subBlkHandle, IAppExtensionFun
     return app_functions->pfn_CreateString(metadataXml.c_str());
 }
 
-Parameter* CziReader::GetBitmapFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions)
+Parameter CziReader::GetBitmapFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions)
 {
     auto sbBlk = this->sbBlkStore.GetForHandle(subBlkHandle);
     if (!sbBlk)
@@ -698,7 +698,7 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
     return this->sbBlkStore.RemoveSubBlock(subBlkHandle);
 }
 
-/*static*/Parameter* CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo, IAppExtensionFunctions* app_functions)
+/*static*/Parameter CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo, IAppExtensionFunctions* app_functions)
 {
     //auto mexApi = MexApi::GetInstance();
     array<const char*, 7> fieldNames = { "Mode", "Pixeltype", "Coordinate", "LogicalRect", "PhysicalSize", "MIndex", "Zoom" };

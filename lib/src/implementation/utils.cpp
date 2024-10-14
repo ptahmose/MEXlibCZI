@@ -255,7 +255,7 @@ public:
 
 /*static*/size_t MexUtils::Dims_1_by_1[2] = { 1, 1 };
 
-/*static*/Parameter* MexUtils::FloatTo1x1Matrix(float v, IAppExtensionFunctions* app_functions)
+/*static*/Parameter MexUtils::FloatTo1x1Matrix(float v, IAppExtensionFunctions* app_functions)
 {
     //auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
     auto m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Single);
@@ -265,7 +265,7 @@ public:
     return m;
 }
 
-/*static*/Parameter* MexUtils::DoubleTo1x1Matrix(double v, IAppExtensionFunctions* app_functions)
+/*static*/Parameter MexUtils::DoubleTo1x1Matrix(double v, IAppExtensionFunctions* app_functions)
 {
     //auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
     auto m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Double);
@@ -275,7 +275,7 @@ public:
     return m;
 }
 
-/*static*/Parameter* MexUtils::DoublesAsNx1Matrix(IAppExtensionFunctions* app_functions, int count,  ...)
+/*static*/Parameter MexUtils::DoublesAsNx1Matrix(IAppExtensionFunctions* app_functions, int count,  ...)
 {
     //auto m = MexApi::GetInstance().MxCreateNumericMatrix(count, 1, mxDOUBLE_CLASS, mxREAL);
     auto m = app_functions->pfn_CreateNumericMatrixReal(count, 1, AppExtensionClassId_Double);
@@ -294,7 +294,7 @@ public:
     return m;
 }
 
-/*static*/Parameter* MexUtils::Int32To1x1Matrix(int v, IAppExtensionFunctions* app_functions)
+/*static*/Parameter MexUtils::Int32To1x1Matrix(int v, IAppExtensionFunctions* app_functions)
 {
     //auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
     auto* m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Int32);
@@ -304,7 +304,7 @@ public:
     return m;
 }
 
-/*static*/Parameter* MexUtils::BooleanTo1x1Matrix(bool b, IAppExtensionFunctions* app_functions)
+/*static*/Parameter MexUtils::BooleanTo1x1Matrix(bool b, IAppExtensionFunctions* app_functions)
 {
     //auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxLOGICAL_CLASS, mxREAL);
     auto* m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Logical);
