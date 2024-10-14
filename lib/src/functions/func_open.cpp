@@ -1,10 +1,8 @@
 #include "func_open.h"
-//#include "libraryInfo.h"
 #include "../implementation/CziReaderManager.h"
 #include <stdexcept>
 #include <memory>
 #include "../implementation/dbgprint.h"
-//#include "mexapi.h"
 #include "../implementation/argsutils.h"
 #include "../implementation/utils.h"
 
@@ -18,7 +16,6 @@ void MexFunction_Open_CheckArguments(MatlabArgs* args)
         throw invalid_argument("not enough arguments");
     }
 
-    //if (!MexApi::GetInstance().MxIsChar(args->prhs[1]))
     if (!args->app_functions->pfn_IsChar(args->prhs[1]))
     {
         throw invalid_argument("Expecting a string as 2nd argument");
@@ -27,7 +24,6 @@ void MexFunction_Open_CheckArguments(MatlabArgs* args)
 
 void MexFunction_Open_Execute(MatlabArgs* args)
 {
-    //const auto filename = MexApi::GetInstance().UpMxArrayToMatlabAllocatedUtf8String(args->prhs[1]);
     const auto filename = CArgsUtils::GetAsUtf8String(args->prhs[1], args->app_functions);
 
     int id = CziReaderManager::GetInstance().CreateNewInstance();

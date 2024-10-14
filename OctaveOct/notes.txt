@@ -1,3 +1,5 @@
 cd D:\dev\MyGitHub\MEXlibCZI\OctaveOct
 
- mkoctfile --mex myhello.c
+ mkoctfile --mex octavelibczi.c
+
+ octlvlibczi('GetVersion')
