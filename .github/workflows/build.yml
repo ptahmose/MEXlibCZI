@@ -48,7 +48,10 @@ jobs:
           REM downside is that installing octave takes a long time.
           REM Note that we are using cmd.exe here, because it can "execute" the .lnk file.
           "%OCTAVECLI_LINK%" --version
-          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE%\OctaveOct ,  mkoctfile --mex octavelibczi.c"
+          echo "cd %GITHUB_WORKSPACE%/OctaveOct ,  mkoctfile --mex octavelibczi.c"
+          set "GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
+          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveOct ,  mkoctfile --mex octavelibczi.c"
+          dir %GITHUB_WORKSPACE%\OctaveOct
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2  
       - name: run build (Linux)
