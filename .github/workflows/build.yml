@@ -29,6 +29,23 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+      - name: install Octave
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          choco install octave --no-progress
+          search_dir="/c/ProgramData/Microsoft/Windows/Start Menu/Programs"
+          octave_link=$(find "$search_dir" -type f -name "Octave*CLI*.lnk" 2>/dev/null)
+          windows_path=$(cygpath -w "$octave_link")
+          echo "OCTAVECLI_LINK=windows_path" >> $GITHUB_ENV
+      - name: build Octave mex-file (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          # We compile the mex file for Octave within Octave itself, this seems the easiest way. The
+          # downside is that installing octave takes a long time.
+          "%OCTAVECLI_LINK%" --version
+          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE%\OctaveOct ,  mkoctfile --mex octavelibczi.c"
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2  
       - name: run build (Linux)
@@ -47,20 +64,6 @@ jobs:
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release 
           cmake --build . --config Release -j
-      - name: install Octave
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          choco install octave --no-progress
-      - name: build Octave mex-file (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          # We compile the mex file for Octave within Octave itself, this seems the easiest way. The
-          # downside is that installing octave takes a long time.
-          octave --version
-          octave_command = "cd ${{github.workspace}}/OctaveOct ,  mkoctfile --mex octavelibczi.c"
-          octave --eval "$octave_command"
       - name: Prepare artifact (Linux)
         id: prepare_linux_artifact
         if: runner.os == 'Linux'
@@ -72,7 +75,7 @@ jobs:
           cp build/MEXlibCZI/MEXlibCZI.mexa64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          echo "linuxx64_build=${name}" >> $GITHUB_OUTPUT
+          echo "linuxx64_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Prepare artifact (Windows)
         id: prepare_windows_artifact
         if: runner.os == 'Windows'
