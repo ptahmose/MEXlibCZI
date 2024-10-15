@@ -17,6 +17,6 @@ if(WIN32)
  #set_target_properties(MatlabCZI PROPERTIES SUFFIX ".mexw64")
 elseif(UNIX)
  #set_target_properties(MatlabCZI PROPERTIES SUFFIX ".mexa64")
- target_link_options(libmexlibczi PRIVATE -static-libgcc -static-libstdc++ )
+ #target_link_options(libmexlibczi PRIVATE -static-libgcc -static-libstdc++ )
  set_target_properties(MatlabCZI PROPERTIES PREFIX "") # otherwise "lib" is prepended
 endif()
