@@ -47,12 +47,19 @@ jobs:
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release 
           cmake --build . --config Release -j
+      - name: install Octave
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          choco install octave --no-progress
       - name: build Octave mex-file (Windows)
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          choco install octave
-          octave_command = "cd $GITHUB_WORKSPACE/OctaveOct ,  mkoctfile --mex octavelibczi.c"
+          # We compile the mex file for Octave within Octave itself, this seems the easiest way. The
+          # downside is that installing octave takes a long time.
+          octave --version
+          octave_command = "cd ${{github.workspace}}/OctaveOct ,  mkoctfile --mex octavelibczi.c"
           octave --eval "$octave_command"
       - name: Prepare artifact (Linux)
         id: prepare_linux_artifact
@@ -65,7 +72,6 @@ jobs:
           cp build/MEXlibCZI/MEXlibCZI.mexa64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          #echo "::set-output name=linuxx64_build::${name}"
           echo "linuxx64_build=${name}" >> $GITHUB_OUTPUT
       - name: Prepare artifact (Windows)
         id: prepare_windows_artifact
