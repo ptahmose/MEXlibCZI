@@ -47,6 +47,13 @@ jobs:
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release 
           cmake --build . --config Release -j
+      - name: build Octave mex-file (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          choco install octave
+          octave_command = "cd $GITHUB_WORKSPACE/OctaveOct ,  mkoctfile --mex octavelibczi.c"
+          octave --eval "$octave_command"
       - name: Prepare artifact (Linux)
         id: prepare_linux_artifact
         if: runner.os == 'Linux'
