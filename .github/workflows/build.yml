@@ -36,14 +36,17 @@ jobs:
           choco install octave --no-progress
           search_dir="/c/ProgramData/Microsoft/Windows/Start Menu/Programs"
           octave_link=$(find "$search_dir" -type f -name "Octave*CLI*.lnk" 2>/dev/null)
-          windows_path=$(cygpath -w "$octave_link")
-          echo "OCTAVECLI_LINK=windows_path" >> "$GITHUB_ENV"
+          octave_link_windows_path=$(cygpath -w "$octave_link")
+          echo "octave_link=$octave_link"
+          echo "octave_link_windows_path=$octave_link_windows_path"
+          echo "OCTAVECLI_LINK=$octave_link_windows_path" >> "$GITHUB_ENV"
       - name: build Octave mex-file (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
           REM We compile the mex file for Octave within Octave itself, this seems the easiest way. The
           REM downside is that installing octave takes a long time.
+          REM Note that we are using cmd.exe here, because it can "execute" the .lnk file.
           "%OCTAVECLI_LINK%" --version
           "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE%\OctaveOct ,  mkoctfile --mex octavelibczi.c"
       - name: Set up MATLAB
