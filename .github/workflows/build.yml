@@ -29,29 +29,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: install Octave
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          choco install octave --no-progress
-          search_dir="/c/ProgramData/Microsoft/Windows/Start Menu/Programs"
-          octave_link=$(find "$search_dir" -type f -name "Octave*CLI*.lnk" 2>/dev/null)
-          octave_link_windows_path=$(cygpath -w "$octave_link")
-          echo "octave_link=$octave_link"
-          echo "octave_link_windows_path=$octave_link_windows_path"
-          echo "OCTAVECLI_LINK=$octave_link_windows_path" >> "$GITHUB_ENV"
-      - name: build Octave mex-file (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          REM We compile the mex file for Octave within Octave itself, this seems the easiest way. The
-          REM downside is that installing octave takes a long time.
-          REM Note that we are using cmd.exe here, because it can "execute" the .lnk file.
-          "%OCTAVECLI_LINK%" --version
-          echo "cd %GITHUB_WORKSPACE%/OctaveOct ,  mkoctfile --mex octavelibczi.c"
-          set "GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
-          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveOct ,  mkoctfile --mex octavelibczi.c"
-          dir %GITHUB_WORKSPACE%\OctaveOct
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2  
       - name: run build (Linux)
@@ -82,6 +59,30 @@ jobs:
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "linuxx64_build=${name}" >> "$GITHUB_OUTPUT"
+      - name: install Octave (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          choco install octave --no-progress
+          # I am not sure how to find the octave-cli-executable now, so we search for the link in the start menu
+          search_dir="/c/ProgramData/Microsoft/Windows/Start Menu/Programs"
+          octave_link=$(find "$search_dir" -type f -name "Octave*CLI*.lnk" 2>/dev/null)
+          octave_link_windows_path=$(cygpath -w "$octave_link")
+          echo "octave_link=$octave_link"
+          echo "octave_link_windows_path=$octave_link_windows_path"
+          echo "OCTAVECLI_LINK=$octave_link_windows_path" >> "$GITHUB_ENV"
+      - name: build Octave mex-file (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          REM We compile the mex file for Octave within Octave itself, this seems the easiest way. The
+          REM downside is that installing octave takes a long time.
+          REM Note that we are using cmd.exe here, because it can "execute" the .lnk file.
+          "%OCTAVECLI_LINK%" --version
+          REM echo "cd %GITHUB_WORKSPACE%/OctaveOct ,  mkoctfile --mex octavelibczi.c"
+          set "GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
+          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveOct , mkoctfile --mex octavelibczi.c"
+          dir %GITHUB_WORKSPACE%\OctaveOct
       - name: Prepare artifact (Windows)
         id: prepare_windows_artifact
         if: runner.os == 'Windows'
