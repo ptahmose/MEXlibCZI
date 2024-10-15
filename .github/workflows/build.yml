@@ -37,13 +37,13 @@ jobs:
           search_dir="/c/ProgramData/Microsoft/Windows/Start Menu/Programs"
           octave_link=$(find "$search_dir" -type f -name "Octave*CLI*.lnk" 2>/dev/null)
           windows_path=$(cygpath -w "$octave_link")
-          echo "OCTAVECLI_LINK=windows_path" >> $GITHUB_ENV
+          echo "OCTAVECLI_LINK=windows_path" >> "$GITHUB_ENV"
       - name: build Octave mex-file (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
-          # We compile the mex file for Octave within Octave itself, this seems the easiest way. The
-          # downside is that installing octave takes a long time.
+          REM We compile the mex file for Octave within Octave itself, this seems the easiest way. The
+          REM downside is that installing octave takes a long time.
           "%OCTAVECLI_LINK%" --version
           "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE%\OctaveOct ,  mkoctfile --mex octavelibczi.c"
       - name: Set up MATLAB
