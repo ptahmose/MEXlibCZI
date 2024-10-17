@@ -336,7 +336,7 @@ bool ChannelDisplaySettingsValidity::Get(Property prop) const
 {
     libCZI::DisplaySettingsPOD dsPod;
 
-    // we create "default channel-display-settings", and the apply the information provided with "partialDs"
+    // we create "default channel-display-settings", and then apply the information provided with "partialDs"
     for (auto it = partialDs.cbegin(); it != partialDs.cend(); ++it)
     {
         ChannelDisplaySettingsPOD channelDisplaySettings;

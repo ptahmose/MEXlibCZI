@@ -1,5 +1,4 @@
 set(libmexlibcziSourceFiles
-  					"DllMain.cpp"
             "exportedfunctions.cpp"
 )
 

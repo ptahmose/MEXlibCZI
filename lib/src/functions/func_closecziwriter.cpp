@@ -1,12 +1,10 @@
 #include "func_open.h"
-//#include "libraryInfo.h"
-//#include <vector>
-#include <memory>
 
 #include "../implementation/CziWriterManager.h"
 #include "../implementation/dbgprint.h"
-//#include "mexapi.h"
 #include "../implementation/utils.h"
+
+#include <memory>
 
 using namespace std;
 

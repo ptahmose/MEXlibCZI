@@ -10,13 +10,15 @@ class MexArray;
 class CArgsUtils
 {
 public:
+    /// Information about a Matlab array. We are only interested in max. 3-dimensional arrays
+    /// at this time, that's why we have a fixed-size array for the dimensions.
     struct ArrayInfo
     {
         static constexpr size_t kMaxDimensions = 3;
-        AppExtensionClassId class_id;
-        std::uint8_t number_of_dimensions;
-        std::array<size_t, kMaxDimensions> dimensions;
-        void* data;
+        AppExtensionClassId class_id;                   ///< This identifies the data-type of the elements.
+        std::uint8_t number_of_dimensions;              ///< Number of dimensions - can be expected to be less than or equal to kMaxDimensions.
+        std::array<size_t, kMaxDimensions> dimensions;  ///< The size of each dimension.
+        void* data;                                     ///< Pointer to the data.
     };
 
     static std::string GetAsUtf8String(const Parameter pArr, IAppExtensionFunctions* app_functions);   

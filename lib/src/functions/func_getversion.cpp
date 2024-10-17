@@ -1,12 +1,6 @@
 #include "func_getversion.h"
-//#include <stdexcept>
-//#include "libraryInfo.h"
-//#include <vector>
-//#include "argsutils.h"
-//#include "CziReaderManager.h"
-//#include "utils.h"
-#include "../implementation/libraryinfo.h"
 #include <vector>
+#include "../implementation/libraryinfo.h"
 
 using namespace std;
 
@@ -36,7 +30,7 @@ void MexFunction_GetVersion_Execute(MatlabArgs* args)
         2,
         _1_by_1,
         static_cast<int>(keys.size()),
-        &fieldNamesRawStrings[0]);
+        fieldNamesRawStrings.data());
 
     for (int i = 0; i < static_cast<int>(keys.size()); ++i)
     {

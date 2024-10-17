@@ -4,7 +4,6 @@
 #include <cstdint>
 #include "CziReader.h"
 #include "CziWriter.h"
-//#include "mexapi.h"
 #include <app_api.h>
 #include "argsutils.h"
 

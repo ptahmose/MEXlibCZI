@@ -1,6 +1,4 @@
 #include "func_getmultichannelscalingtilecomposite.h"
-#include "../implementation/CziReaderManager.h"
-#include <vector>
 #include <memory>
 #include "../implementation/argsutils.h"
 #include "../implementation/utils.h"

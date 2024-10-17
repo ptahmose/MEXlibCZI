@@ -1,6 +1,6 @@
 #include "func_open.h"
-//#include "libraryInfo.h"
 #include "../implementation/CziWriterManager.h"
+
 #include <vector>
 #include <memory>
 

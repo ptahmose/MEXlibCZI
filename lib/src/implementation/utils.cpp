@@ -5,7 +5,6 @@
 #include <cstdarg> 
 #include "CziReaderManager.h"
 #include "CziWriterManager.h"
-//#include "mexapi.h"
 #include <app_api.h>
 #include "dbgprint.h"
 #if _WIN32
@@ -257,9 +256,7 @@ public:
 
 /*static*/Parameter MexUtils::FloatTo1x1Matrix(float v, IAppExtensionFunctions* app_functions)
 {
-    //auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
     auto m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Single);
-    //float* ptr = MexApi::GetInstance().MxGetSingles(m);
     float* ptr = app_functions->pfn_GetSingles(m);
     *ptr = v;
     return m;
@@ -267,9 +264,7 @@ public:
 
 /*static*/Parameter MexUtils::DoubleTo1x1Matrix(double v, IAppExtensionFunctions* app_functions)
 {
-    //auto m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
     auto m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Double);
-    //double* ptr = MexApi::GetInstance().MxGetDoubles(m);
     double* ptr = app_functions->pfn_GetDoubles(m);
     *ptr = MexUtils::CoerceValueDbl(v, app_functions);
     return m;
@@ -277,9 +272,7 @@ public:
 
 /*static*/Parameter MexUtils::DoublesAsNx1Matrix(IAppExtensionFunctions* app_functions, int count,  ...)
 {
-    //auto m = MexApi::GetInstance().MxCreateNumericMatrix(count, 1, mxDOUBLE_CLASS, mxREAL);
     auto m = app_functions->pfn_CreateNumericMatrixReal(count, 1, AppExtensionClassId_Double);
-    //double* ptr = MexApi::GetInstance().MxGetDoubles(m);
     double* ptr = app_functions->pfn_GetDoubles(m);
     va_list list;
     va_start(list, count);
@@ -296,9 +289,7 @@ public:
 
 /*static*/Parameter MexUtils::Int32To1x1Matrix(int v, IAppExtensionFunctions* app_functions)
 {
-    //auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
     auto* m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Int32);
-    //int* ptr = MexApi::GetInstance().MxGetInt32s(m);
     int* ptr = app_functions->pfn_GetInt32s(m);
     *ptr = v;
     return m;
@@ -306,9 +297,7 @@ public:
 
 /*static*/Parameter MexUtils::BooleanTo1x1Matrix(bool b, IAppExtensionFunctions* app_functions)
 {
-    //auto* m = MexApi::GetInstance().MxCreateNumericMatrix(1, 1, mxLOGICAL_CLASS, mxREAL);
     auto* m = app_functions->pfn_CreateNumericMatrixReal(1, 1, AppExtensionClassId_Logical);
-    //bool* ptr = MexApi::GetInstance().MxGetLogicals(m);
     bool* ptr = app_functions->pfn_GetLogicals(m);
     *ptr = b;
     return m;
@@ -318,12 +307,10 @@ public:
 {
     if (isnan(d))
     {
-        //return MexApi::GetInstance().GetDblNan();
         return app_functions->pfn_GetNaNDouble();
     }
     else if (isinf(d))
     {
-        //return MexApi::GetInstance().GetDblInf();
         return app_functions->pfn_GetInfDouble();
     }
     else

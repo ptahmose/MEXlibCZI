@@ -1,13 +1,9 @@
 #include "func_addsubblock.h"
-//#include "libraryInfo.h"
-#include "../implementation/CziWriterManager.h"
 #include <limits>
 #include <memory>
 #include <optional>
 
 #include "../implementation/argsutils.h"
-#include "../implementation/dbgprint.h"
-//#include "mexapi.h"
 #include "../implementation/utils.h"
 
 using namespace std;
