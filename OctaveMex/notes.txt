@@ -1,4 +1,4 @@
-cd D:\dev\MyGitHub\MEXlibCZI\OctaveOct
+cd D:\dev\MyGitHub\MEXlibCZI\OctaveMex
 
  mkoctfile --mex octavelibczi.c
 

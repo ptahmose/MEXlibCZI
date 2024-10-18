@@ -76,7 +76,6 @@ configure_file (
 	ESCAPE_QUOTES @ONLY)
 
 
-
 add_library (lib 
 			       ${libSourceFiles})
 

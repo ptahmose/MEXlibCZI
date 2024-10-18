@@ -79,24 +79,43 @@ jobs:
           REM downside is that installing octave takes a long time.
           REM Note that we are using cmd.exe here, because it can "execute" the .lnk file.
           "%OCTAVECLI_LINK%" --version
-          REM echo "cd %GITHUB_WORKSPACE%/OctaveOct ,  mkoctfile --mex octavelibczi.c"
+          REM echo "cd %GITHUB_WORKSPACE%/OctaveMex ,  mkoctfile --mex octavelibczi.c"
           set "GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
-          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveOct , mkoctfile --mex octavelibczi.c"
-          dir %GITHUB_WORKSPACE%\OctaveOct
-      - name: Prepare artifact (Windows)
+          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveMex , mkoctfile --mex octavelibczi.c"
+          # now, copy the libmexlibczi.dll to this folder
+          cp build/MEXlibCZI/Release/libmexlibczi.dll %GITHUB_WORKSPACE%\OctaveMex
+          dir %GITHUB_WORKSPACE%\OctaveMex
+      - name: Prepare MATLAB-mex artifact (Windows)
         id: prepare_windows_artifact
         if: runner.os == 'Windows'
         shell: bash
         run: |
           mkdir -p artifacts
-          name="MEXlibCZI-windows-x64-$(git describe --always)"
+          name="MATLAB-MEXlibCZI-windows-x64-$(git describe --always)"
           mkdir -p artifacts/${name}
           cp build/MEXlibCZI/Release/MEXlibCZI.mexw64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          #echo "::set-output name=windowsx64_build::${name}"
-          echo "windowsx64_build=${name}" >> $GITHUB_OUTPUT
-      - name: Upload artifacts
+          echo "windowsx64_matlab_build=${name}" >> $GITHUB_OUTPUT
+      - name: Upload MATLAB-mex artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.artifactPath }}/
+          name: ${{ env.artifactName }}
+      - name: Prepare Octave-mex artifact (Windows)
+        id: prepare_windows_artifact
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          name="Octave-MEXlibCZI-windows-x64-$(git describe --always)"
+          mkdir -p artifacts/${name}
+          cp ${GITHUB_WORKSPACE}/OctaveMex/libmexlibczi.dll artifacts/${name}/
+          cp ${GITHUB_WORKSPACE}/OctaveMex/octavelibczi.mex artifacts/${name}/
+          echo "artifactName=${name}" >> "$GITHUB_ENV"
+          echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
+          echo "windowsx64_octave_build=${name}" >> $GITHUB_OUTPUT
+      - name: Upload Octave-mex artifacts
         uses: actions/upload-artifact@v4
         with:
           path: ${{ env.artifactPath }}/
@@ -111,7 +130,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Download All Artifacts
-        if: needs.build.outputs.linuxx64_artifact != '' || needs.build.outputs.windowsx64_artifact != ''
+        if: needs.build.outputs.linuxx64_artifact != '' || needs.build.outputs.windowsx64_matlab_artifact != ''
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts  # download to a specific folder
@@ -132,6 +151,6 @@ jobs:
           tag_name: ${{ env.tagName }}
           files: |
             ./artifacts/${{ needs.build.outputs.linuxx64_artifact }}/MEXlibCZI.mexa64
-            ./artifacts/${{ needs.build.outputs.windowsx64_artifact }}/MEXlibCZI.mexw64
+            ./artifacts/${{ needs.build.outputs.windowsx64_matlab_artifact }}/MEXlibCZI.mexw64
           prerelease: true
 

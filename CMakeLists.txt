@@ -58,15 +58,17 @@ message(STATUS "OCTAVE_INCLUDE_DIRS: " ${OCTAVE_INCLUDE_DIRS})
 message("########################################")
 ]]
 
+# build the static library containing the MEX functions
+add_subdirectory("lib")
+
+# build the Matlab-MEX file
 add_subdirectory ("MEXlibCZI")
 
-add_subdirectory("lib")
-add_subdirectory("MatlabMex")
-
 ##set(OCTAVE_CONFIGEXECUTABLE_PATHHINT "D:/SW/octave-9.2.0-w64/mingw64/bin")
-set(OCTAVE_CONFIGEXECUTABLE_PATHHINT "/d/SW/octave-9.2.0-w64/mingw64/bin/")
-find_package(Octave)
+#set(OCTAVE_CONFIGEXECUTABLE_PATHHINT "/d/SW/octave-9.2.0-w64/mingw64/bin/")
+#find_package(Octave)
 
 #add_subdirectory("OctaveOct")
 
+# build a dynamic library containing the MEX functions (which is used by the mex-file for Octave)
 add_subdirectory("libmexlibczi")
