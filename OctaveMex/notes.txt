@@ -1,0 +1,5 @@
+cd D:\dev\MyGitHub\MEXlibCZI\OctaveMex
+
+ mkoctfile --mex octavelibczi.c
+
+ octavelibczi('GetVersion')
