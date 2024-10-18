@@ -348,7 +348,7 @@ static void Initialize()
 #else
     static const char DllName[] = "libmexlibczi.so";
 
-    Dl_info dl_info;
+    struct Dl_info dl_info;
     if (dladdr((void*)&Initialize, &dl_info) == 0)
     {
         mexErrMsgIdAndTxt("MATLAB:mexlibCZI:dladdrFailed", "Failed to get the handle of the module.");
