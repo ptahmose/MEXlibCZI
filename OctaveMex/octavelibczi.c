@@ -345,6 +345,11 @@ static void Initialize()
     pfn_OnInitialize = (void(*)())GetProcAddress(hModule, "OnInitialize");
     pfn_OnShutdown = (void(*)())GetProcAddress(hModule, "OnShutdown");
     pfn_mexFunction = (void(*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))GetProcAddress(hModule, "mexFunction");
+    if (pfn_OnInitialize == NULL || pfn_OnShutdown == NULL || pfn_mexFunction == NULL)
+    {
+        FreeLibrary(hModule);
+        mexErrMsgIdAndTxt("MATLAB:mexlibCZI:getProcAddressFailed", "Failed to get the address of the function.");
+    }
 #else
     static const char DllName[] = "libmexlibczi.so";
 
@@ -376,12 +381,12 @@ static void Initialize()
     pfn_OnInitialize = (void(*)())dlsym(hModule, "OnInitialize");
     pfn_OnShutdown = (void(*)())dlsym(hModule, "OnShutdown");
     pfn_mexFunction = (void(*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))dlsym(hModule, "mexFunction");
-#endif
     if (pfn_OnInitialize == NULL || pfn_OnShutdown == NULL || pfn_mexFunction == NULL)
     {
-        FreeLibrary(hModule);
+        dlclose(hModule);
         mexErrMsgIdAndTxt("MATLAB:mexlibCZI:getProcAddressFailed", "Failed to get the address of the function.");
     }
+#endif
 
     pfn_OnInitialize();
     mexAtExit(pfn_OnShutdown);
