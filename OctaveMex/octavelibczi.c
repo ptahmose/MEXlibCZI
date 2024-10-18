@@ -345,7 +345,7 @@ static void Initialize()
     pfn_OnShutdown = (void(*)())GetProcAddress(hModule, "OnShutdown");
     pfn_mexFunction = (void(*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))GetProcAddress(hModule, "mexFunction");
 #else
-    static const WCHAR DllName[] = "libmexlibczi.so";
+    static const char DllName[] = "libmexlibczi.so";
 
     Dl_info dl_info;
     if (dladdr((void*)&Initialize, &dl_info) == 0)
