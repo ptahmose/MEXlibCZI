@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #else
+#define _GNU_SOURCE
 #include <dlfcn.h>
 #include <limits.h>
 #include <stdlib.h>
