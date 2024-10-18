@@ -72,6 +72,11 @@ jobs:
           echo "octave_link=$octave_link"
           echo "octave_link_windows_path=$octave_link_windows_path"
           echo "OCTAVECLI_LINK=$octave_link_windows_path" >> "$GITHUB_ENV"
+      - name: install Octave (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          apt install octave
       - name: build Octave mex-file (Windows)
         if: runner.os == 'Windows'
         shell: cmd
@@ -111,8 +116,8 @@ jobs:
           mkdir -p artifacts
           name="Octave-MEXlibCZI-windows-x64-$(git describe --always)"
           mkdir -p artifacts/${name}
-          cp ${GITHUB_WORKSPACE}/OctaveMex/libmexlibczi.dll artifacts/${name}/
-          cp ${GITHUB_WORKSPACE}/OctaveMex/octavelibczi.mex artifacts/${name}/
+          cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/libmexlibczi.dll artifacts/${name}/
+          cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/octavelibczi.mex artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "windowsx64_octave_build=${name}" >> $GITHUB_OUTPUT
