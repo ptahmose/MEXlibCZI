@@ -1,4 +1,3 @@
-#define MX_HAS_INTERLEAVED_COMPLEX 1
 #define _GNU_SOURCE
 #ifdef _WIN32
 #include <Windows.h>
@@ -9,6 +8,7 @@
 #include <unistd.h>
 #endif
 
+#define MX_HAS_INTERLEAVED_COMPLEX 1
 #include "mex.h"
 #include "../AppModel/include/app_api.h"
 #include <string.h>
