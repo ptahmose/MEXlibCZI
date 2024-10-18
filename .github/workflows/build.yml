@@ -91,6 +91,14 @@ jobs:
           # now, copy the libmexlibczi.dll to this folder
           cp build/MEXlibCZI/Release/libmexlibczi.dll %GITHUB_WORKSPACE%\OctaveMex
           dir %GITHUB_WORKSPACE%\OctaveMex
+      - name: build Octave mex-file (Linux)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          cd OctaveMex
+          octave --cli "mkoctfile --mex octavelibczi.c"
+          cp build/MEXlibCZI/Release/libmexlibczi.so .
+          ls 
       - name: Prepare MATLAB-mex artifact (Windows)
         id: prepare_windows_matlab_artifact
         if: runner.os == 'Windows'
