@@ -11,5 +11,5 @@ target_link_libraries(libmexlibczi PRIVATE lib)
 target_include_directories(libmexlibczi PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../lib" "${CMAKE_CURRENT_SOURCE_DIR}/../AppModel/include")
 
 if(UNIX)
- set_target_properties(MatlabCZI PROPERTIES PREFIX "") # otherwise "lib" is prepended
+ set_target_properties(libmexlibczi PROPERTIES PREFIX "") # otherwise "lib" is prepended
 endif()
