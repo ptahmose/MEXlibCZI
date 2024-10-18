@@ -2,7 +2,14 @@
 #include "mex.h"
 #include "../AppModel/include/app_api.h"
 #include <string.h>
+#ifdef _WIN32
 #include <Windows.h>
+#else
+#include <dlfcn.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <unistd.h>
+#endif
 
 static bool octaveMexIsNanOrInfDouble(double value)
 {
@@ -300,7 +307,7 @@ static void Initialize()
     // * we try to load the library from the same folder where this mex file is located
     // * therefore, we first get the handle of the module of this mex file, use this handle to get the path of the mex file
     // * and then, we replace the file name with the name of the dynamic library
-
+#ifdef _WIN32
     HMODULE hModuleOfMexFile;
     BOOL B = GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCWSTR)&Initialize, &hModuleOfMexFile);
     if (!B)
@@ -337,6 +344,36 @@ static void Initialize()
     pfn_OnInitialize = (void(*)())GetProcAddress(hModule, "OnInitialize");
     pfn_OnShutdown = (void(*)())GetProcAddress(hModule, "OnShutdown");
     pfn_mexFunction = (void(*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))GetProcAddress(hModule, "mexFunction");
+#else
+    Dl_info dl_info;
+    if (dladdr((void*)&Initialize, &dl_info) == 0)
+    {
+        mexErrMsgIdAndTxt("MATLAB:mexlibCZI:dladdrFailed", "Failed to get the handle of the module.");
+    }
+
+    char* path = (char*)malloc(PATH_MAX + strlen(DllName) + 1);
+    strncpy(path, dl_info.dli_fname, PATH_MAX);
+    char* last_slash = strrchr(path, '/');
+    if (last_slash != NULL)
+    {
+        strcpy(last_slash + 1, DllName);
+    }
+    else
+    {
+        strcpy(path, DllName);
+    }
+
+    void* hModule = dlopen(path, RTLD_LAZY);
+    free(path);
+    if (hModule == NULL)
+    {
+        mexErrMsgIdAndTxt("MATLAB:mexlibCZI:dlopenFailed", "Failed to load the library.");
+    }
+
+    pfn_OnInitialize = (void(*)())dlsym(hModule, "OnInitialize");
+    pfn_OnShutdown = (void(*)())dlsym(hModule, "OnShutdown");
+    pfn_mexFunction = (void(*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))dlsym(hModule, "mexFunction");
+#endif
     if (pfn_OnInitialize == NULL || pfn_OnShutdown == NULL || pfn_mexFunction == NULL)
     {
         FreeLibrary(hModule);

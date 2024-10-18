@@ -124,7 +124,7 @@ jobs:
           mkdir -p artifacts
           name="Octave-MEXlibCZI-windows-x64-$(git describe --always)"
           mkdir -p artifacts/${name}
-          cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/libmexlibczi.dll artifacts/${name}/
+          cp $(cygpath "${GITHUB_WORKSPACE}")/libmexlibczi/libmexlibczi.dll artifacts/${name}/
           cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/octavelibczi.mex artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
