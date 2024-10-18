@@ -76,7 +76,7 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          sudo apt install -y -qq octave liboctave-dev
+          sudo apt install -y -qq -o=Dpkg::Progress-Fancy="0" octave liboctave-dev
       - name: build Octave mex-file (Windows)
         if: runner.os == 'Windows'
         shell: cmd
@@ -98,10 +98,7 @@ jobs:
           cd OctaveMex
           octave --version
           octave --eval "mkoctfile --mex octavelibczi.c"
-          #cp build/MEXlibCZI/Release/libmexlibczi.so .
-          pwd
-          #ls ${GITHUB_WORKSPACE}/libmexlibczi
-          ls ../build/libmexlibczi
+          cp ../build/libmexlibczi/libmexlibczi.so .
       - name: Prepare MATLAB-mex artifact (Windows)
         id: prepare_windows_matlab_artifact
         if: runner.os == 'Windows'
