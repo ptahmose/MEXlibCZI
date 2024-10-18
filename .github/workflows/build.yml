@@ -76,7 +76,7 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          sudo apt install octave liboctave-dev
+          sudo apt install -y -q octave liboctave-dev
       - name: build Octave mex-file (Windows)
         if: runner.os == 'Windows'
         shell: cmd
