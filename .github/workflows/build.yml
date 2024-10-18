@@ -25,7 +25,8 @@ jobs:
         os: [ubuntu-latest, windows-latest]  # Windows and Linux builds
     outputs:
       linuxx64_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_build }}
-      windowsx64_artifact: ${{ steps.prepare_windows_artifact.outputs.windowsx64_build }}
+      windowsx64_matlab_artifact: ${{ steps.prepare_windows_matlab_artifact.outputs.windowsx64_matlab_build }}
+      windowsx64_octave_artifact: ${{ steps.prepare_windows_octave_artifact.outputs.windowsx64_octave_build }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -86,7 +87,7 @@ jobs:
           cp build/MEXlibCZI/Release/libmexlibczi.dll %GITHUB_WORKSPACE%\OctaveMex
           dir %GITHUB_WORKSPACE%\OctaveMex
       - name: Prepare MATLAB-mex artifact (Windows)
-        id: prepare_windows_artifact
+        id: prepare_windows_matlab_artifact
         if: runner.os == 'Windows'
         shell: bash
         run: |
@@ -103,7 +104,7 @@ jobs:
           path: ${{ env.artifactPath }}/
           name: ${{ env.artifactName }}
       - name: Prepare Octave-mex artifact (Windows)
-        id: prepare_windows_artifact
+        id: prepare_windows_octave_artifact
         if: runner.os == 'Windows'
         shell: bash
         run: |
