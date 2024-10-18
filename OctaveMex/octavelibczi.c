@@ -1,16 +1,17 @@
 #define MX_HAS_INTERLEAVED_COMPLEX 1
-#include "mex.h"
-#include "../AppModel/include/app_api.h"
-#include <string.h>
+#define _GNU_SOURCE
 #ifdef _WIN32
 #include <Windows.h>
 #else
-#define _GNU_SOURCE
 #include <dlfcn.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <unistd.h>
 #endif
+
+#include "mex.h"
+#include "../AppModel/include/app_api.h"
+#include <string.h>
 
 static bool octaveMexIsNanOrInfDouble(double value)
 {
