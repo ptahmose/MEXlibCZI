@@ -55,7 +55,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts
-          name="MEXlibCZI-linux-x64-$(git describe --always)"
+          name="MATLAB-MEXlibCZI-linux-x64-$(git describe --always)"
           mkdir -p artifacts/${name}
           cp build/MEXlibCZI/MEXlibCZI.mexa64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
