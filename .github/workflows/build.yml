@@ -174,18 +174,21 @@ jobs:
           git_version=$(git describe --always)
           echo "releaseName=version ${mexlibczi_version} (${git_version})" >> "$GITHUB_ENV"
           echo "tagName=v${mexlibczi_version}" >> "$GITHUB_ENV"
-
+          ls -l ./artifacts
+          cd ./artifacts
+          # Loop through all directories in the current directory
+          for dir in */; do
+            # Remove the trailing slash from the directory name
+            folder_name=$(basename "$dir")
+            # Create a zip archive with the same name as the folder
+            7z a -tzip "${folder_name}.zip" "$folder_name"
+          done
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ env.releaseName }}
           tag_name: ${{ env.tagName }}
           files: |
-            ./artifacts/${{ needs.build.outputs.linuxx64_matlab_artifact }}/MEXlibCZI.mexa64
-            ./artifacts/${{ needs.build.outputs.windowsx64_matlab_artifact }}/MEXlibCZI.mexw64
-            ./artifacts/${{ needs.build.outputs.linuxx64_octave_artifact }}/octavelibczi.mex
-            ./artifacts/${{ needs.build.outputs.linuxx64_octave_artifact }}/libmexlibczi.so
-            ./artifacts/${{ needs.build.outputs.windowsx64_octave_artifact }}/octavelibczi.mex
-            ./artifacts/${{ needs.build.outputs.windowsx64_octave_artifact }}/libmexlibczi.dll
+            ./artifacts/*.zip
           prerelease: true
 
