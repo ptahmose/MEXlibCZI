@@ -93,7 +93,7 @@ jobs:
           dir %GITHUB_WORKSPACE%\OctaveMex
       - name: build Octave mex-file (Linux)
         if: runner.os == 'Linux'
-        shell: cmd
+        shell: bash
         run: |
           cd OctaveMex
           octave --cli "mkoctfile --mex octavelibczi.c"
