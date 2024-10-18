@@ -92,7 +92,7 @@ jobs:
           cp build/MEXlibCZI/Release/libmexlibczi.dll %GITHUB_WORKSPACE%\OctaveMex
           dir %GITHUB_WORKSPACE%\OctaveMex
       - name: build Octave mex-file (Linux)
-        if: runner.os == 'Windows'
+        if: runner.os == 'Linux'
         shell: cmd
         run: |
           cd OctaveMex
