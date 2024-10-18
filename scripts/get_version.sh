@@ -11,10 +11,10 @@ extract_value() {
 }
 
 # Extract values from the CMakeLists.txt file
-MAJOR=$(extract_value "MEXCZI_MAJOR")
-MINOR=$(extract_value "MEXCZI_MINOR")
-PATCH=$(extract_value "MEXCZI_PATCH")
-EXT=$(extract_value "MEXCZI_EXT")
+MAJOR=$(extract_value "MEXLIBCZI_MAJOR")
+MINOR=$(extract_value "MEXLIBCZI_MINOR")
+PATCH=$(extract_value "MEXLIBCZI_PATCH")
+EXT=$(extract_value "MEXLIBCZI_EXT")
 
 # Combine the version string
 if [[ -n "$EXT" ]]; then
