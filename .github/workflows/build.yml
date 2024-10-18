@@ -24,7 +24,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]  # Windows and Linux builds
     outputs:
-      linuxx64_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_build }}
+      linuxx64_matlab_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_matlab_build }}
+      linuxx64_octave_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_octave_build }}
       windowsx64_matlab_artifact: ${{ steps.prepare_windows_matlab_artifact.outputs.windowsx64_matlab_build }}
       windowsx64_octave_artifact: ${{ steps.prepare_windows_octave_artifact.outputs.windowsx64_octave_build }}
     steps:
@@ -48,8 +49,8 @@ jobs:
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release 
           cmake --build . --config Release -j
-      - name: Prepare artifact (Linux)
-        id: prepare_linux_artifact
+      - name: Prepare MATLAB artifact (Linux)
+        id: prepare_linux_matlab_artifact
         if: runner.os == 'Linux'
         shell: bash
         run: |
@@ -59,7 +60,7 @@ jobs:
           cp build/MEXlibCZI/MEXlibCZI.mexa64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          echo "linuxx64_build=${name}" >> "$GITHUB_OUTPUT"
+          echo "linuxx64_matlab_build=${name}" >> "$GITHUB_OUTPUT"
       - name: install Octave (Windows)
         if: runner.os == 'Windows'
         shell: bash
@@ -98,7 +99,7 @@ jobs:
           cd OctaveMex
           octave --version
           octave --eval "mkoctfile --mex octavelibczi.c"
-          cp ../build/libmexlibczi/libmexlibczi.so .
+          cp ../build/libmexlibczi/libmexlibczi.so .  # now, copy the libmexlibczi.so to this folder
       - name: Prepare MATLAB-mex artifact (Windows)
         id: prepare_windows_matlab_artifact
         if: runner.os == 'Windows'
@@ -129,6 +130,19 @@ jobs:
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "windowsx64_octave_build=${name}" >> $GITHUB_OUTPUT
+      - name: Prepare Octave-mex artifact (Linux)
+        id: prepare_linux_octave_artifact
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          name="Octave-MEXlibCZI-linux-x64-$(git describe --always)"
+          mkdir -p artifacts/${name}
+          cp $(cygpath "${GITHUB_WORKSPACE}")/libmexlibczi/libmexlibczi.so artifacts/${name}/
+          cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/octavelibczi.mex artifacts/${name}/
+          echo "artifactName=${name}" >> "$GITHUB_ENV"
+          echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
+          echo "linuxx64_octave_build=${name}" >> $GITHUB_OUTPUT
       - name: Upload Octave-mex artifacts
         uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'  # currently we only build Octave mex files on Windows
@@ -145,7 +159,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Download All Artifacts
-        if: needs.build.outputs.linuxx64_artifact != '' || needs.build.outputs.windowsx64_matlab_artifact != ''
+        if: needs.build.outputs.linuxx64_matlab_artifact != '' || needs.build.outputs.windowsx64_matlab_artifact != '' || needs.build.outputs.linuxx64_octave_artifact != '' || needs.build.outputs.windowsx64_octave_artifact != ''
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts  # download to a specific folder
@@ -165,7 +179,11 @@ jobs:
           name: ${{ env.releaseName }}
           tag_name: ${{ env.tagName }}
           files: |
-            ./artifacts/${{ needs.build.outputs.linuxx64_artifact }}/MEXlibCZI.mexa64
+            ./artifacts/${{ needs.build.outputs.linuxx64_matlab_artifact }}/MEXlibCZI.mexa64
             ./artifacts/${{ needs.build.outputs.windowsx64_matlab_artifact }}/MEXlibCZI.mexw64
+            ./artifacts/${{ needs.build.outputs.linuxx64_octave_artifact }}/octavelibczi.mex
+            ./artifacts/${{ needs.build.outputs.linuxx64_octave_artifact }}/libmexlibczi.so
+            ./artifacts/${{ needs.build.outputs.windowsx64_octave_artifact }}/octavelibczi.mex
+            ./artifacts/${{ needs.build.outputs.windowsx64_octave_artifact }}/libmexlibczi.dll
           prerelease: true
 
