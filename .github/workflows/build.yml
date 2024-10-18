@@ -138,8 +138,8 @@ jobs:
           mkdir -p artifacts
           name="Octave-MEXlibCZI-linux-x64-$(git describe --always)"
           mkdir -p artifacts/${name}
-          cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/libmexlibczi.so artifacts/${name}/
-          cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/octavelibczi.mex artifacts/${name}/
+          cp ${GITHUB_WORKSPACE}/OctaveMex/libmexlibczi.so artifacts/${name}/
+          cp ${GITHUB_WORKSPACE}/OctaveMex/octavelibczi.mex artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "linuxx64_octave_build=${name}" >> $GITHUB_OUTPUT
