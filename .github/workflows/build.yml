@@ -89,7 +89,7 @@ jobs:
           REM echo "cd %GITHUB_WORKSPACE%/OctaveMex ,  mkoctfile --mex octavelibczi.c"
           set "GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
           "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveMex , mkoctfile --mex octavelibczi.c"
-          # now, copy the libmexlibczi.dll to this folder
+          REM now, copy the libmexlibczi.dll to this folder
           cp build/MEXlibCZI/Release/libmexlibczi.dll %GITHUB_WORKSPACE%\OctaveMex
           dir %GITHUB_WORKSPACE%\OctaveMex
       - name: build Octave mex-file (Linux)
