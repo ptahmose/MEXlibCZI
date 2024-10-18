@@ -96,6 +96,7 @@ jobs:
         shell: bash
         run: |
           cd OctaveMex
+          octave --version
           octave --eval "mkoctfile --mex octavelibczi.c"
           #cp build/MEXlibCZI/Release/libmexlibczi.so .
           pwd
