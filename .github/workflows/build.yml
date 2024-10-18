@@ -76,7 +76,7 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          apt install octave
+          sudo apt install octave
       - name: build Octave mex-file (Windows)
         if: runner.os == 'Windows'
         shell: cmd
