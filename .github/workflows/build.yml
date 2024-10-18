@@ -145,7 +145,6 @@ jobs:
           echo "linuxx64_octave_build=${name}" >> $GITHUB_OUTPUT
       - name: Upload Octave-mex artifacts
         uses: actions/upload-artifact@v4
-        if: runner.os == 'Windows'  # currently we only build Octave mex files on Windows
         with:
           path: ${{ env.artifactPath }}/
           name: ${{ env.artifactName }}
