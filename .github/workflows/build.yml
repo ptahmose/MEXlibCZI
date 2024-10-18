@@ -77,7 +77,7 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          sudo apt install -y -qq -o=Dpkg::Progress-Fancy="0" octave liboctave-dev
+          sudo apt-get install -y -qq -o=Dpkg::Progress-Fancy="0" octave liboctave-dev
       - name: build Octave mex-file (Windows)
         if: runner.os == 'Windows'
         shell: cmd
@@ -90,8 +90,6 @@ jobs:
           set "GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
           "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveMex , mkoctfile --mex octavelibczi.c"
           REM now, copy the libmexlibczi.dll to this folder
-          echo "*** directory listing of build\libmexlibczi\Release ***"
-          dir build\libmexlibczi\Release\
           copy /B build\libmexlibczi\Release\libmexlibczi.dll %GITHUB_WORKSPACE%\OctaveMex
           echo "*** directory listing of %GITHUB_WORKSPACE%\OctaveMex ***"
           dir %GITHUB_WORKSPACE%\OctaveMex
@@ -110,11 +108,11 @@ jobs:
         run: |
           mkdir -p artifacts
           name="MATLAB-MEXlibCZI-windows-x64-$(git describe --always)"
-          mkdir -p artifacts/${name}
-          cp build/MEXlibCZI/Release/MEXlibCZI.mexw64 artifacts/${name}/
+          mkdir -p "artifacts/${name}"
+          cp "build/MEXlibCZI/Release/MEXlibCZI.mexw64" "artifacts/${name}/"
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          echo "windowsx64_matlab_build=${name}" >> $GITHUB_OUTPUT
+          echo "windowsx64_matlab_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Upload MATLAB-mex artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -127,12 +125,12 @@ jobs:
         run: |
           mkdir -p artifacts
           name="Octave-MEXlibCZI-windows-x64-$(git describe --always)"
-          mkdir -p artifacts/${name}
-          cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/libmexlibczi.dll artifacts/${name}/
-          cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/octavelibczi.mex artifacts/${name}/
+          mkdir -p "artifacts/${name}"
+          cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/libmexlibczi.dll "artifacts/${name}/"
+          cp $(cygpath "${GITHUB_WORKSPACE}")/OctaveMex/octavelibczi.mex "artifacts/${name}/"
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          echo "windowsx64_octave_build=${name}" >> $GITHUB_OUTPUT
+          echo "windowsx64_octave_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Prepare Octave-mex artifact (Linux)
         id: prepare_linux_octave_artifact
         if: runner.os == 'Linux'
@@ -140,12 +138,12 @@ jobs:
         run: |
           mkdir -p artifacts
           name="Octave-MEXlibCZI-linux-x64-$(git describe --always)"
-          mkdir -p artifacts/${name}
-          cp ${GITHUB_WORKSPACE}/OctaveMex/libmexlibczi.so artifacts/${name}/
-          cp ${GITHUB_WORKSPACE}/OctaveMex/octavelibczi.mex artifacts/${name}/
+          mkdir -p "artifacts/${name}"
+          cp "${GITHUB_WORKSPACE}/OctaveMex/libmexlibczi.so" "artifacts/${name}/"
+          cp "${GITHUB_WORKSPACE}/OctaveMex/octavelibczi.mex" "artifacts/${name}/"
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          echo "linuxx64_octave_build=${name}" >> $GITHUB_OUTPUT
+          echo "linuxx64_octave_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Upload Octave-mex artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -169,7 +167,7 @@ jobs:
         shell: bash
         run: |
           cd scripts
-          mexlibczi_version=$(bash get_version.sh)
+          mexlibczi_version="$(bash get_version.sh)"
           cd ..
           git_version=$(git describe --always)
           echo "releaseName=version ${mexlibczi_version} (${git_version})" >> "$GITHUB_ENV"
@@ -179,7 +177,7 @@ jobs:
           # Loop through all directories in the current directory
           for dir in */; do
             # Remove the trailing slash from the directory name
-            folder_name=$(basename "$dir")
+            folder_name="$(basename "$dir")"
             # Create a zip archive with the same name as the folder
             7z a -tzip "${folder_name}.zip" "$folder_name"
           done

@@ -364,3 +364,5 @@ FodyWeavers.xsd
 
 out/
 build/
+/OctaveMex/libmexlibczi.dll
+/OctaveMex/octavelibczi.mex
