@@ -299,8 +299,6 @@ static void(*pfn_OnShutdown)(void);
 static void(*pfn_OnInitialize)(void);
 static void(*pfn_mexFunction)(int nlhs, Parameter plhs[], int nrhs, const Parameter prhs[], struct IAppExtensionFunctions* app_functions);
 
-static const WCHAR DllName[] = L"libmexlibczi.dll";
-
 static void Initialize()
 {
     // we try to load the dynamic library containg the mex function here
@@ -308,6 +306,8 @@ static void Initialize()
     // * therefore, we first get the handle of the module of this mex file, use this handle to get the path of the mex file
     // * and then, we replace the file name with the name of the dynamic library
 #ifdef _WIN32
+    static const WCHAR DllName[] = L"libmexlibczi.dll";
+
     HMODULE hModuleOfMexFile;
     BOOL B = GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCWSTR)&Initialize, &hModuleOfMexFile);
     if (!B)
@@ -345,6 +345,8 @@ static void Initialize()
     pfn_OnShutdown = (void(*)())GetProcAddress(hModule, "OnShutdown");
     pfn_mexFunction = (void(*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))GetProcAddress(hModule, "mexFunction");
 #else
+    static const WCHAR DllName[] = "libmexlibczi.so";
+
     Dl_info dl_info;
     if (dladdr((void*)&Initialize, &dl_info) == 0)
     {
