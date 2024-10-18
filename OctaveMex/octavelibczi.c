@@ -360,8 +360,9 @@ static void Initialize()
         mexErrMsgIdAndTxt("MATLAB:mexlibCZI:dladdrFailed", "Failed to get the handle of the module.");
     }
 
-    char* path = (char*)malloc(PATH_MAX + strlen(DllName) + 1);
-    strncpy(path, dl_info.dli_fname, PATH_MAX);
+    size_t max_length_path = strlen(dl_info.dli_fname) + strlen(DllName) + 1;
+    char* path = (char*)malloc(max_length_path + strlen(DllName) + 1);
+    strcpy(path, dl_info.dli_fname);
     char* last_slash = strrchr(path, '/');
     if (last_slash != NULL)
     {

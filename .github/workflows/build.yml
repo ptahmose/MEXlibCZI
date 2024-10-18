@@ -97,8 +97,9 @@ jobs:
         run: |
           cd OctaveMex
           octave --eval "mkoctfile --mex octavelibczi.c"
-          cp build/MEXlibCZI/Release/libmexlibczi.so .
-          ls 
+          #cp build/MEXlibCZI/Release/libmexlibczi.so .
+          pwd
+          ls build/MEXlibCZI/
       - name: Prepare MATLAB-mex artifact (Windows)
         id: prepare_windows_matlab_artifact
         if: runner.os == 'Windows'
