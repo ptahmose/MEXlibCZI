@@ -27,8 +27,7 @@ void MexFunction_AddSubBlock_CheckArguments(MatlabArgs* args)
         throw invalid_argument("1st argument must be an integer");
     }
 
-    //if (!MexApi::GetInstance().MxIsChar(args->prhs[2]))
-    if (args->app_functions->pfn_IsChar(args->prhs[2]))
+    if (!args->app_functions->pfn_IsChar(args->prhs[2]))
     {
         throw invalid_argument("2nd argument must be a string");
     }
@@ -38,7 +37,6 @@ void MexFunction_AddSubBlock_CheckArguments(MatlabArgs* args)
         throw invalid_argument("3nd argument must be a ROI");
     }
 
-    //if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[4], 1, args->app_functions) && !MexApi::GetInstance().MxIsChar(args->prhs[4]))
     if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[4], 1, args->app_functions) && !args->app_functions->pfn_IsChar(args->prhs[4]))
     {
         throw invalid_argument("4th argument must be an integer or a string");
