@@ -9,6 +9,8 @@ directly read and write [CZI-documents](https://www.zeiss.com/microscopy/int/pro
 It is based on [libCZI](https://github.com/ptahmose/libCZI).
 ![MEXlibCZI](./doc/pictures/intro.PNG "MEXlibCZI")
 
+This project provides a MEX-file for use with MATLAB and Octave.
+
 The available commands are documented here: [commands](./doc/commands.markdown)
 
 # Installing
