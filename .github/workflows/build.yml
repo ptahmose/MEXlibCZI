@@ -77,7 +77,16 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          sudo apt-get install -y -qq -o=Dpkg::Progress-Fancy="0" octave liboctave-dev
+          # the name of the "dev package" has changed as of Ubuntu 24.04
+          # Extract Ubuntu version from /etc/os-release
+          ubuntu_version=$(grep VERSION_ID /etc/os-release | cut -d '"' -f 2)
+          # Compare the version to 24.04 using dpkg --compare-versions
+          if dpkg --compare-versions "$ubuntu_version" ge "24.04"; then
+            octave_dev_package="octave-dev"
+          else
+            octave_dev_package="liboctave-dev"
+          fi
+          sudo apt-get install -y -qq -o=Dpkg::Progress-Fancy="0" octave $octave_dev_package
       - name: build Octave mex-file (Windows)
         if: runner.os == 'Windows'
         shell: cmd
