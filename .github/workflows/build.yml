@@ -115,8 +115,8 @@ jobs:
         run: |
           cd tests/octave
           set GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
-          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveMex,addpath('../../OctaveMex'),test('test_basic_operation.m')"
-          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveMex,addpath('../../OctaveMex'),test('test_write.m')"
+          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/tests/octave,addpath('../../OctaveMex'),test('test_basic_operation.m')"
+          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/tests/octave,addpath('../../OctaveMex'),test('test_write.m')"
       - name: Prepare MATLAB-mex artifact (Windows)
         id: prepare_windows_matlab_artifact
         if: runner.os == 'Windows'
