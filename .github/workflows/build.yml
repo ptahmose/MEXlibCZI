@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]  # Windows and Linux builds
+        os: [ubuntu-24.04, windows-latest]  # Windows and Linux builds
     outputs:
       linuxx64_matlab_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_matlab_build }}
       linuxx64_octave_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_octave_build }}
