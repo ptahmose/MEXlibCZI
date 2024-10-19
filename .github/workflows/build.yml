@@ -22,6 +22,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        # Note: We use the latest version of Ubuntu 24.04 in order to get a more recent version of Octave (we get 8.4 currently)
+        #       We better should use a version >6.4, otherwise the Octave-mex-support seems to be missing some functions.
         os: [ubuntu-24.04, windows-latest]  # Windows and Linux builds
     outputs:
       linuxx64_matlab_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_matlab_build }}
@@ -116,16 +118,16 @@ jobs:
         run: |
           cd tests/octave
           ls -l ../../OctaveMex
-          octave --eval "addpath('../../OctaveMex'),test('test_basic_operation.m')"
-          octave --eval "addpath('../../OctaveMex'),test('test_write.m')"
+          octave --eval "addpath('../../OctaveMex'),result=test('test_basic_operation.m'); if ~all([result.passed]), exit(1); else, exit(0); end"
+          octave --eval "addpath('../../OctaveMex'),result=test('test_write.m'); if ~all([result.passed]), exit(1); else, exit(0); end"
       - name: Octave Unit-Tests (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
           cd tests/octave
           set GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
-          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/tests/octave,addpath('../../OctaveMex'),test('test_basic_operation.m')"
-          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/tests/octave,addpath('../../OctaveMex'),test('test_write.m')"
+          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/tests/octave,addpath('../../OctaveMex'),result=test('test_basic_operation.m'); if ~all([result.passed]), exit(1); else, exit(0); end"
+          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/tests/octave,addpath('../../OctaveMex'),result=test('test_write.m'); if ~all([result.passed]), exit(1); else, exit(0); end"
       - name: Prepare MATLAB-mex artifact (Windows)
         id: prepare_windows_matlab_artifact
         if: runner.os == 'Windows'
