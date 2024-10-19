@@ -13,6 +13,8 @@
 #include "../AppModel/include/app_api.h"
 #include <string.h>
 
+
+
 static bool octaveMexIsNanOrInfDouble(double value)
 {
     return mxIsNaN(value) || mxIsInf(value);
@@ -40,52 +42,92 @@ static void* octaveMexGetData(const Parameter parameter)
 
 static uint8_t* octaveMexGetUint8s(const Parameter parameter)
 {
+#if OCTAVEMEX_HAS_GET_TYPED
     return mxGetUint8s((const mxArray*)parameter);
+#else
+    return (uint8_t*)octaveMexGetData(parameter);
+#endif
 }
 
 static int8_t* octaveMexGetInt8s(const Parameter parameter)
 {
+#if OCTAVEMEX_HAS_GET_TYPED
     return mxGetInt8s((const mxArray*)parameter);
+#else
+    return (int8_t*)octaveMexGetData(parameter);
+#endif
 }
 
 static uint16_t* octaveMexGetUint16s(const Parameter parameter)
 {
+#if OCTAVEMEX_HAS_GET_TYPED
     return mxGetUint16s((const mxArray*)parameter);
+#else
+    return (uint16_t*)octaveMexGetData(parameter);
+#endif
 }
 
 static int16_t* octaveMexGetInt16s(const Parameter parameter)
 {
+#if OCTAVEMEX_HAS_GET_TYPED
     return mxGetInt16s((const mxArray*)parameter);
+#else
+    return (int16_t*)octaveMexGetData(parameter);
+#endif
 }
 
 static uint32_t* octaveMexGetUint32s(const Parameter parameter)
 {
+#if OCTAVEMEX_HAS_GET_TYPED
     return mxGetUint32s((const mxArray*)parameter);
+#else
+    return (uint32_t*)octaveMexGetData(parameter);
+#endif
 }
 
 static int32_t* octaveMexGetInt32s(const Parameter parameter)
 {
+#if OCTAVEMEX_HAS_GET_TYPED
     return mxGetInt32s((const mxArray*)parameter);
+#else
+    return (int32_t*)octaveMexGetData(parameter);
+#endif
 }
 
 static uint64_t* octaveMexGetUint64s(const Parameter parameter)
 {
+#if OCTAVEMEX_HAS_GET_TYPED
     return mxGetUint64s((const mxArray*)parameter);
+#else
+    return (uint64_t*)octaveMexGetData(parameter);
+#endif
 }
 
 static int64_t* octaveMexGetInt64s(const Parameter parameter)
 {
+#if OCTAVEMEX_HAS_GET_TYPED
     return mxGetInt64s((const mxArray*)parameter);
+#else
+    return (int64_t*)octaveMexGetData(parameter);
+#endif
 }
 
 static double* octaveMexGetDoubles(const Parameter parameter)
 {
+#if OCTAVEMEX_HAS_GET_TYPED
     return mxGetDoubles((const mxArray*)parameter);
+#else
+    return (double*)octaveMexGetData(parameter);
+#endif
 }
 
 static float* octaveMexGetSingles(const Parameter parameter)
 {
+#if OCTAVEMEX_HAS_GET_TYPED
     return mxGetSingles((const mxArray*)parameter);
+#else
+    return (float*)octaveMexGetData(parameter);
+#endif
 }
 
 static bool* octaveMexGetLogicals(const Parameter parameter)
