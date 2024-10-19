@@ -101,6 +101,20 @@ jobs:
           octave --version
           octave --eval "mkoctfile --mex octavelibczi.c"
           cp ../build/libmexlibczi/libmexlibczi.so .  # now, copy the libmexlibczi.so to this folder
+      - name: Octave Unit-Tests (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          cd tests/octave
+          octave --eval "addpath('../../OctaveMex'),test('test_basic_operation.m')"
+          octave --eval "addpath('../../OctaveMex'),test('test_write.m')"
+      - name: Octave Unit-Tests (Linux)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          cd tests/octave
+          "%OCTAVECLI_LINK%" --eval "addpath('../../OctaveMex'),test('test_basic_operation.m')"
+          "%OCTAVECLI_LINK%" --eval "addpath('../../OctaveMex'),test('test_write.m')"
       - name: Prepare MATLAB-mex artifact (Windows)
         id: prepare_windows_matlab_artifact
         if: runner.os == 'Windows'

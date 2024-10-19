@@ -1,6 +1,5 @@
 % File: test_write.m
 
-addpath('../../OctaveMex');
 
 %!test
 %! handle=octavelibczi ('CreateCziWriter','test.czi','x');
