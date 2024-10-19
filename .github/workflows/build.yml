@@ -51,6 +51,19 @@ jobs:
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release 
           cmake --build . --config Release -j
+      - name: Prepare MATLAB unit tests
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          # if on Windows, then this is the mex-file we need to copy to the tests/MATLAB folder
+          if [ -f "build/MEXlibCZI/Release/MEXlibCZI.mexw64" ]; then
+            cp "build/MEXlibCZI/Release/MEXlibCZI.mexw64" tests/MATLAB/
+          fi
+      - name: Run statements
+        if: runner.os == 'Windows'
+        uses: matlab-actions/run-command@v2
+        with:
+          command: cd tests/MATLAB; results = runtests, assertSuccess(results);
       - name: Prepare MATLAB artifact (Linux)
         id: prepare_linux_matlab_artifact
         if: runner.os == 'Linux'
