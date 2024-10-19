@@ -106,9 +106,10 @@ jobs:
         shell: bash
         run: |
           cd tests/octave
+          ls -l ../../OctaveMex
           octave --eval "addpath('../../OctaveMex'),test('test_basic_operation.m')"
           octave --eval "addpath('../../OctaveMex'),test('test_write.m')"
-      - name: Octave Unit-Tests (Linux)
+      - name: Octave Unit-Tests (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
