@@ -40,7 +40,7 @@
             <mxPoint x="670" y="140" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="BRgU4PrnbskxXR9fhvR0-17" value="dynamically liks&lt;br&gt;to at runtime" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="BRgU4PrnbskxXR9fhvR0-17" value="dynamically links&lt;br&gt;to at runtime" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry x="585" y="210" width="110" height="40" as="geometry" />
         </mxCell>
       </root>

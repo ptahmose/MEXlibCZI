@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 3.11)
 
 set(MEXLIBCZI_MAJOR 0)
 set(MEXLIBCZI_MINOR 3)
-set(MEXLIBCZI_PATCH 2)
+set(MEXLIBCZI_PATCH 3)
 set(MEXLIBCZI_EXT "alpha")
 
 if(WIN32)
@@ -22,6 +22,8 @@ project ("MEXlibCZI"
           DESCRIPTION "mex extension (for MATLAB and Octave) for reading/writing CZI-files with libCZI")
 
 # Options controlling the CMake-build are gathered here
+
+# When this option is ON, we build the mex extension for MATLAB. Otherwise, we don't build the mex extension for MATLAB.
 option(MEXLIBCZI_BUILD_MATLABMEX "Build the mex extension for MATLAB" ON)
 
 # include RapidJSON -> https://www.jibbow.com/posts/rapidjson-cmake/

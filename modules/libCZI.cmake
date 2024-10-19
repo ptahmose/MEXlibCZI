@@ -1,5 +1,9 @@
 include(FetchContent)
 
+# Set necessary build options for libCZI
+set(LIBCZI_BUILD_CZICMD OFF CACHE BOOL "" FORCE)
+set(LIBCZI_BUILD_DYNLIB OFF CACHE BOOL "" FORCE)
+set(LIBCZI_BUILD_UNITTESTS OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
   libCZI
@@ -8,14 +12,5 @@ FetchContent_Declare(
   GIT_TAG        origin/main
 )
 
-if(NOT libCZI_POPULATED)
-  message(STATUS "Fetching libCZI")
-  FetchContent_Populate(libCZI)
-
-  set(LIBCZI_BUILD_CZICMD OFF CACHE BOOL "" FORCE)
-  set(LIBCZI_BUILD_DYNLIB OFF CACHE BOOL "" FORCE)
-  set(LIBCZI_BUILD_UNITTESTS OFF CACHE BOOL "" FORCE)
-
-  add_subdirectory(${libczi_SOURCE_DIR} ${libczi_BINARY_DIR})
-endif()
-
+# Fetch the content and make it available
+FetchContent_MakeAvailable(libCZI)
