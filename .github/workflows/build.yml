@@ -87,7 +87,7 @@ jobs:
           REM Note that we are using cmd.exe here, because it can "execute" the .lnk file.
           "%OCTAVECLI_LINK%" --version
           REM echo "cd %GITHUB_WORKSPACE%/OctaveMex ,  mkoctfile --mex octavelibczi.c"
-          set "GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
+          set GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
           "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveMex , mkoctfile --mex octavelibczi.c"
           REM now, copy the libmexlibczi.dll to this folder
           copy /B build\libmexlibczi\Release\libmexlibczi.dll %GITHUB_WORKSPACE%\OctaveMex
@@ -114,8 +114,9 @@ jobs:
         shell: cmd
         run: |
           cd tests/octave
-          "%OCTAVECLI_LINK%" --eval "addpath('../../OctaveMex'),test('test_basic_operation.m')"
-          "%OCTAVECLI_LINK%" --eval "addpath('../../OctaveMex'),test('test_write.m')"
+          set GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
+          "%OCTAVECLI_LINK%" --eval ""cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveMex,addpath('../../OctaveMex'),test('test_basic_operation.m')"
+          "%OCTAVECLI_LINK%" --eval ""cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveMex,addpath('../../OctaveMex'),test('test_write.m')"
       - name: Prepare MATLAB-mex artifact (Windows)
         id: prepare_windows_matlab_artifact
         if: runner.os == 'Windows'
