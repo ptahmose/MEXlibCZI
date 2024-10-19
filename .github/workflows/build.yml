@@ -117,16 +117,16 @@ jobs:
         shell: bash
         run: |
           cd tests/octave
-          octave --eval "addpath('../../OctaveMex'),result=test('test_basic_operation.m'); if ~all([result.passed]), exit(1); else, exit(0); end"
-          octave --eval "addpath('../../OctaveMex'),result=test('test_write.m'); if ~all([result.passed]), exit(1); else, exit(0); end"
+          octave --eval "addpath('../../OctaveMex'),if test('test_basic_operation.m'), exit(0); else, exit(1); end"
+          octave --eval "addpath('../../OctaveMex'),if test('test_write.m'), exit(0); else, exit(1); end"
       - name: Octave Unit-Tests (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
           cd tests/octave
           set GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
-          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/tests/octave,addpath('../../OctaveMex'),result=test('test_basic_operation.m'); if ~all([result.passed]), exit(1); else, exit(0); end"
-          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/tests/octave,addpath('../../OctaveMex'),result=test('test_write.m'); if ~all([result.passed]), exit(1); else, exit(0); end"
+          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/tests/octave,addpath('../../OctaveMex'),if test('test_basic_operation.m'), exit(0); else, exit(1); end"
+          "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/tests/octave,addpath('../../OctaveMex'),if test('test_write.m'), exit(0); else, exit(1); end"
       - name: Prepare MATLAB-mex artifact (Windows)
         id: prepare_windows_matlab_artifact
         if: runner.os == 'Windows'
