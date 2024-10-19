@@ -117,6 +117,8 @@ jobs:
         shell: bash
         run: |
           cd tests/octave
+          # Note: Unfortunately, if using 'test' in functional form, there is no way to get the "test-result output" in the console it seems.
+          #       c.f. https://docs.octave.org/interpreter/Test-Functions.html
           octave --eval "addpath('../../OctaveMex'),if test('test_basic_operation.m'), exit(0); else, exit(1); end"
           octave --eval "addpath('../../OctaveMex'),if test('test_write.m'), exit(0); else, exit(1); end"
       - name: Octave Unit-Tests (Windows)
