@@ -13,7 +13,13 @@
 #include "../AppModel/include/app_api.h"
 #include <string.h>
 
-
+/*
+With Octave <= version 6.4.0, the mex-functions mxGetInt8s etc. are not available. This define
+then enables a workaround to use mxGetData and cast the pointer to the desired type. This seems
+to work, but it seems fishy and might be troublesome. It is therefore avoided, but this also means
+that the mex-file built will not work with Octave <= 6.4.0.
+*/
+#define OCTAVEMEX_HAS_GET_TYPED 1
 
 static bool octaveMexIsNanOrInfDouble(double value)
 {
@@ -345,6 +351,10 @@ static void(*pfn_mexFunction)(int nlhs, Parameter plhs[], int nrhs, const Parame
 
 static void Initialize()
 {
+    static const char* Function_name_OnInitialize = "OnInitialize";
+    static const char* Function_name_OnShutdown = "OnShutdown";
+    static const char* Function_name_MexFunction = "mexFunction";
+
     // we try to load the dynamic library containg the mex function here
     // * we try to load the library from the same folder where this mex file is located
     // * therefore, we first get the handle of the module of this mex file, use this handle to get the path of the mex file
@@ -385,9 +395,9 @@ static void Initialize()
         mexErrMsgIdAndTxt("MATLAB:mexlibCZI:loadLibraryFailed", "Failed to load the library.");
     }
 
-    pfn_OnInitialize = (void(*)())GetProcAddress(hModule, "OnInitialize");
-    pfn_OnShutdown = (void(*)())GetProcAddress(hModule, "OnShutdown");
-    pfn_mexFunction = (void(*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))GetProcAddress(hModule, "mexFunction");
+    pfn_OnInitialize = (void(*)())GetProcAddress(hModule, Function_name_OnInitialize);
+    pfn_OnShutdown = (void(*)())GetProcAddress(hModule, Function_name_OnShutdown);
+    pfn_mexFunction = (void(*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))GetProcAddress(hModule, Function_name_MexFunction);
     if (pfn_OnInitialize == NULL || pfn_OnShutdown == NULL || pfn_mexFunction == NULL)
     {
         FreeLibrary(hModule);
@@ -422,9 +432,9 @@ static void Initialize()
         mexErrMsgIdAndTxt("MATLAB:mexlibCZI:dlopenFailed", "Failed to load the library.");
     }
 
-    pfn_OnInitialize = (void(*)())dlsym(hModule, "OnInitialize");
-    pfn_OnShutdown = (void(*)())dlsym(hModule, "OnShutdown");
-    pfn_mexFunction = (void(*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))dlsym(hModule, "mexFunction");
+    pfn_OnInitialize = (void(*)())dlsym(hModule, Function_name_OnInitialize);
+    pfn_OnShutdown = (void(*)())dlsym(hModule, Function_name_OnShutdown);
+    pfn_mexFunction = (void(*)(int, Parameter[], int, const Parameter[], struct IAppExtensionFunctions*))dlsym(hModule, Function_name_MexFunction);
     if (pfn_OnInitialize == NULL || pfn_OnShutdown == NULL || pfn_mexFunction == NULL)
     {
         dlclose(hModule);

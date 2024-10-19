@@ -117,7 +117,6 @@ jobs:
         shell: bash
         run: |
           cd tests/octave
-          ls -l ../../OctaveMex
           octave --eval "addpath('../../OctaveMex'),result=test('test_basic_operation.m'); if ~all([result.passed]), exit(1); else, exit(0); end"
           octave --eval "addpath('../../OctaveMex'),result=test('test_write.m'); if ~all([result.passed]), exit(1); else, exit(0); end"
       - name: Octave Unit-Tests (Windows)
