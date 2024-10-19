@@ -1,4 +1,4 @@
-% File: test_basic_operation.m
+% File: TestMEXlibCZI_Basic_Operation.m
 classdef TestMEXlibCZI_Basic_Operation < matlab.unittest.TestCase
 
     methods (Test)
