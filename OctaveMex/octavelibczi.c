@@ -19,7 +19,11 @@ then enables a workaround to use mxGetData and cast the pointer to the desired t
 to work, but it seems fishy and might be troublesome. It is therefore avoided, but this also means
 that the mex-file built will not work with Octave <= 6.4.0.
 */
-#define OCTAVEMEX_HAS_GET_TYPED 1
+#ifdef OCTAVEMEX_NO_GET_TYPED
+    #define OCTAVEMEX_HAS_GET_TYPED 0
+#else
+    #define OCTAVEMEX_HAS_GET_TYPED 1
+#endif
 
 static bool octaveMexIsNanOrInfDouble(double value)
 {
