@@ -24,10 +24,12 @@ jobs:
       matrix:
         # Note: We use the latest version of Ubuntu 24.04 in order to get a more recent version of Octave (we get 8.4 currently)
         #       We better should use a version >6.4, otherwise the Octave-mex-support seems to be missing some functions.
-        os: [ubuntu-24.04, windows-latest]  # Windows and Linux builds
+        os: [ubuntu-24.04, ubuntu-22.04, windows-latest]  # Windows and Linux builds
     outputs:
-      linuxx64_matlab_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_matlab_build }}
-      linuxx64_octave_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_octave_build }}
+      linuxx64_ubuntu24_matlab_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_ubuntu24_matlab_build }}
+      linuxx64_ubuntu24_octave_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_ubuntu24_octave_build }}
+      linuxx64_ubuntu22_matlab_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_ubuntu22_matlab_build }}
+      linuxx64_ubuntu22_octave_artifact: ${{ steps.prepare_linux_artifact.outputs.linuxx64_ubuntu22_octave_build }}
       windowsx64_matlab_artifact: ${{ steps.prepare_windows_matlab_artifact.outputs.windowsx64_matlab_build }}
       windowsx64_octave_artifact: ${{ steps.prepare_windows_octave_artifact.outputs.windowsx64_octave_build }}
     steps:
@@ -65,18 +67,30 @@ jobs:
         uses: matlab-actions/run-command@v2
         with:
           command: cd tests/MATLAB; results = runtests, assertSuccess(results);
-      - name: Prepare MATLAB artifact (Linux)
+      - name: Prepare MATLAB artifact (Linux Ubuntu24)
         id: prepare_linux_matlab_artifact
-        if: runner.os == 'Linux'
+        if: matrix.os == 'ubuntu-24.04'
         shell: bash
         run: |
           mkdir -p artifacts
-          name="MATLAB-MEXlibCZI-linux-x64-$(git describe --always)"
+          name="MATLAB-MEXlibCZI-linux-ubuntu24_x64-$(git describe --always)"
           mkdir -p artifacts/${name}
           cp build/MEXlibCZI/MEXlibCZI.mexa64 artifacts/${name}/
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          echo "linuxx64_matlab_build=${name}" >> "$GITHUB_OUTPUT"
+          echo "linuxx64_ubuntu24_matlab_build=${name}" >> "$GITHUB_OUTPUT"
+      - name: Prepare MATLAB artifact (Linux Ubuntu22)
+        id: prepare_linux_matlab_artifact
+        if: matrix.os == 'ubuntu-22.04'
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          name="MATLAB-MEXlibCZI-linux-ubuntu22_x64-$(git describe --always)"
+          mkdir -p artifacts/${name}
+          cp build/MEXlibCZI/MEXlibCZI.mexa64 artifacts/${name}/
+          echo "artifactName=${name}" >> "$GITHUB_ENV"
+          echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
+          echo "linuxx64_ubuntu22_matlab_build=${name}" >> "$GITHUB_OUTPUT"
       - name: install Octave (Windows)
         if: runner.os == 'Windows'
         shell: bash
@@ -184,19 +198,32 @@ jobs:
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "windowsx64_octave_build=${name}" >> "$GITHUB_OUTPUT"
-      - name: Prepare Octave-mex artifact (Linux)
+      - name: Prepare Octave-mex artifact (Linux Ubuntu24)
         id: prepare_linux_octave_artifact
-        if: runner.os == 'Linux'
+        if: matrix.os == 'ubuntu-24.04'
         shell: bash
         run: |
           mkdir -p artifacts
-          name="Octave-MEXlibCZI-linux-x64-$(git describe --always)"
+          name="Octave-MEXlibCZI-linux-ubuntu24_x64-$(git describe --always)"
           mkdir -p "artifacts/${name}"
           cp "${GITHUB_WORKSPACE}/OctaveMex/libmexlibczi.so" "artifacts/${name}/"
           cp "${GITHUB_WORKSPACE}/OctaveMex/octavelibczi.mex" "artifacts/${name}/"
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
-          echo "linuxx64_octave_build=${name}" >> "$GITHUB_OUTPUT"
+          echo "linuxx64_ubuntu24_octave_build=${name}" >> "$GITHUB_OUTPUT"
+      - name: Prepare Octave-mex artifact (Linux Ubuntu22)
+        id: prepare_linux_octave_artifact
+        if: matrix.os == 'ubuntu-24.04'
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          name="Octave-MEXlibCZI-linux-ubuntu22_x64-$(git describe --always)"
+          mkdir -p "artifacts/${name}"
+          cp "${GITHUB_WORKSPACE}/OctaveMex/libmexlibczi.so" "artifacts/${name}/"
+          cp "${GITHUB_WORKSPACE}/OctaveMex/octavelibczi.mex" "artifacts/${name}/"
+          echo "artifactName=${name}" >> "$GITHUB_ENV"
+          echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
+          echo "linuxx64_ubuntu22_octave_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Upload Octave-mex artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -212,7 +239,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Download All Artifacts
-        if: needs.build.outputs.linuxx64_matlab_artifact != '' || needs.build.outputs.windowsx64_matlab_artifact != '' || needs.build.outputs.linuxx64_octave_artifact != '' || needs.build.outputs.windowsx64_octave_artifact != ''
+        if: needs.build.outputs.linuxx64_ubuntu24_matlab_artifact != '' || needs.build.outputs.linuxx64_ubuntu22_matlab_artifact != '' || needs.build.outputs.windowsx64_matlab_artifact != '' || needs.build.outputs.linuxx64_ubuntu24_octave_artifact != '' || needs.build.outputs.linuxx64_ubuntu22_octave_artifact != '' || needs.build.outputs.windowsx64_octave_artifact != ''
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts  # download to a specific folder
