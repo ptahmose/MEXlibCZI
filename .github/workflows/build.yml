@@ -145,7 +145,7 @@ jobs:
           # Compare versions
           if [[ "$(printf '%s\n' "$octave_version" "$max_version" | sort -V | head -n 1)" == "$octave_version" ]]; then
               echo "Octave version is less than or equal to $max_version"
-              octave --eval "mkoctfile --mex octavelibczi.c -D OCTAVEMEX_NO_GET_TYPED"
+              octave --eval "mkoctfile --mex octavelibczi.c -DOCTAVEMEX_NO_GET_TYPED"
           else
               echo "Octave version is greater than $max_version"
               octave --eval "mkoctfile --mex octavelibczi.c"
