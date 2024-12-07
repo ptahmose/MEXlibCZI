@@ -123,8 +123,19 @@ jobs:
         shell: bash
         run: |
           cd OctaveMex
-          octave --version
-          octave --eval "mkoctfile --mex octavelibczi.c"
+          # Get the version of Octave
+          octave_version=$(octave --version | head -n 1 | awk '{print $NF}')
+          echo "Detected Octave version: $octave_version"
+          # Define the version to compare against - for versions <= 6.4.0, we want to define "OCTAVEMEX_NO_GET_TYPED" in order to not use functions not available in older versions
+          max_version="6.4.0"
+          # Compare versions
+          if [[ "$(printf '%s\n' "$octave_version" "$max_version" | sort -V | head -n 1)" == "$octave_version" ]]; then
+              echo "Octave version is less than or equal to $max_version"
+              octave --eval "mkoctfile --mex octavelibczi.c -D OCTAVEMEX_NO_GET_TYPED"
+          else
+              echo "Octave version is greater than $max_version"
+              octave --eval "mkoctfile --mex octavelibczi.c"
+          fi
           cp ../build/libmexlibczi/libmexlibczi.so .  # now, copy the libmexlibczi.so to this folder
       - name: Octave Unit-Tests (Linux)
         if: runner.os == 'Linux'
