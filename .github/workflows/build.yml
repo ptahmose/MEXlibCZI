@@ -68,7 +68,7 @@ jobs:
         with:
           command: cd tests/MATLAB; results = runtests, assertSuccess(results);
       - name: Prepare MATLAB artifact (Linux Ubuntu24)
-        id: prepare_linux_matlab_artifact
+        id: prepare_linux_ubuntu24_matlab_artifact
         if: matrix.os == 'ubuntu-24.04'
         shell: bash
         run: |
@@ -80,7 +80,7 @@ jobs:
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "linuxx64_ubuntu24_matlab_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Prepare MATLAB artifact (Linux Ubuntu22)
-        id: prepare_linux_matlab_artifact
+        id: prepare_linux_ubuntu22_matlab_artifact
         if: matrix.os == 'ubuntu-22.04'
         shell: bash
         run: |
@@ -199,7 +199,7 @@ jobs:
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "windowsx64_octave_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Prepare Octave-mex artifact (Linux Ubuntu24)
-        id: prepare_linux_octave_artifact
+        id: prepare_linux_ubuntu24_octave_artifact
         if: matrix.os == 'ubuntu-24.04'
         shell: bash
         run: |
@@ -212,8 +212,8 @@ jobs:
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "linuxx64_ubuntu24_octave_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Prepare Octave-mex artifact (Linux Ubuntu22)
-        id: prepare_linux_octave_artifact
-        if: matrix.os == 'ubuntu-24.04'
+        id: prepare_linux_ubuntu22_octave_artifact
+        if: matrix.os == 'ubuntu-22.04'
         shell: bash
         run: |
           mkdir -p artifacts
