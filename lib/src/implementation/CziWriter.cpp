@@ -54,7 +54,8 @@ void CziWriter::Close()
             display_settings.channelDisplaySettings[i] = channelDisplaySettings;
         }
 
-        MetadataUtils::WriteDisplaySettings(metadata_builder.get(), DisplaySettingsPOD::CreateIDisplaySettingSp(display_settings).get());
+        unique_ptr<libCZI::IDisplaySettings> display_settings_ptr(DisplaySettingsPOD::CreateIDisplaySetting(display_settings));
+        MetadataUtils::WriteDisplaySettings(metadata_builder.get(), display_settings_ptr.get());
     }
 
     auto xml = metadata_builder->GetXml(true);

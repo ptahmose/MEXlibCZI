@@ -36,5 +36,26 @@ classdef TestMEXlib_Write < matlab.unittest.TestCase
             MEXlibCZI ('Close',handle);
             delete('test2.czi');
         end
+
+        function testWriteMultiChannelCZIAndOpenItAndCheck(testCase)
+            handle=MEXlibCZI ('CreateCziWriter','test_multichannel_8ch.czi','x');
+            MEXlibCZI('AddSubBlock', handle, 'C00',[0,0,1024,768], 'gray8', uint8(randi([0,255], 1024, 768)), struct('M',0))
+            MEXlibCZI('AddSubBlock', handle, 'C01',[0,0,1024,768], 'gray8', uint8(randi([0,255], 1024, 768)), struct('M',0))
+            MEXlibCZI('AddSubBlock', handle, 'C02',[0,0,1024,768], 'gray8', uint8(randi([0,255], 1024, 768)), struct('M',0))
+            MEXlibCZI('AddSubBlock', handle, 'C03',[0,0,1024,768], 'gray8', uint8(randi([0,255], 1024, 768)), struct('M',0))
+            MEXlibCZI('AddSubBlock', handle, 'C04',[0,0,1024,768], 'gray8', uint8(randi([0,255], 1024, 768)), struct('M',0))
+            MEXlibCZI('AddSubBlock', handle, 'C05',[0,0,1024,768], 'gray8', uint8(randi([0,255], 1024, 768)), struct('M',0))
+            MEXlibCZI('AddSubBlock', handle, 'C06',[0,0,1024,768], 'gray8', uint8(randi([0,255], 1024, 768)), struct('M',0))
+            MEXlibCZI('AddSubBlock', handle, 'C07',[0,0,1024,768], 'gray8', uint8(randi([0,255], 1024, 768)), struct('M',0))
+            MEXlibCZI ('CloseCziWriter',handle);
+            handle = MEXlibCZI ('Open','test_multichannel_8ch.czi');
+            info = MEXlibCZI ('GetInfo', handle);
+            testCase.verifyTrue(isa(info.subblockcount, 'int32'));
+            testCase.verifyEqual(info.subblockcount, int32(8));
+            testCase.verifyClass(info.dimBounds.C, 'int32');
+            testCase.verifyEqual(info.dimBounds.C, int32([0, 8]));
+            MEXlibCZI ('Close',handle);
+            delete('test_multichannel_8ch.czi');
+        end
     end
 end
