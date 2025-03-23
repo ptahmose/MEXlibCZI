@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 3.11)
 
 set(MEXLIBCZI_MAJOR 0)
 set(MEXLIBCZI_MINOR 3)
-set(MEXLIBCZI_PATCH 4)
+set(MEXLIBCZI_PATCH 5)
 set(MEXLIBCZI_EXT "alpha")
 
 if(WIN32)

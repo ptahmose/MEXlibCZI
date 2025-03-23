@@ -185,6 +185,14 @@ Adds a subblock to the writer object.
 | 5          | 2d or 3d array of numbers  | The bitmap to be written into the subblock |
 | 6          | struct (optional) | property bag with options for the operation |
 
+The following pixel types are available (for argument #4):
+
+| Pixel type | Description |
+| --- | --- |
+| "gray8" | 8-bit grayscale |
+| "gray16" | 16-bit grayscale |
+| "bgr24" | 8-bit BGR color |
+
 The following options are available (for argument #6):
 
 | Option         | type    | Description |
