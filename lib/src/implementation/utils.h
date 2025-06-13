@@ -44,7 +44,7 @@ private:
     std::uint32_t width_{ 0 };
     std::uint32_t height_{ 0 };
     std::uint32_t stride_{ 0 };
-    std::atomic<int> lock_cnt = ATOMIC_VAR_INIT(0);
+    std::atomic<int> lock_cnt_ = ATOMIC_VAR_INIT(0);
 public:
     Bitmap(libCZI::PixelType pixel_type, std::uint32_t width, std::uint32_t height);
     virtual ~Bitmap();
