@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstdint>
+#include <atomic>
 #include "CziReader.h"
 #include "CziWriter.h"
 #include <app_api.h>
@@ -43,6 +44,7 @@ private:
     std::uint32_t width_{ 0 };
     std::uint32_t height_{ 0 };
     std::uint32_t stride_{ 0 };
+    std::atomic<int> lock_cnt = ATOMIC_VAR_INIT(0);
 public:
     Bitmap(libCZI::PixelType pixel_type, std::uint32_t width, std::uint32_t height);
     virtual ~Bitmap();
@@ -50,4 +52,5 @@ public:
     virtual libCZI::IntSize GetSize() const;
     virtual libCZI::BitmapLockInfo  Lock();
     virtual void Unlock();
+    virtual int GetLockCount() const;
 };

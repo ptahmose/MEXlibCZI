@@ -348,6 +348,7 @@ libCZI::IntSize Bitmap::GetSize() const
 
 libCZI::BitmapLockInfo  Bitmap::Lock()
 {
+    std::atomic_fetch_add(&this->lock_cnt_, 1);
     libCZI::BitmapLockInfo bitmapLockInfo;
     bitmapLockInfo.ptrData = this->ptrData_;
     bitmapLockInfo.ptrDataRoi = this->ptrData_;
@@ -358,5 +359,10 @@ libCZI::BitmapLockInfo  Bitmap::Lock()
 
 void Bitmap::Unlock()
 {
-    // nothing to do
+    std::atomic_fetch_sub(&this->lock_cnt_, 1);
+}
+
+int Bitmap::GetLockCount() const
+{
+    return std::atomic_load(&this->lock_cnt_);
 }
