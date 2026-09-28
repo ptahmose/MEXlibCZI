@@ -7,7 +7,7 @@ set(LIBCZI_BUILD_UNITTESTS OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
   libCZI
-  GIT_REPOSITORY https://github.com/ptahmose/libCZI.git
+  GIT_REPOSITORY https://github.com/ptahmose/libczi-zeiss.git
   #GIT_REPOSITORY https://github.com/ZEISS/libczi
   GIT_TAG        jbl/XT
 )
