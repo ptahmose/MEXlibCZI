@@ -9,7 +9,7 @@ FetchContent_Declare(
   libCZI
   GIT_REPOSITORY https://github.com/ptahmose/libCZI.git
   #GIT_REPOSITORY https://github.com/ZEISS/libczi
-  GIT_TAG        origin/jbl/XT
+  GIT_TAG        jbl/XT
 )
 
 # Fetch the content and make it available
