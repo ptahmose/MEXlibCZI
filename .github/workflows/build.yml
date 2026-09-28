@@ -34,16 +34,16 @@ jobs:
       windowsx64_octave_artifact: ${{ steps.prepare_windows_octave_artifact.outputs.windowsx64_octave_build }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up MATLAB
-        uses: matlab-actions/setup-matlab@v2  
+        uses: matlab-actions/setup-matlab@v3
       - name: run build (Linux)
         if: runner.os == 'Linux'
         shell: bash
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release 
+          cmake .. -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release -j
       - name: run build (Windows)
         if: runner.os == 'Windows'
@@ -181,7 +181,7 @@ jobs:
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "windowsx64_matlab_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Upload MATLAB-mex artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           path: ${{ env.artifactPath }}/
           name: ${{ env.artifactName }}
@@ -225,7 +225,7 @@ jobs:
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "linuxx64_ubuntu22_octave_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Upload Octave-mex artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           path: ${{ env.artifactPath }}/
           name: ${{ env.artifactName }}
@@ -237,7 +237,7 @@ jobs:
     if: inputs.create_release == 'true'  # Only run if release is selected
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Download All Artifacts
         if: needs.build.outputs.linuxx64_ubuntu24_matlab_artifact != '' || needs.build.outputs.linuxx64_ubuntu22_matlab_artifact != '' || needs.build.outputs.windowsx64_matlab_artifact != '' || needs.build.outputs.linuxx64_ubuntu24_octave_artifact != '' || needs.build.outputs.linuxx64_ubuntu22_octave_artifact != '' || needs.build.outputs.windowsx64_octave_artifact != ''
         uses: actions/download-artifact@v4
