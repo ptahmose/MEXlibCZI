@@ -8,7 +8,7 @@ set(LIBCZI_BUILD_UNITTESTS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
   libCZI
   GIT_REPOSITORY https://github.com/ZEISS/libczi
-  GIT_TAG        main
+  GIT_TAG        f8f0ccc12f8193a22bf5a093f4f29f75ffc05a7a
 )
 
 # Fetch the content and make it available
