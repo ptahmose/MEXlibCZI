@@ -64,7 +64,7 @@ jobs:
             cp "build/MEXlibCZI/MEXlibCZI.mexa64" tests/MATLAB/
           fi
       - name: Run MATLAB unit tests
-        uses: matlab-actions/run-command@v2
+        uses: matlab-actions/run-command@v3
         with:
           command: cd tests/MATLAB; results = runtests, assertSuccess(results);
       - name: Prepare MATLAB artifact (Linux Ubuntu24)
@@ -181,7 +181,7 @@ jobs:
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "windowsx64_matlab_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Upload MATLAB-mex artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           path: ${{ env.artifactPath }}/
           name: ${{ env.artifactName }}
@@ -225,7 +225,7 @@ jobs:
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "linuxx64_ubuntu22_octave_build=${name}" >> "$GITHUB_OUTPUT"
       - name: Upload Octave-mex artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           path: ${{ env.artifactPath }}/
           name: ${{ env.artifactName }}
