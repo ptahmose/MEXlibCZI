@@ -38,7 +38,7 @@ void MexFunction_Open_Execute(MatlabArgs* args)
     auto reader = CziReaderManager::GetInstance().GetInstance(id);
     try
     {
-        VDBGPRINT((CDbg::Level::Trace, "MexFunction_Open_Execute: attempt to open file \"%s\".", filename));
+        VDBGPRINT((CDbg::Level::Trace, "MexFunction_Open_Execute: attempt to open file \"%s\".", filename.c_str()));
         reader->Open(filename, open_options);
     }
     catch (exception& exception)
