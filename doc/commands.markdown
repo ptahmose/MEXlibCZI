@@ -29,6 +29,17 @@ The function returns a struct containing version information. It does not take a
 ## Open
 
 The specified file (second argument) is opened, and a handle for the document is returned.
+An optional third argument supplies libCZI reader open options as a character string
+of semicolon-separated `key=value` pairs:
+
+```matlab
+h = MEXlibCZI('Open', 'sample.czi', 'laxSubblockCoordinateChecks=false;swapTAndY=true;subBlockDirectoryInfoDiscrepancy=ignore');
+```
+
+Omitting this argument or passing `''` uses libCZI's default open options.
+Unspecified options retain their defaults. Keys and values are case-sensitive.
+Unknown keys are ignored by libCZI; invalid syntax or values produce an error.
+The same optional argument is supported by `octavelibczi`.
 
 ![CZIGetInfo sample](pictures/open_sample.PNG)
 
@@ -53,7 +64,7 @@ Get information about the specified CZI-document. A struct is returned.
 
 ## GetScaling
 
-Retrieve scaling information from the specified document. The scaling is given in units of µm. 
+Retrieve scaling information from the specified document. The scaling is given in units of ï¿½m. 
 If no information is available, the property will have the value of NaN.
 
 ![CZIGetInfo sample](pictures/getscaling_sample.PNG)

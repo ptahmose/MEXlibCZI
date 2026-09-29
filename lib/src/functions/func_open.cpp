@@ -20,18 +20,26 @@ void MexFunction_Open_CheckArguments(MatlabArgs* args)
     {
         throw invalid_argument("Expecting a string as 2nd argument");
     }
+
+    if (args->nrhs >= 3 && !args->app_functions->pfn_IsChar(args->prhs[2]))
+    {
+        throw invalid_argument("Expecting a string as 3rd argument");
+    }
 }
 
 void MexFunction_Open_Execute(MatlabArgs* args)
 {
     const auto filename = CArgsUtils::GetAsUtf8String(args->prhs[1], args->app_functions);
+    const auto open_options = args->nrhs >= 3
+        ? CArgsUtils::GetAsUtf8String(args->prhs[2], args->app_functions)
+        : string();
 
     int id = CziReaderManager::GetInstance().CreateNewInstance();
     auto reader = CziReaderManager::GetInstance().GetInstance(id);
     try
     {
         VDBGPRINT((CDbg::Level::Trace, "MexFunction_Open_Execute: attempt to open file \"%s\".", filename));
-        reader->Open(filename);
+        reader->Open(filename, open_options);
     }
     catch (exception& exception)
     {

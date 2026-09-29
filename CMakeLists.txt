@@ -4,7 +4,7 @@
 cmake_minimum_required (VERSION 3.11)
 
 set(MEXLIBCZI_MAJOR 0)
-set(MEXLIBCZI_MINOR 4)
+set(MEXLIBCZI_MINOR 5)
 set(MEXLIBCZI_PATCH 0)
 set(MEXLIBCZI_EXT "alpha")
 
