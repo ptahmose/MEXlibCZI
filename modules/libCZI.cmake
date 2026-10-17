@@ -9,7 +9,8 @@ FetchContent_Declare(
   libCZI
   GIT_REPOSITORY https://github.com/ptahmose/libczi-zeiss.git
   #GIT_REPOSITORY https://github.com/ZEISS/libczi
-  GIT_TAG        jbl/XT
+  #GIT_TAG        jbl/XT
+  GIT_TAG       jbl/XT_XZ-subblock-workaround_and_compatibility
 )
 
 # Fetch the content and make it available
