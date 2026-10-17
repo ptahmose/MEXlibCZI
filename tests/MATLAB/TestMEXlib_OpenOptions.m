@@ -9,7 +9,7 @@ classdef TestMEXlib_OpenOptions < matlab.unittest.TestCase
             MEXlibCZI('CloseCziWriter', writer);
 
             variants = {{}, {''}, ...
-                {'laxSubblockCoordinateChecks=false;swapTAndY=true;subBlockDirectoryInfoDiscrepancy=ignore'}};
+                {'laxSubblockCoordinateChecks=false;dimensionSwapWorkaround=XtSubblocks'}};
             for i = 1:numel(variants)
                 args = variants{i};
                 handle = MEXlibCZI('Open', filename, args{:});
