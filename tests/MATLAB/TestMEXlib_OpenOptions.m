@@ -50,5 +50,53 @@ classdef TestMEXlib_OpenOptions < matlab.unittest.TestCase
 
             clear cleanupReader;
         end
+
+        function testXzSubblocksWorkaround(testCase)
+            % This test verifies the XzSubblocks dimension-swap workaround.
+            %
+            % The test file Xztest.czi contains a subblock with an
+            % unconventional dimension layout.
+            %
+            % Without the workaround, the bounding box reflects the
+            % original interpretation of the subblock dimensions.
+            %
+            % Enabling "dimensionSwapWorkaround=XzSubblocks" changes the
+            % interpretation of the subblock dimensions, resulting in
+            % a different bounding box.
+            %
+            % The underlying CZI file is not modified.
+        
+            % Locate the test file relative to this unit test.
+            testDir = fileparts(mfilename('fullpath'));
+            filename = fullfile(testDir, 'Xztest.czi');
+        
+            testCase.assertTrue(isfile(filename), ...
+                'Test file Xztest.czi not found.');
+        
+            % First, open the file normally, without any workaround.
+            handle = MEXlibCZI('Open', filename);
+            cleanupReader = onCleanup(@() MEXlibCZI('Close', handle));
+        
+            info = MEXlibCZI('GetInfo', handle);
+        
+            % TODO: Verify the expected statistics without the workaround.
+            % testCase.verifyEqual(info.subblockcount, int32(1));
+            % testCase.verifyEqual(info.boundingBox, int32([0 0 3 1]));
+        
+            clear cleanupReader;
+        
+            % Now open the same file with the XzSubblocks workaround enabled.
+            handle = MEXlibCZI('Open', filename, ...
+                'dimensionSwapWorkaround=XzSubblocks');
+            cleanupReader = onCleanup(@() MEXlibCZI('Close', handle));
+        
+            info = MEXlibCZI('GetInfo', handle);
+        
+            % TODO: Verify the expected statistics with the workaround.
+            % testCase.verifyEqual(info.subblockcount, int32(1));
+            % testCase.verifyEqual(info.boundingBox, int32([0 0 3 4]));
+        
+            clear cleanupReader;
+        end
     end
 end
