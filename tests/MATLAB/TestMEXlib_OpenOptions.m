@@ -79,9 +79,8 @@ classdef TestMEXlib_OpenOptions < matlab.unittest.TestCase
         
             info = MEXlibCZI('GetInfo', handle);
         
-            % TODO: Verify the expected statistics without the workaround.
-            % testCase.verifyEqual(info.subblockcount, int32(1));
-            % testCase.verifyEqual(info.boundingBox, int32([0 0 3 1]));
+            testCase.verifyEqual(info.subblockcount, int32(1));
+            testCase.verifyEqual(info.boundingBox, int32([0 0 3 1]));
         
             clear cleanupReader;
         
@@ -92,9 +91,8 @@ classdef TestMEXlib_OpenOptions < matlab.unittest.TestCase
         
             info = MEXlibCZI('GetInfo', handle);
         
-            % TODO: Verify the expected statistics with the workaround.
-            % testCase.verifyEqual(info.subblockcount, int32(1));
-            % testCase.verifyEqual(info.boundingBox, int32([0 0 3 4]));
+            testCase.verifyEqual(info.subblockcount, int32(1));
+            testCase.verifyEqual(info.boundingBox, int32([0 0 3 4]));
         
             clear cleanupReader;
         end
