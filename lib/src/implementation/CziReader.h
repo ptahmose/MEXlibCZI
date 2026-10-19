@@ -23,7 +23,7 @@ public:
     CziReader() : reader(libCZI::CreateCZIReader())
     {}
 
-    void Open(const std::string& utf8_filename);
+    void Open(const std::string& utf8_filename, const std::string& open_options = "");
 
     Parameter GetInfo(IAppExtensionFunctions* app_functions);
     std::string GetMetadataXml();
