@@ -33,7 +33,7 @@ An optional third argument supplies libCZI reader open options as a character st
 of semicolon-separated `key=value` pairs:
 
 ```matlab
-h = MEXlibCZI('Open', 'sample.czi', 'laxSubblockCoordinateChecks=false;swapTAndY=true;subBlockDirectoryInfoDiscrepancy=ignore');
+h = MEXlibCZI('Open', 'sample.czi', 'dimensionSwapWorkaround=XtSubblocks');
 ```
 
 Omitting this argument or passing `''` uses libCZI's default open options.
@@ -64,7 +64,7 @@ Get information about the specified CZI-document. A struct is returned.
 
 ## GetScaling
 
-Retrieve scaling information from the specified document. The scaling is given in units of �m. 
+Retrieve scaling information from the specified document. The scaling is given in units of µm. 
 If no information is available, the property will have the value of NaN.
 
 ![CZIGetInfo sample](pictures/getscaling_sample.PNG)
