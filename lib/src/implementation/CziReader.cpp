@@ -777,7 +777,8 @@ Parameter CziReader::QuerySubBlockDirectory(const SubBlockDirectoryFilter& filte
 				physical_size_ptr[1 * count + pos] = static_cast<int32_t>(info.physicalSize.h);
 				mindex_ptr[pos] = info.IsMindexValid() ? info.mIndex : kInvalidValue;
 				++pos;
-				return true;
+				// Stop as soon as all elements counted in the first pass have been found.
+				return pos < count;
 			});
 	}
 
