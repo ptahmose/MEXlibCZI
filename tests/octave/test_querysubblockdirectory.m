@@ -64,5 +64,16 @@
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, 42)");
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Roi', [1 2]))");
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', 1))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', sparse([0 1]))))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Roi', sparse([9 9 5 5])))");
 %! octavelibczi ('Close', handle);
 %! delete('test_qsbd_args.czi');
+
+%!test
+%! handle = create_test_file('test_qsbd_uint32.czi');
+%! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', uint32(0), 'C', uint32([0 1]))));
+%! assert(sortrows(double(d.Coordinate)), [0 0; 0 1]);
+%! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Roi', uint32([9 9 5 5])));
+%! assert(d.LogicalRect, int32([10 10 2 2]));
+%! octavelibczi ('Close', handle);
+%! delete('test_qsbd_uint32.czi');

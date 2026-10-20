@@ -87,6 +87,20 @@ classdef TestMEXlib_QuerySubBlockDirectory < matlab.unittest.TestCase
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, 42), ?MException);
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Roi', [1 2])), ?MException);
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', 1)), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', sparse([0 1])))), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Roi', sparse([9 9 5 5]))), ?MException);
+        end
+
+        function testUint32CoordinateSetAndRoi(testCase)
+            [handle, cleanupFile] = createTestFile('test_qsbd_uint32.czi'); %#ok<ASGLU>
+            cleanupReader = onCleanup(@() MEXlibCZI('Close', handle)); %#ok<NASGU>
+
+            d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', uint32(0), 'C', uint32([0 1]))));
+            testCase.verifyEqual(size(d.Index), [2 1]);
+            testCase.verifyEqual(sortrows(d.Coordinate), int32([0 0; 0 1]));
+
+            d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Roi', uint32([9 9 5 5])));
+            testCase.verifyEqual(d.LogicalRect, int32([10 10 2 2]));
         end
     end
 end

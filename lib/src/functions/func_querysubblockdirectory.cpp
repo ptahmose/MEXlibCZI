@@ -36,9 +36,9 @@ namespace
                     continue;
                 }
 
-                if (!CArgsUtils::IsNumericArrayOfMinSize(field, 1, app_functions))
+                if (!CArgsUtils::IsNumericArrayOfMinSize(field, 1, app_functions) || app_functions->pfn_IsSparse(field))
                 {
-                    throw invalid_argument(string("The field 'Coordinate.") + field_name + "' must be a non-empty numeric array.");
+                    throw invalid_argument(string("The field 'Coordinate.") + field_name + "' must be a non-empty, non-sparse numeric array.");
                 }
 
                 const size_t count = app_functions->pfn_GetNumberOfElements(field);
@@ -58,7 +58,7 @@ namespace
         if (const auto roi_field = app_functions->pfn_GetField(filter_argument, "Roi"); roi_field != nullptr)
         {
             libCZI::IntRect roi;
-            if (!CArgsUtils::IsNumericArrayOfMinSize(roi_field, 4, app_functions) || !CArgsUtils::TryGetIntRect(roi_field, &roi, app_functions))
+            if (!CArgsUtils::IsNumericArrayOfMinSize(roi_field, 4, app_functions) || app_functions->pfn_IsSparse(roi_field) || !CArgsUtils::TryGetIntRect(roi_field, &roi, app_functions))
             {
                 throw invalid_argument("The field 'Roi' must be a numeric array [x y width height] with non-negative width and height.");
             }
