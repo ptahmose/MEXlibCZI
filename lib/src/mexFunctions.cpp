@@ -15,6 +15,7 @@
 #include "functions/func_createcziwriter.h"
 #include "functions/func_addsubblock.h"
 #include "functions/func_closecziwriter.h"
+#include "functions/func_querysubblockdirectory.h"
 
 /*static*/const CMexFunctions::MexFuncItem CMexFunctions::funcItems[] =
 {
@@ -33,6 +34,7 @@
     {u8"GetBitmapFromSubBlock", {MexFunction_GetBitmapFromSubBlock_CheckArguments,MexFunction_GetBitmapFromSubBlock_Execute}},
     {u8"GetMetadataFromSubBlock", {MexFunction_GetMetadataFromSubBlock_CheckArguments,MexFunction_GetMetadataFromSubBlock_Execute}},
     {u8"ReleaseSubBlock", {MexFunction_ReleaseSubBlock_CheckArguments,MexFunction_ReleaseSubBlock_Execute}},
+    {u8"QuerySubBlockDirectory", {MexFunction_QuerySubBlockDirectory_CheckArguments,MexFunction_QuerySubBlockDirectory_Execute}},
     {u8"CreateCziWriter", {MexFunction_CreateCziWriter_CheckArguments, MexFunction_CreateCziWriter_Execute}},
     {u8"AddSubBlock", {MexFunction_AddSubBlock_CheckArguments, MexFunction_AddSubBlock_Execute}},
     {u8"CloseCziWriter", {MexFunction_CloseCziWriter_CheckArguments, MexFunction_CloseCziWriter_Execute}},

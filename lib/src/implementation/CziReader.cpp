@@ -1,6 +1,8 @@
 #include "CziReader.h"
 #include "inc_libczi.h"
 #include <locale>
+#include <algorithm>
+#include <limits>
 
 #include "CziUtilities.h"
 #include <app_api.h>
@@ -641,6 +643,140 @@ Parameter CziReader::GetBitmapFromSubBlock(int subBlkHandle, IAppExtensionFuncti
 bool CziReader::ReleaseSubBlock(int subBlkHandle)
 {
 	return this->sbBlkStore.RemoveSubBlock(subBlkHandle);
+}
+
+Parameter CziReader::QuerySubBlockDirectory(const SubBlockDirectoryFilter& filter, IAppExtensionFunctions* app_functions)
+{
+	const libCZI::IntRect* roi = filter.roi.has_value() ? &filter.roi.value() : nullptr;
+
+	const auto matches_coordinate_filter = [&filter](const libCZI::SubBlockInfo& info)->bool
+	{
+		for (const auto& item : filter.coordinate)
+		{
+			int value;
+			if (!info.coordinate.TryGetPosition(item.first, &value) ||
+				std::find(item.second.cbegin(), item.second.cend(), value) == item.second.cend())
+			{
+				return false;
+			}
+		}
+
+		return true;
+	};
+
+	// First pass: determine the number of selected subblocks and the union of the dimensions they have.
+	// The subblock directory is in memory, so this is cheap, and it allows us to fill the result arrays
+	// directly in the second pass without any intermediate copy.
+	constexpr int kMaxDimension = static_cast<int>(libCZI::DimensionIndex::MaxDim);
+	size_t count = 0;
+	bool dimension_present[kMaxDimension + 1] = {};
+	this->reader->EnumSubset(
+		nullptr,
+		roi,
+		filter.only_layer0,
+		[&](int, const libCZI::SubBlockInfo& info)->bool
+		{
+			if (matches_coordinate_filter(info))
+			{
+				++count;
+				for (int i = static_cast<int>(libCZI::DimensionIndex::MinDim); i <= kMaxDimension; ++i)
+				{
+					if (info.coordinate.IsValid(static_cast<libCZI::DimensionIndex>(i)))
+					{
+						dimension_present[i] = true;
+					}
+				}
+			}
+
+			return true;
+		});
+
+	vector<libCZI::DimensionIndex> dimensions;
+	string dimension_chars;
+	for (int i = static_cast<int>(libCZI::DimensionIndex::MinDim); i <= kMaxDimension; ++i)
+	{
+		if (dimension_present[i])
+		{
+			const auto dim = static_cast<libCZI::DimensionIndex>(i);
+			dimensions.push_back(dim);
+			dimension_chars.push_back(libCZI::Utils::DimensionToChar(dim));
+		}
+	}
+
+	constexpr int32_t kInvalidValue = numeric_limits<int32_t>::min();
+
+	const Parameter index_array = app_functions->pfn_CreateNumericMatrixReal(count, 1, AppExtensionClassId_Int32);
+	const Parameter mode_array = app_functions->pfn_CreateNumericMatrixReal(count, 1, AppExtensionClassId_Uint8);
+	const Parameter pixeltype_array = app_functions->pfn_CreateNumericMatrixReal(count, 1, AppExtensionClassId_Uint8);
+	const Parameter coordinate_array = app_functions->pfn_CreateNumericMatrixReal(count, dimensions.size(), AppExtensionClassId_Int32);
+	const Parameter logical_rect_array = app_functions->pfn_CreateNumericMatrixReal(count, 4, AppExtensionClassId_Int32);
+	const Parameter physical_size_array = app_functions->pfn_CreateNumericMatrixReal(count, 2, AppExtensionClassId_Int32);
+	const Parameter mindex_array = app_functions->pfn_CreateNumericMatrixReal(count, 1, AppExtensionClassId_Int32);
+
+	if (count > 0)
+	{
+		int32_t* const index_ptr = app_functions->pfn_GetInt32s(index_array);
+		uint8_t* const mode_ptr = app_functions->pfn_GetUint8s(mode_array);
+		uint8_t* const pixeltype_ptr = app_functions->pfn_GetUint8s(pixeltype_array);
+		int32_t* const coordinate_ptr = dimensions.empty() ? nullptr : app_functions->pfn_GetInt32s(coordinate_array);
+		int32_t* const logical_rect_ptr = app_functions->pfn_GetInt32s(logical_rect_array);
+		int32_t* const physical_size_ptr = app_functions->pfn_GetInt32s(physical_size_array);
+		int32_t* const mindex_ptr = app_functions->pfn_GetInt32s(mindex_array);
+
+		// Note: MATLAB arrays are in column-major order, i.e. element (row, column) is found at "column * count + row".
+		size_t pos = 0;
+		this->reader->EnumSubset(
+			nullptr,
+			roi,
+			filter.only_layer0,
+			[&](int index, const libCZI::SubBlockInfo& info)->bool
+			{
+				if (!matches_coordinate_filter(info))
+				{
+					return true;
+				}
+
+				if (pos >= count)
+				{
+					return false;
+				}
+
+				index_ptr[pos] = index;
+				mode_ptr[pos] = static_cast<uint8_t>(info.GetCompressionMode());
+				pixeltype_ptr[pos] = static_cast<uint8_t>(info.pixelType);
+				for (size_t d = 0; d < dimensions.size(); ++d)
+				{
+					int value;
+					coordinate_ptr[d * count + pos] = info.coordinate.TryGetPosition(dimensions[d], &value) ? value : kInvalidValue;
+				}
+
+				logical_rect_ptr[0 * count + pos] = info.logicalRect.x;
+				logical_rect_ptr[1 * count + pos] = info.logicalRect.y;
+				logical_rect_ptr[2 * count + pos] = info.logicalRect.w;
+				logical_rect_ptr[3 * count + pos] = info.logicalRect.h;
+				physical_size_ptr[0 * count + pos] = static_cast<int32_t>(info.physicalSize.w);
+				physical_size_ptr[1 * count + pos] = static_cast<int32_t>(info.physicalSize.h);
+				mindex_ptr[pos] = info.IsMindexValid() ? info.mIndex : kInvalidValue;
+				++pos;
+				return true;
+			});
+	}
+
+	static const char* field_names[] = { "Index", "Mode", "Pixeltype", "CoordinateDimensions", "Coordinate", "LogicalRect", "PhysicalSize", "MIndex" };
+	const Parameter s = app_functions->pfn_CreateStructArray(
+		2,
+		MexUtils::Dims_1_by_1,
+		static_cast<int>(sizeof(field_names) / sizeof(field_names[0])),
+		field_names);
+	app_functions->pfn_SetFieldByNumber(s, 0, 0, index_array);
+	app_functions->pfn_SetFieldByNumber(s, 0, 1, mode_array);
+	app_functions->pfn_SetFieldByNumber(s, 0, 2, pixeltype_array);
+	app_functions->pfn_SetFieldByNumber(s, 0, 3, app_functions->pfn_CreateString(dimension_chars.c_str()));
+	app_functions->pfn_SetFieldByNumber(s, 0, 4, coordinate_array);
+	app_functions->pfn_SetFieldByNumber(s, 0, 5, logical_rect_array);
+	app_functions->pfn_SetFieldByNumber(s, 0, 6, physical_size_array);
+	app_functions->pfn_SetFieldByNumber(s, 0, 7, mindex_array);
+	return s;
 }
 
 /*static*/Parameter CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo, IAppExtensionFunctions* app_functions)

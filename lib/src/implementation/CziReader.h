@@ -4,6 +4,9 @@
 #include <mutex>
 #include <memory>
 #include <array>
+#include <map>
+#include <optional>
+#include <vector>
 #include "CziReaderSbBlkStore.h"
 //#include "mexapi.h"
 #include <app_api.h>
@@ -44,6 +47,26 @@ public:
     Parameter GetMetadataFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
     Parameter GetBitmapFromSubBlock(int subBlkHandle, IAppExtensionFunctions* app_functions);
     bool    ReleaseSubBlock(int subBlkHandle);
+
+    /// Describes which subblocks are to be returned by QuerySubBlockDirectory. All members are optional;
+    /// a default-constructed instance selects all subblocks.
+    struct SubBlockDirectoryFilter
+    {
+        /// For each dimension in this map, the subblock's coordinate must be one of the given values.
+        /// A subblock which does not have the dimension at all does not match.
+        std::map<libCZI::DimensionIndex, std::vector<int>> coordinate;
+
+        /// If set, only subblocks whose logical rectangle intersects this ROI are selected.
+        std::optional<libCZI::IntRect> roi;
+
+        /// If true, only subblocks of pyramid-layer 0 are selected.
+        bool only_layer0{ false };
+    };
+
+    /// Queries the subblock directory (which is held in memory, so no file I/O is incurred) and returns
+    /// the information about the selected subblocks as a struct of arrays (see documentation of the
+    /// "QuerySubBlockDirectory" command). The order of the subblocks is not specified.
+    Parameter QuerySubBlockDirectory(const SubBlockDirectoryFilter& filter, IAppExtensionFunctions* app_functions);
 private:
     static Parameter ConvertToMatlabStruct(const libCZI::IDimBounds* bounds, IAppExtensionFunctions* app_functions);
 

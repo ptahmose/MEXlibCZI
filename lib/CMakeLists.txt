@@ -54,7 +54,9 @@ set (libSourceFiles
 			"src/functions/func_addsubblock.cpp" 
 			"src/functions/func_addsubblock.h" 
 			"src/functions/func_closecziwriter.cpp" 
-			"src/functions/func_closecziwriter.h")
+			"src/functions/func_closecziwriter.h"
+			"src/functions/func_querysubblockdirectory.cpp"
+			"src/functions/func_querysubblockdirectory.h")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
  set(lib_ENABLE_LOGGING 1)
