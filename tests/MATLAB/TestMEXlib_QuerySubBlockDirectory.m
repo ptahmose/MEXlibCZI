@@ -89,6 +89,12 @@ classdef TestMEXlib_QuerySubBlockDirectory < matlab.unittest.TestCase
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', 1)), ?MException);
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', sparse([0 1])))), ?MException);
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Roi', sparse([9 9 5 5]))), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 0.6))), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', single(0.5)))), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Roi', [9.5 9 5 5])), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('OnlyLayer0', [1 0])), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('OnlyLayer0', sparse(1))), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', sparse(handle)), ?MException);
         end
 
         function testUint32CoordinateSetAndRoi(testCase)

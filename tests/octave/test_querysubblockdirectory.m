@@ -66,6 +66,12 @@
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', 1))");
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', sparse([0 1]))))");
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Roi', sparse([9 9 5 5])))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 0.6)))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', single(0.5))))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Roi', [9.5 9 5 5]))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('OnlyLayer0', [1 0]))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('OnlyLayer0', sparse(1)))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', sparse(handle))");
 %! octavelibczi ('Close', handle);
 %! delete('test_qsbd_args.czi');
 
