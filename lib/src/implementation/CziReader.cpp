@@ -648,8 +648,9 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
 Parameter CziReader::QuerySubBlockDirectory(const SubBlockDirectoryFilter& filter, IAppExtensionFunctions* app_functions)
 {
 	// Design notes:
-	// - The ROI and pyramid-layer-0 criteria are delegated to libCZI's EnumSubset; the coordinate-set
-	//   criterion is not expressible there (it only takes a single coordinate), so we apply it ourselves.
+	// - The ROI and pyramid-layer-0 criteria are delegated to libCZI's EnumSubset; the coordinate criterion
+	//   is not expressible there (it only takes a single value per dimension, not an interval), so we apply
+	//   it ourselves, with one range check per dimension and subblock.
 	// - The result is a struct of arrays with one row per subblock. Since the subblocks may have different
 	//   sets of dimensions, "Coordinate" is a matrix over the union of dimensions (named by
 	//   "CoordinateDimensions"), where a dimension the subblock does not have is marked with INT32_MIN.
@@ -657,15 +658,23 @@ Parameter CziReader::QuerySubBlockDirectory(const SubBlockDirectoryFilter& filte
 	//   can be allocated with their final size; no ordering is guaranteed (it is the libCZI enumeration order).
 	const libCZI::IntRect* roi = filter.roi.has_value() ? &filter.roi.value() : nullptr;
 
-	// Checks whether the subblock's coordinate has all dimensions of the filter, with a value that is
-	// contained in the filter's set for the dimension.
-	const auto matches_coordinate_filter = [&filter](const libCZI::SubBlockInfo& info)->bool
+	struct DimensionInterval { libCZI::DimensionIndex dimension; int64_t start; int64_t end; };
+	vector<DimensionInterval> intervals;
+	filter.coordinate.EnumValidDimensions(
+		[&intervals](libCZI::DimensionIndex dim, int start, int size)->bool
+		{
+			intervals.push_back({ dim, start, static_cast<int64_t>(start) + size });
+			return true;
+		});
+
+	// Checks whether the subblock's coordinate has all dimensions of the filter, with a value within
+	// the interval given for the dimension.
+	const auto matches_coordinate_filter = [&intervals](const libCZI::SubBlockInfo& info)->bool
 	{
-		for (const auto& item : filter.coordinate)
+		for (const auto& item : intervals)
 		{
 			int value;
-			if (!info.coordinate.TryGetPosition(item.first, &value) ||
-				std::find(item.second.cbegin(), item.second.cend(), value) == item.second.cend())
+			if (!info.coordinate.TryGetPosition(item.dimension, &value) || value < item.start || value >= item.end)
 			{
 				return false;
 			}

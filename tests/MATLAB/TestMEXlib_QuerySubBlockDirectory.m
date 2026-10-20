@@ -42,9 +42,14 @@ classdef TestMEXlib_QuerySubBlockDirectory < matlab.unittest.TestCase
             testCase.verifyEqual(size(d.Index), [2 1]);
             testCase.verifyEqual(sortrows(d.Coordinate), int32([0 1; 1 1]));
 
-            d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', [0 1], 'C', 0)));
+            d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', [0 2], 'C', 0)));
             testCase.verifyEqual(size(d.Index), [2 1]);
             testCase.verifyEqual(sortrows(d.Coordinate), int32([0 0; 1 0]));
+
+            % an interval not starting at zero
+            d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', [1 5], 'C', [0 1])));
+            testCase.verifyEqual(size(d.Index), [1 1]);
+            testCase.verifyEqual(d.Coordinate, int32([1 0]));
 
             % the returned index can be used to retrieve the bitmap
             d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', 1, 'C', 1)));
@@ -92,6 +97,10 @@ classdef TestMEXlib_QuerySubBlockDirectory < matlab.unittest.TestCase
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 0.6))), ?MException);
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', single(0.5)))), ?MException);
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Roi', [9.5 9 5 5])), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', [0 0]))), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', [0 1 2]))), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', single(2147483648)))), ?MException);
+            testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('Roi', single([2147483648 0 1 1]))), ?MException);
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('OnlyLayer0', [1 0])), ?MException);
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', handle, struct('OnlyLayer0', sparse(1))), ?MException);
             testCase.verifyError(@() MEXlibCZI('QuerySubBlockDirectory', sparse(handle)), ?MException);
@@ -101,7 +110,7 @@ classdef TestMEXlib_QuerySubBlockDirectory < matlab.unittest.TestCase
             [handle, cleanupFile] = createTestFile('test_qsbd_uint32.czi'); %#ok<ASGLU>
             cleanupReader = onCleanup(@() MEXlibCZI('Close', handle)); %#ok<NASGU>
 
-            d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', uint32(0), 'C', uint32([0 1]))));
+            d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', uint32(0), 'C', uint32([0 2]))));
             testCase.verifyEqual(size(d.Index), [2 1]);
             testCase.verifyEqual(sortrows(d.Coordinate), int32([0 0; 0 1]));
 

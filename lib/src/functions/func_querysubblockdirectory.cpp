@@ -1,5 +1,6 @@
 #include "func_querysubblockdirectory.h"
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include "../implementation/argsutils.h"
@@ -9,41 +10,37 @@ using namespace std;
 
 namespace
 {
-    // Returns true if the numeric array contains no fractional values. The shared integer conversion
-    // rounds floating-point values, which is not wanted for filter values (0.6 must not select 1).
-    bool HasOnlyIntegralValues(const Parameter array, IAppExtensionFunctions* app_functions)
+    // Reads the element at "index" as an int32. In contrast to the shared CArgsUtils::TryGetInt32, floating-point
+    // values are not rounded: fractional values (as well as NaN/Inf and values outside the int32-range) are
+    // rejected. The range is checked in double precision (a float cannot represent INT_MAX exactly).
+    bool TryGetIntegralInt32(const Parameter array, size_t index, int* value, IAppExtensionFunctions* app_functions)
     {
-        const AppExtensionClassId class_id = app_functions->pfn_GetClassId(array);
-        const size_t count = app_functions->pfn_GetNumberOfElements(array);
-        if (class_id == AppExtensionClassId_Double)
+        double v;
+        switch (app_functions->pfn_GetClassId(array))
         {
-            const double* p = app_functions->pfn_GetDoubles(array);
-            for (size_t i = 0; i < count; ++i)
-            {
-                if (p[i] != std::floor(p[i]))
-                {
-                    return false;
-                }
-            }
-        }
-        else if (class_id == AppExtensionClassId_Single)
-        {
-            const float* p = app_functions->pfn_GetSingles(array);
-            for (size_t i = 0; i < count; ++i)
-            {
-                if (p[i] != std::floor(p[i]))
-                {
-                    return false;
-                }
-            }
+        case AppExtensionClassId_Double:
+            v = app_functions->pfn_GetDoubles(array)[index];
+            break;
+        case AppExtensionClassId_Single:
+            v = static_cast<double>(app_functions->pfn_GetSingles(array)[index]);
+            break;
+        default:
+            return CArgsUtils::TryGetInt32(array, index, value, app_functions);
         }
 
+        if (!std::isfinite(v) || v != std::floor(v) || v < static_cast<double>(numeric_limits<int>::min()) || v > static_cast<double>(numeric_limits<int>::max()))
+        {
+            return false;
+        }
+
+        *value = static_cast<int>(v);
         return true;
     }
 
     // Converts the filter struct given by the user into a SubBlockDirectoryFilter. Recognized fields (all optional):
-    //   Coordinate  - struct with one field per dimension letter (e.g. 'Z', 'C'), each a non-empty numeric
-    //                 array giving the set of accepted values for that dimension
+    //   Coordinate  - struct with one field per dimension letter (e.g. 'Z', 'C'), each either a scalar (a single
+    //                 value) or [start size] (the interval start..start+size-1), the same representation
+    //                 as used for dimension bounds elsewhere (e.g. in GetInfo)
     //   Roi         - [x y width height]
     //   OnlyLayer0  - logical or numeric scalar
     // Invalid content results in an exception. Note that the app-API does not allow to enumerate the
@@ -69,34 +66,38 @@ namespace
                     continue;
                 }
 
-                if (!CArgsUtils::IsNumericArrayOfMinSize(field, 1, app_functions) || app_functions->pfn_IsSparse(field) || !HasOnlyIntegralValues(field, app_functions))
+                const size_t count = CArgsUtils::IsNumericArrayOfMinSize(field, 1, app_functions) ? app_functions->pfn_GetNumberOfElements(field) : 0;
+                int start = 0, size = 1;
+                if ((count != 1 && count != 2) ||
+                    app_functions->pfn_IsSparse(field) ||
+                    !TryGetIntegralInt32(field, 0, &start, app_functions) ||
+                    (count == 2 && !TryGetIntegralInt32(field, 1, &size, app_functions)) ||
+                    size < 1)
                 {
-                    throw invalid_argument(string("The field 'Coordinate.") + field_name + "' must be a non-empty, non-sparse numeric array of integral values.");
+                    throw invalid_argument(string("The field 'Coordinate.") + field_name + "' must be a non-sparse integral scalar or [start size] with size > 0.");
                 }
 
-                const size_t count = app_functions->pfn_GetNumberOfElements(field);
-                vector<int> values(count);
-                for (size_t k = 0; k < count; ++k)
-                {
-                    if (!CArgsUtils::TryGetInt32(field, k, &values[k], app_functions))
-                    {
-                        throw invalid_argument(string("The field 'Coordinate.") + field_name + "' must contain integer values.");
-                    }
-                }
-
-                filter.coordinate[dimension] = std::move(values);
+                filter.coordinate.Set(dimension, start, size);
             }
         }
 
         if (const auto roi_field = app_functions->pfn_GetField(filter_argument, "Roi"); roi_field != nullptr)
         {
-            libCZI::IntRect roi;
-            if (!CArgsUtils::IsNumericArrayOfMinSize(roi_field, 4, app_functions) || app_functions->pfn_IsSparse(roi_field) || !HasOnlyIntegralValues(roi_field, app_functions) || !CArgsUtils::TryGetIntRect(roi_field, &roi, app_functions))
+            int values[4];
+            bool valid = CArgsUtils::IsNumericArrayOfMinSize(roi_field, 4, app_functions) &&
+                app_functions->pfn_GetNumberOfElements(roi_field) == 4 &&
+                !app_functions->pfn_IsSparse(roi_field);
+            for (size_t k = 0; valid && k < 4; ++k)
             {
-                throw invalid_argument("The field 'Roi' must be a non-sparse numeric array [x y width height] of integral values with non-negative width and height.");
+                valid = TryGetIntegralInt32(roi_field, k, &values[k], app_functions);
             }
 
-            filter.roi = roi;
+            if (!valid || values[2] < 0 || values[3] < 0)
+            {
+                throw invalid_argument("The field 'Roi' must be a non-sparse array [x y width height] of four integral values with non-negative width and height.");
+            }
+
+            filter.roi = libCZI::IntRect{ values[0], values[1], values[2], values[3] };
         }
 
         if (const auto layer0_field = app_functions->pfn_GetField(filter_argument, "OnlyLayer0"); layer0_field != nullptr)

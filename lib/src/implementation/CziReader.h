@@ -53,9 +53,9 @@ public:
     /// This is the native counterpart of the (optional) filter struct of the MATLAB command.
     struct SubBlockDirectoryFilter
     {
-        /// For each dimension in this map, the subblock's coordinate must be one of the given values.
-        /// A subblock which does not have the dimension at all does not match.
-        std::map<libCZI::DimensionIndex, std::vector<int>> coordinate;
+        /// For each dimension valid in this object, the subblock's coordinate must lie within the interval
+        /// [start, start + size). A subblock which does not have the dimension at all does not match.
+        libCZI::CDimBounds coordinate;
 
         /// If set, only subblocks whose logical rectangle intersects this ROI are selected.
         std::optional<libCZI::IntRect> roi;

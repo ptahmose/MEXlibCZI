@@ -181,7 +181,7 @@ The following (all optional) fields of the filter struct are available:
 
 | Field          | type                        | Description |
 | :-----         | :---                        | :--- |
-| "Coordinate"   | struct                      | Restricts the result to subblocks with the specified coordinates. For each dimension (`Z`, `C`, `T`, `R`, `S`, `I`, `H`, `V`, `B`) a field can be given, containing a non-empty array of integers - the subblock must have one of those values for the dimension. A subblock which does not have the dimension at all does not match. Dimensions not mentioned are not restricted. Example: `struct('C', 0, 'Z', [2 3])`. |
+| "Coordinate"   | struct                      | Restricts the result to subblocks with the specified coordinates. For each dimension (`Z`, `C`, `T`, `R`, `S`, `I`, `H`, `V`, `B`) a field can be given, which is either a single integer *n* (selects that value) or `[start size]` (selects the values *start* to *start+size-1*; *size* must be greater than 0). This is the same representation as used for dimension bounds elsewhere (e.g. in "GetInfo"). The subblock's coordinate must lie in the interval for each dimension given; a subblock which does not have the dimension at all does not match. Dimensions not mentioned are not restricted. Values must be integral (fractional values are an error). Example: `struct('C', 0, 'Z', [2 2])` selects channel 0 and Z-planes 2 and 3. |
 | "Roi"          | array of 4 numbers          | `[x y width height]`. Only subblocks whose logical rectangle intersects this region are returned. |
 | "OnlyLayer0"   | logical                     | If true, only subblocks of pyramid-layer 0 are returned. Default is false. |
 

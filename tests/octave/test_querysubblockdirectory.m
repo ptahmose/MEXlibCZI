@@ -38,8 +38,10 @@
 %! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 1)));
 %! assert(d.CoordinateDimensions, 'ZC');
 %! assert(sortrows(double(d.Coordinate)), [0 1; 1 1]);
-%! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', [0 1], 'C', 0)));
+%! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', [0 2], 'C', 0)));
 %! assert(sortrows(double(d.Coordinate)), [0 0; 1 0]);
+%! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', [1 5], 'C', [0 1])));
+%! assert(double(d.Coordinate), [1 0]);
 %! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', 1, 'C', 1)));
 %! assert(size(d.Index), [1 1]);
 %! assert(octavelibczi ('GetSubBlockBitmap', handle, d.Index(1)), uint8([4 4; 4 4]));
@@ -69,6 +71,10 @@
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 0.6)))");
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', single(0.5))))");
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Roi', [9.5 9 5 5]))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', [0 0])))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', [0 1 2])))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', single(2147483648))))");
+%! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('Roi', single([2147483648 0 1 1])))");
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('OnlyLayer0', [1 0]))");
 %! fail("octavelibczi ('QuerySubBlockDirectory', handle, struct('OnlyLayer0', sparse(1)))");
 %! fail("octavelibczi ('QuerySubBlockDirectory', sparse(handle))");
@@ -77,7 +83,7 @@
 
 %!test
 %! handle = create_test_file('test_qsbd_uint32.czi');
-%! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', uint32(0), 'C', uint32([0 1]))));
+%! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', uint32(0), 'C', uint32([0 2]))));
 %! assert(sortrows(double(d.Coordinate)), [0 0; 0 1]);
 %! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Roi', uint32([9 9 5 5])));
 %! assert(d.LogicalRect, int32([10 10 2 2]));
