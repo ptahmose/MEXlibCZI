@@ -8,6 +8,13 @@ using namespace std;
 
 namespace
 {
+    // Converts the filter struct given by the user into a SubBlockDirectoryFilter. Recognized fields (all optional):
+    //   Coordinate  - struct with one field per dimension letter (e.g. 'Z', 'C'), each a non-empty numeric
+    //                 array giving the set of accepted values for that dimension
+    //   Roi         - [x y width height]
+    //   OnlyLayer0  - logical or numeric scalar
+    // Invalid content results in an exception. Note that the app-API does not allow to enumerate the
+    // fields of a struct, so unknown fields (or unknown dimension letters) are silently ignored.
     CziReader::SubBlockDirectoryFilter ParseFilter(const Parameter filter_argument, IAppExtensionFunctions* app_functions)
     {
         CziReader::SubBlockDirectoryFilter filter;
@@ -81,6 +88,8 @@ namespace
     }
 }
 
+// Command "QuerySubBlockDirectory": retrieves information about the subblocks in the subblock directory
+// (optionally restricted by a filter) without reading the subblocks themselves. See doc/commands.markdown.
 void MexFunction_QuerySubBlockDirectory_CheckArguments(MatlabArgs* args)
 {
     // arguments:
@@ -107,6 +116,7 @@ void MexFunction_QuerySubBlockDirectory_CheckArguments(MatlabArgs* args)
     }
 }
 
+// Parses the (optional) filter and returns the struct-of-arrays describing the selected subblocks.
 void MexFunction_QuerySubBlockDirectory_Execute(MatlabArgs* args)
 {
     int id;

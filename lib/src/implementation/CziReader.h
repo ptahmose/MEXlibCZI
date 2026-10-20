@@ -49,7 +49,8 @@ public:
     bool    ReleaseSubBlock(int subBlkHandle);
 
     /// Describes which subblocks are to be returned by QuerySubBlockDirectory. All members are optional;
-    /// a default-constructed instance selects all subblocks.
+    /// a default-constructed instance selects all subblocks. The criteria are combined with a logical AND.
+    /// This is the native counterpart of the (optional) filter struct of the MATLAB command.
     struct SubBlockDirectoryFilter
     {
         /// For each dimension in this map, the subblock's coordinate must be one of the given values.
@@ -63,9 +64,16 @@ public:
         bool only_layer0{ false };
     };
 
+    /// Purpose: allow the user to discover which subblocks exist (and where, in terms of dimension
+    /// coordinates, position, size, pixel type, compression) without reading any subblock data, so that
+    /// e.g. the dimensional order of a file can be reconstructed and bitmaps be loaded on demand via the
+    /// returned subblock index (see GetSubBlockBitmap/ReadSubBlock).
+    ///
     /// Queries the subblock directory (which is held in memory, so no file I/O is incurred) and returns
     /// the information about the selected subblocks as a struct of arrays (see documentation of the
-    /// "QuerySubBlockDirectory" command). The order of the subblocks is not specified.
+    /// "QuerySubBlockDirectory" command). A struct of arrays (instead of an array of structs) is used
+    /// deliberately: there may be millions of subblocks, and MATLAB has a considerable per-element
+    /// overhead for struct arrays. The order of the subblocks is not specified.
     Parameter QuerySubBlockDirectory(const SubBlockDirectoryFilter& filter, IAppExtensionFunctions* app_functions);
 private:
     static Parameter ConvertToMatlabStruct(const libCZI::IDimBounds* bounds, IAppExtensionFunctions* app_functions);

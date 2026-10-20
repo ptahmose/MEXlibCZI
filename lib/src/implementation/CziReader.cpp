@@ -647,8 +647,18 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
 
 Parameter CziReader::QuerySubBlockDirectory(const SubBlockDirectoryFilter& filter, IAppExtensionFunctions* app_functions)
 {
+	// Design notes:
+	// - The ROI and pyramid-layer-0 criteria are delegated to libCZI's EnumSubset; the coordinate-set
+	//   criterion is not expressible there (it only takes a single coordinate), so we apply it ourselves.
+	// - The result is a struct of arrays with one row per subblock. Since the subblocks may have different
+	//   sets of dimensions, "Coordinate" is a matrix over the union of dimensions (named by
+	//   "CoordinateDimensions"), where a dimension the subblock does not have is marked with INT32_MIN.
+	// - The result is filled using two passes over the directory (count, then fill) so that the arrays
+	//   can be allocated with their final size; no ordering is guaranteed (it is the libCZI enumeration order).
 	const libCZI::IntRect* roi = filter.roi.has_value() ? &filter.roi.value() : nullptr;
 
+	// Checks whether the subblock's coordinate has all dimensions of the filter, with a value that is
+	// contained in the filter's set for the dimension.
 	const auto matches_coordinate_filter = [&filter](const libCZI::SubBlockInfo& info)->bool
 	{
 		for (const auto& item : filter.coordinate)
