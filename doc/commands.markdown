@@ -194,7 +194,7 @@ different queries. Use `Index` to identify a subblock.
 | "Index"                | int32, Nx1     | The index of the subblock (the number to be used with "GetSubBlock" and "GetSubBlockBitmap"). |
 | "Mode"                 | uint8, Nx1     | The compression mode (numeric code, see below). |
 | "Pixeltype"            | uint8, Nx1     | The pixel type (numeric code, see below). |
-| "CoordinateDimensions" | char, 1xD      | The dimensions which are present in at least one of the returned subblocks, in the order `ZCTRSIHVB`, e.g. `'ZCT'`. |
+| "CoordinateDimensions" | char, 1xD      | The dimensions present in at least one subblock in the document, in the order `ZCTRSIHVB`, e.g. `'ZCT'`. This is independent of the filter, including when no subblocks match. |
 | "Coordinate"           | int32, NxD     | Column *j* contains the coordinate for the dimension given by the *j*-th character of "CoordinateDimensions". For a subblock which does not have this dimension, the value is `intmin('int32')`. |
 | "LogicalRect"          | int32, Nx4     | `[x y width height]` of the subblock's logical rectangle. |
 | "PhysicalSize"         | int32, Nx2     | `[width height]` of the subblock's bitmap. The zoom factor can be calculated from "LogicalRect" and "PhysicalSize". |
