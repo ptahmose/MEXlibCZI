@@ -36,12 +36,24 @@
 %!test
 %! handle = create_test_file('test_qsbd_coord.czi');
 %! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 1)));
-%! assert(d.CoordinateDimensions, 'ZC');
-%! assert(sortrows(double(d.Coordinate)), [0 1; 1 1]);
+%! % Coordinate columns cover all file dimensions, even when the matches lack T.
+%! assert(d.CoordinateDimensions, 'ZCT');
+%! assert(size(d.Index), [2 1]);
+%! assert(sortrows(d.Coordinate), int32([0 1 intmin('int32'); 1 1 intmin('int32')]));
 %! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', [0 2], 'C', 0)));
-%! assert(sortrows(double(d.Coordinate)), [0 0; 1 0]);
+%! % C0T5 also matches because it has no Z coordinate.
+%! assert(d.CoordinateDimensions, 'ZCT');
+%! assert(size(d.Index), [3 1]);
+%! assert(sortrows(d.Coordinate), int32([intmin('int32') 0 5; 0 0 intmin('int32'); 1 0 intmin('int32')]));
 %! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', [1 5], 'C', [0 1])));
-%! assert(double(d.Coordinate), [1 0]);
+%! assert(d.CoordinateDimensions, 'ZCT');
+%! assert(size(d.Index), [2 1]);
+%! assert(sortrows(d.Coordinate), int32([intmin('int32') 0 5; 1 0 intmin('int32')]));
+%! % A queried dimension absent from a subblock is ignored for that subblock.
+%! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 0, 'T', 5)));
+%! assert(d.CoordinateDimensions, 'ZCT');
+%! assert(size(d.Index), [3 1]);
+%! assert(sortrows(d.Coordinate), int32([intmin('int32') 0 5; 0 0 intmin('int32'); 1 0 intmin('int32')]));
 %! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', 1, 'C', 1)));
 %! assert(size(d.Index), [1 1]);
 %! assert(octavelibczi ('GetSubBlockBitmap', handle, d.Index(1)), uint8([4 4; 4 4]));
@@ -57,7 +69,8 @@
 %! assert(size(d.Index), [5 1]);
 %! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 42)));
 %! assert(isempty(d.Index));
-%! assert(size(d.Coordinate, 1), 0);
+%! assert(size(d.Coordinate), [0 3]);
+%! assert(d.CoordinateDimensions, 'ZCT');
 %! octavelibczi ('Close', handle);
 %! delete('test_qsbd_roi.czi');
 
@@ -84,7 +97,10 @@
 %!test
 %! handle = create_test_file('test_qsbd_uint32.czi');
 %! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', uint32(0), 'C', uint32([0 2]))));
-%! assert(sortrows(double(d.Coordinate)), [0 0; 0 1]);
+%! % C0T5 also matches because it has no Z coordinate.
+%! assert(d.CoordinateDimensions, 'ZCT');
+%! assert(size(d.Index), [3 1]);
+%! assert(sortrows(d.Coordinate), int32([intmin('int32') 0 5; 0 0 intmin('int32'); 0 1 intmin('int32')]));
 %! d = octavelibczi ('QuerySubBlockDirectory', handle, struct('Roi', uint32([9 9 5 5])));
 %! assert(d.LogicalRect, int32([10 10 2 2]));
 %! octavelibczi ('Close', handle);
