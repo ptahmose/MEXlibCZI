@@ -38,18 +38,27 @@ classdef TestMEXlib_QuerySubBlockDirectory < matlab.unittest.TestCase
             cleanupReader = onCleanup(@() MEXlibCZI('Close', handle)); %#ok<NASGU>
 
             d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 1)));
-            testCase.verifyEqual(d.CoordinateDimensions, 'ZC');
+            testCase.verifyEqual(d.CoordinateDimensions, 'ZCT');
             testCase.verifyEqual(size(d.Index), [2 1]);
-            testCase.verifyEqual(sortrows(d.Coordinate), int32([0 1; 1 1]));
+            % Coordinate columns cover all file dimensions, even when the matches lack T.
+            testCase.verifyEqual(sortrows(d.Coordinate), int32([0 1 intmin('int32'); 1 1 intmin('int32')]));
 
             d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', [0 2], 'C', 0)));
-            testCase.verifyEqual(size(d.Index), [2 1]);
-            testCase.verifyEqual(sortrows(d.Coordinate), int32([0 0; 1 0]));
+            % C0T5 also matches because it has no Z coordinate.
+            testCase.verifyEqual(d.CoordinateDimensions, 'ZCT');
+            testCase.verifyEqual(size(d.Index), [3 1]);
+            testCase.verifyEqual(sortrows(d.Coordinate), int32([intmin('int32') 0 5; 0 0 intmin('int32'); 1 0 intmin('int32')]));
 
             % an interval not starting at zero
             d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', [1 5], 'C', [0 1])));
-            testCase.verifyEqual(size(d.Index), [1 1]);
-            testCase.verifyEqual(d.Coordinate, int32([1 0]));
+            testCase.verifyEqual(d.CoordinateDimensions, 'ZCT');
+            testCase.verifyEqual(size(d.Index), [2 1]);
+            testCase.verifyEqual(sortrows(d.Coordinate), int32([intmin('int32') 0 5; 1 0 intmin('int32')]));
+
+            % if a queried dimension is absent from a subblock, it is ignored for that subblock
+            d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 0, 'T', 5)));
+            testCase.verifyEqual(size(d.Index), [3 1]);
+            testCase.verifyEqual(sortrows(d.Coordinate), int32([intmin('int32') 0 5; 0 0 intmin('int32'); 1 0 intmin('int32')]));
 
             % the returned index can be used to retrieve the bitmap
             d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', 1, 'C', 1)));
@@ -81,8 +90,8 @@ classdef TestMEXlib_QuerySubBlockDirectory < matlab.unittest.TestCase
 
             d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('C', 42)));
             testCase.verifyEmpty(d.Index);
-            testCase.verifyEqual(size(d.Coordinate, 1), 0);
-            testCase.verifyEmpty(d.CoordinateDimensions);
+            testCase.verifyEqual(size(d.Coordinate), [0 3]);
+            testCase.verifyEqual(d.CoordinateDimensions, 'ZCT');
         end
 
         function testInvalidArgumentsThrow(testCase)
@@ -111,8 +120,10 @@ classdef TestMEXlib_QuerySubBlockDirectory < matlab.unittest.TestCase
             cleanupReader = onCleanup(@() MEXlibCZI('Close', handle)); %#ok<NASGU>
 
             d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Coordinate', struct('Z', uint32(0), 'C', uint32([0 2]))));
-            testCase.verifyEqual(size(d.Index), [2 1]);
-            testCase.verifyEqual(sortrows(d.Coordinate), int32([0 0; 0 1]));
+            % C0T5 also matches because it has no Z coordinate.
+            testCase.verifyEqual(d.CoordinateDimensions, 'ZCT');
+            testCase.verifyEqual(size(d.Index), [3 1]);
+            testCase.verifyEqual(sortrows(d.Coordinate), int32([intmin('int32') 0 5; 0 0 intmin('int32'); 0 1 intmin('int32')]));
 
             d = MEXlibCZI('QuerySubBlockDirectory', handle, struct('Roi', uint32([9 9 5 5])));
             testCase.verifyEqual(d.LogicalRect, int32([10 10 2 2]));
