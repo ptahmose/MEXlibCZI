@@ -665,7 +665,7 @@ Parameter CziReader::QuerySubBlockDirectory(const SubBlockDirectoryFilter& filte
 					}
 
 					// if the subblock has a position for this dimension, then it must be within the specified bounds
-					if (pos < start || pos >= start + size)
+					if (pos < start || static_cast<int64_t>(pos) >= static_cast<int64_t>(start) + size)
 					{
 						// ...otherwise, the subblock is not included in the result set and we can stop checking further dimensions
 						is_included = false;
