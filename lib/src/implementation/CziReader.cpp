@@ -647,83 +647,69 @@ bool CziReader::ReleaseSubBlock(int subBlkHandle)
 
 Parameter CziReader::QuerySubBlockDirectory(const SubBlockDirectoryFilter& filter, IAppExtensionFunctions* app_functions)
 {
-	// Design notes:
-	// - The ROI and pyramid-layer-0 criteria are delegated to libCZI's EnumSubset; the coordinate criterion
-	//   is not expressible there (it only takes a single value per dimension, not an interval), so we apply
-	//   it ourselves, with one range check per dimension and subblock.
-	// - The result is a struct of arrays with one row per subblock. Since the subblocks may have different
-	//   sets of dimensions, "Coordinate" is a matrix over the union of dimensions (named by
-	//   "CoordinateDimensions"), where a dimension the subblock does not have is marked with INT32_MIN.
-	// - The result is filled using two passes over the directory (count, then fill) so that the arrays
-	//   can be allocated with their final size; no ordering is guaranteed (it is the libCZI enumeration order).
-	const libCZI::IntRect* roi = filter.roi.has_value() ? &filter.roi.value() : nullptr;
+	const auto& bounds = filter.bounds;
 
-	struct DimensionInterval { libCZI::DimensionIndex dimension; int64_t start; int64_t end; };
-	vector<DimensionInterval> intervals;
-	filter.coordinate.EnumValidDimensions(
-		[&intervals](libCZI::DimensionIndex dim, int start, int size)->bool
+	// filter function to determine if a subblock is within the specified bounds
+	const auto filter_bounds = [&bounds](const libCZI::SubBlockInfo& info)->bool
 		{
-			intervals.push_back({ dim, start, static_cast<int64_t>(start) + size });
-			return true;
-		});
+			bool is_included = true;
+			bounds.EnumValidDimensions(
+				[&info, &bounds, &is_included](libCZI::DimensionIndex dim, int start, int size)->bool
+				{
+					int pos;
 
-	// Checks whether the subblock's coordinate has all dimensions of the filter, with a value within
-	// the interval given for the dimension.
-	const auto matches_coordinate_filter = [&intervals](const libCZI::SubBlockInfo& info)->bool
-	{
-		for (const auto& item : intervals)
-		{
-			int value;
-			if (!info.coordinate.TryGetPosition(item.dimension, &value) || value < item.start || value >= item.end)
-			{
-				return false;
-			}
-		}
+					// if the subblock does not have a position for this dimension, then this is ignored for the purpose of filtering
+					if (info.coordinate.TryGetPosition(dim, &pos) == false)
+					{
+						return true;
+					}
 
-		return true;
-	};
+					// if the subblock has a position for this dimension, then it must be within the specified bounds
+					if (pos < start || pos >= start + size)
+					{
+						// ...otherwise, the subblock is not included in the result set and we can stop checking further dimensions
+						is_included = false;
+						return false;
+					}
 
-	// First pass: determine the number of selected subblocks and the union of the dimensions they have.
-	// The subblock directory is in memory, so this is cheap, and it allows us to fill the result arrays
-	// directly in the second pass without any intermediate copy.
-	constexpr int kMaxDimension = static_cast<int>(libCZI::DimensionIndex::MaxDim);
+					return true;
+				});
+
+			return is_included;
+		};
+			
+	// first pass: count the number of subblocks that match the filter criteria
+	// We need to do this first because we need to know the size of the output arrays before we can allocate them.
 	size_t count = 0;
-	bool dimension_present[kMaxDimension + 1] = {};
 	this->reader->EnumSubset(
 		nullptr,
-		roi,
+		filter.roi.IsNonEmpty()? &filter.roi : nullptr,
 		filter.only_layer0,
 		[&](int, const libCZI::SubBlockInfo& info)->bool
 		{
-			if (matches_coordinate_filter(info))
+			const bool b = filter_bounds(info);
+			if (b)
 			{
 				++count;
-				for (int i = static_cast<int>(libCZI::DimensionIndex::MinDim); i <= kMaxDimension; ++i)
-				{
-					if (info.coordinate.IsValid(static_cast<libCZI::DimensionIndex>(i)))
-					{
-						dimension_present[i] = true;
-					}
-				}
 			}
 
 			return true;
 		});
 
-	vector<libCZI::DimensionIndex> dimensions;
-	string dimension_chars;
-	for (int i = static_cast<int>(libCZI::DimensionIndex::MinDim); i <= kMaxDimension; ++i)
-	{
-		if (dimension_present[i])
-		{
-			const auto dim = static_cast<libCZI::DimensionIndex>(i);
-			dimensions.push_back(dim);
-			dimension_chars.push_back(libCZI::Utils::DimensionToChar(dim));
-		}
-	}
-
 	constexpr int32_t kInvalidValue = numeric_limits<int32_t>::min();
 
+	// determine the number of dimensions (we are going to use for the output "Coordinate" matrix)
+	vector<libCZI::DimensionIndex> dimensions;
+	dimensions.reserve(static_cast<size_t>(libCZI::DimensionIndex::MaxDim));
+	const auto statistics = this->reader->GetStatistics();
+	statistics.dimBounds.EnumValidDimensions(
+		[&dimensions](libCZI::DimensionIndex dim, int, int)->bool
+		{
+			dimensions.emplace_back(dim);
+			return true;
+		});
+
+	// now we can allocate the output arrays
 	const Parameter index_array = app_functions->pfn_CreateNumericMatrixReal(count, 1, AppExtensionClassId_Int32);
 	const Parameter mode_array = app_functions->pfn_CreateNumericMatrixReal(count, 1, AppExtensionClassId_Uint8);
 	const Parameter pixeltype_array = app_functions->pfn_CreateNumericMatrixReal(count, 1, AppExtensionClassId_Uint8);
@@ -741,20 +727,22 @@ Parameter CziReader::QuerySubBlockDirectory(const SubBlockDirectoryFilter& filte
 		int32_t* const logical_rect_ptr = app_functions->pfn_GetInt32s(logical_rect_array);
 		int32_t* const physical_size_ptr = app_functions->pfn_GetInt32s(physical_size_array);
 		int32_t* const mindex_ptr = app_functions->pfn_GetInt32s(mindex_array);
-
-		// Note: MATLAB arrays are in column-major order, i.e. element (row, column) is found at "column * count + row".
+		
 		size_t pos = 0;
+		// second pass: fill the output arrays with the subblock information
 		this->reader->EnumSubset(
 			nullptr,
-			roi,
+			filter.roi.IsNonEmpty() ? &filter.roi : nullptr,
 			filter.only_layer0,
 			[&](int index, const libCZI::SubBlockInfo& info)->bool
 			{
-				if (!matches_coordinate_filter(info))
+				const bool b = filter_bounds(info);
+				if (!b)
 				{
 					return true;
 				}
 
+				// safety-guard, must not happen
 				if (pos >= count)
 				{
 					return false;
@@ -776,27 +764,39 @@ Parameter CziReader::QuerySubBlockDirectory(const SubBlockDirectoryFilter& filte
 				physical_size_ptr[0 * count + pos] = static_cast<int32_t>(info.physicalSize.w);
 				physical_size_ptr[1 * count + pos] = static_cast<int32_t>(info.physicalSize.h);
 				mindex_ptr[pos] = info.IsMindexValid() ? info.mIndex : kInvalidValue;
+
 				++pos;
+
 				// Stop as soon as all elements counted in the first pass have been found.
 				return pos < count;
 			});
 	}
 
+
 	static const char* field_names[] = { "Index", "Mode", "Pixeltype", "CoordinateDimensions", "Coordinate", "LogicalRect", "PhysicalSize", "MIndex" };
-	const Parameter s = app_functions->pfn_CreateStructArray(
+	const Parameter return_data = app_functions->pfn_CreateStructArray(
 		2,
 		MexUtils::Dims_1_by_1,
-		static_cast<int>(sizeof(field_names) / sizeof(field_names[0])),
+		static_cast<int>(std::size(field_names)),
 		field_names);
-	app_functions->pfn_SetFieldByNumber(s, 0, 0, index_array);
-	app_functions->pfn_SetFieldByNumber(s, 0, 1, mode_array);
-	app_functions->pfn_SetFieldByNumber(s, 0, 2, pixeltype_array);
-	app_functions->pfn_SetFieldByNumber(s, 0, 3, app_functions->pfn_CreateString(dimension_chars.c_str()));
-	app_functions->pfn_SetFieldByNumber(s, 0, 4, coordinate_array);
-	app_functions->pfn_SetFieldByNumber(s, 0, 5, logical_rect_array);
-	app_functions->pfn_SetFieldByNumber(s, 0, 6, physical_size_array);
-	app_functions->pfn_SetFieldByNumber(s, 0, 7, mindex_array);
-	return s;
+
+	string dimension_chars;
+	dimension_chars.reserve(dimensions.size());
+	for (libCZI::DimensionIndex dim : dimensions)
+	{
+		dimension_chars.push_back(libCZI::Utils::DimensionToChar(dim));
+	}
+
+	app_functions->pfn_SetFieldByNumber(return_data, 0, 0, index_array);
+	app_functions->pfn_SetFieldByNumber(return_data, 0, 1, mode_array);
+	app_functions->pfn_SetFieldByNumber(return_data, 0, 2, pixeltype_array);
+	app_functions->pfn_SetFieldByNumber(return_data, 0, 3, app_functions->pfn_CreateString(dimension_chars.c_str()));
+	app_functions->pfn_SetFieldByNumber(return_data, 0, 4, coordinate_array);
+	app_functions->pfn_SetFieldByNumber(return_data, 0, 5, logical_rect_array);
+	app_functions->pfn_SetFieldByNumber(return_data, 0, 6, physical_size_array);
+	app_functions->pfn_SetFieldByNumber(return_data, 0, 7, mindex_array);
+
+	return return_data;
 }
 
 /*static*/Parameter CziReader::ConvertToMatlabStruct(const libCZI::SubBlockInfo& sbBlkInfo, IAppExtensionFunctions* app_functions)

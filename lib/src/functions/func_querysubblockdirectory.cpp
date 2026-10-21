@@ -77,7 +77,7 @@ namespace
                     throw invalid_argument(string("The field 'Coordinate.") + field_name + "' must be a non-sparse integral scalar or [start size] with size > 0.");
                 }
 
-                filter.coordinate.Set(dimension, start, size);
+                filter.bounds.Set(dimension, start, size);
             }
         }
 
