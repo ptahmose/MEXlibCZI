@@ -214,12 +214,12 @@ using namespace libCZI;
         {
             //const auto pui32 = MexApi::GetInstance().MxGetUint32s(pArr);
             const auto pui32 = app_functions->pfn_GetUint32s(pArr);
-            if (*pui32 > static_cast<uint32_t>(numeric_limits<int>::max()))
+            if (*(pui32 + index) > static_cast<uint32_t>(numeric_limits<int>::max()))
             {
                 return false;
             }
 
-            rv = *pui32;
+            rv = *(pui32 + index);
         }
         break;
     case AppExtensionClassId_Int64:
