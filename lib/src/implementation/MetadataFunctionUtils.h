@@ -12,6 +12,7 @@ namespace MetadataFunctionUtils
     {
         int id;
         if (args->app_functions->pfn_GetNumberOfElements(args->prhs[1]) != 1 ||
+            args->app_functions->pfn_GetClassId(args->prhs[1]) != AppExtensionClassId_Int32 ||
             !CArgsUtils::TryGetInt32(args->prhs[1], &id, args->app_functions))
         {
             throw std::invalid_argument("Expected a scalar integer handle");
