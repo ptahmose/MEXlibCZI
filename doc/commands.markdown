@@ -400,8 +400,9 @@ The builder remains usable after its originating writer closes. Release it with
 
 ## MetadataBuilder_Modify
 
-Applies a convenience operation to a metadata builder. Currently, the supported
-operation is `'Scaling'`, implemented through `MetadataUtils::WriteScalingInfoEx`.
+Applies a convenience operation to a metadata builder. Supported operations are
+`'Scaling'` (`MetadataUtils::WriteScalingInfoEx`) and `'GeneralDocumentInfo'`
+(`MetadataUtils::WriteGeneralDocumentInfo`).
 Further convenience operations can be added under the same command.
 
 ```matlab
@@ -411,7 +412,7 @@ MEXlibCZI('MetadataBuilder_Modify', metadata_builder, 'Scaling', values);
 | argument # | type | Description |
 | --- | --- | --- |
 | 1 | scalar integer handle | A live metadata builder handle. |
-| 2 | character array | Operation name; currently `'Scaling'`. |
+| 2 | character array | `'Scaling'` or `'GeneralDocumentInfo'`. |
 | 3 | scalar struct | The operation's parameters. |
 
 **Outputs:** none. The builder is modified in place; the CZI file is unchanged.
@@ -451,6 +452,47 @@ MEXlibCZI('MetadataBuilder_Modify', metadata_builder, 'Scaling', ...
 
 Use [MetadataBuilder_GetXml](#metadatabuilder_getxml) to obtain the modified
 document and [Writer_WriteMetadata](#writer_writemetadata) to write it.
+
+### GeneralDocumentInfo parameters
+
+Sets general information under `Metadata/Information/Document` in the builder.
+
+```matlab
+MEXlibCZI('MetadataBuilder_Modify', metadata_builder, 'GeneralDocumentInfo', info);
+```
+
+| Field | type | Description |
+| --- | --- | --- |
+| `Name` | character array | Document name. |
+| `Title` | character array | Document title. |
+| `UserName` | character array | Name of the user who created the document. |
+| `Description` | character array | Description of the document. |
+| `Comment` | character array | Additional comments. |
+| `Keywords` | character array | Keywords separated by semicolons. |
+| `CreationDateTime` | character array | Creation timestamp in XML `dateTime` format, e.g. `'2026-10-29T13:42:17.123Z'`. Written to the XML `CreationDate` element. |
+| `Rating` | int32 scalar | Five-star rating from 0 to 5, inclusive. |
+
+All fields are optional, but at least one recognized field must be supplied.
+Omitted fields and empty character arrays leave existing values unchanged,
+following libCZI's string-setter semantics. Use XML editing to clear a text field.
+Unrecognized struct fields are ignored. Supplied fields are checked before the
+update is applied. Creation timestamps are passed through as text without date
+parsing or format validation; MATLAB `datetime` objects are not accepted directly.
+
+```matlab
+t = datetime('now', 'TimeZone', 'UTC');
+t.Format = 'yyyy-MM-dd''T''HH:mm:ss.SSSXXX';
+info = struct('Name', 'Processed image', ...
+    'Description', 'Background subtraction applied', ...
+    'Keywords', 'processed;fluorescence', ...
+    'CreationDateTime', char(t), 'Rating', int32(4));
+MEXlibCZI('MetadataBuilder_Modify', metadata_builder, 'GeneralDocumentInfo', info);
+```
+
+`XXX` includes a timezone offset, or `Z` for UTC. In Octave, supply the timestamp
+as a character array directly or create it using its date-formatting facilities.
+These changes affect the builder only: retrieve the XML and pass it to
+`Writer_WriteMetadata` to persist them in the CZI file.
 
 ## MetadataBuilder_GetXml
 

@@ -4,7 +4,7 @@
  *
  * Inputs:
  *   metadata_builder - Live scalar builder handle from Writer_GetPreparedMetadata.
- *   operation        - Case-sensitive character array; currently 'Scaling'.
+ *   operation        - Case-sensitive character array: 'Scaling' or 'GeneralDocumentInfo'.
  *   values           - Scalar structure with the operation's arguments.
  * Outputs: none.
  *
@@ -17,6 +17,14 @@
  * All recognized values are parsed before the builder is modified. Unsupported
  * operations raise an error. Changes affect only the builder until its XML is
  * explicitly passed to Writer_WriteMetadata.
+ *
+ * GeneralDocumentInfo fields (all optional, at least one recognized field required):
+ *   Name, Title, UserName, Description, Comment, Keywords, CreationDateTime:
+ *     Character arrays. Keywords are semicolon-separated; CreationDateTime uses
+ *     XML dateTime syntax, e.g. '2026-10-29T13:42:17.123Z'. No date parsing is done.
+ *   Rating: int32 scalar from 0 to 5.
+ * Omitted fields and empty character arrays leave existing values unchanged,
+ * matching GeneralDocumentInfo's string setters. Other fields are ignored.
  */
 #include "func_metadatabuilder_modify.h"
 #include "../implementation/MetadataFunctionUtils.h"
@@ -27,6 +35,69 @@
 
 namespace
 {
+    // Build the complete update before touching XML so invalid fields do not
+    // leave a partially modified document. Empty strings follow libCZI's setters.
+    void WriteGeneralDocumentInfo(libCZI::ICziMetadataBuilder* metadata_builder,
+        Parameter values, IAppExtensionFunctions* api)
+    {
+        libCZI::GeneralDocumentInfo info;
+        const struct
+        {
+            const char* name;
+            void (libCZI::GeneralDocumentInfo::* set)(const std::wstring&);
+        } fields[] =
+        {
+            {"Name", &libCZI::GeneralDocumentInfo::SetName},
+            {"Title", &libCZI::GeneralDocumentInfo::SetTitle},
+            {"UserName", &libCZI::GeneralDocumentInfo::SetUserName},
+            {"Description", &libCZI::GeneralDocumentInfo::SetDescription},
+            {"Comment", &libCZI::GeneralDocumentInfo::SetComment},
+            {"Keywords", &libCZI::GeneralDocumentInfo::SetKeywords},
+            {"CreationDateTime", &libCZI::GeneralDocumentInfo::SetCreationDate}
+        };
+        bool any = false;
+        for (const auto& field : fields)
+        {
+            auto value = api->pfn_GetField(values, field.name);
+            if (value)
+            {
+                if (!api->pfn_IsChar(value))
+                {
+                    throw std::invalid_argument("GeneralDocumentInfo text fields must be character arrays");
+                }
+
+                (info.*(field.set))(Utils::convertUtf8ToWchar_t(CArgsUtils::GetAsUtf8String(value, api)));
+                any = true;
+            }
+        }
+
+        auto rating = api->pfn_GetField(values, "Rating");
+        if (rating)
+        {
+            if (api->pfn_GetClassId(rating) != AppExtensionClassId_Int32 ||
+                api->pfn_GetNumberOfElements(rating) != 1 || api->pfn_IsSparse(rating))
+            {
+                throw std::invalid_argument("Rating must be an int32 scalar from 0 to 5");
+            }
+
+            const int rating_value = *api->pfn_GetInt32s(rating);
+            if (rating_value < 0 || rating_value > 5)
+            {
+                throw std::invalid_argument("Rating must be an int32 scalar from 0 to 5");
+            }
+
+            info.SetRating(rating_value);
+            any = true;
+        }
+
+        if (!any)
+        {
+            throw std::invalid_argument("GeneralDocumentInfo requires at least one recognized field");
+        }
+
+        libCZI::MetadataUtils::WriteGeneralDocumentInfo(metadata_builder, info);
+    }
+
     // Keep double precision for metre-scale values; the generic float argument
     // conversion helper would unnecessarily reduce precision here.
     double ReadScale(Parameter value, IAppExtensionFunctions* api)
@@ -75,6 +146,12 @@ void MexFunction_MetadataBuilder_Modify_Execute(MatlabArgs* args)
     auto api = args->app_functions;
     auto metadata_builder = MetadataBuilderManager::Get(MetadataFunctionUtils::GetHandle(args));
     const auto operation = CArgsUtils::GetAsUtf8String(args->prhs[2], api);
+    if (operation == "GeneralDocumentInfo")
+    {
+        WriteGeneralDocumentInfo(metadata_builder.get(), args->prhs[3], api);
+        return;
+    }
+
     if (operation != "Scaling")
     {
         throw std::invalid_argument("Unsupported metadata operation");
