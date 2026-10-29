@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "implementation/CziWriterManager.h"
+#include "implementation/MetadataBuilderManager.h"
 #include "implementation/CziReaderManager.h"
 
 using namespace mexlibCZI;
@@ -85,6 +86,7 @@ void mexlibCZI::mexFunction(int nlhs, Parameter plhs[], int nrhs, const Paramete
 
 void mexlibCZI::OnShutdown()
 {
+    MetadataBuilderManager::Clear();
     CziReaderManager::GetInstance().RemoveAllInstances();
     CziWriterManager::GetInstance().RemoveAllInstances();
 }

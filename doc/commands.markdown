@@ -293,3 +293,55 @@ The following options are available (for argument #6):
 ## CloseCziWriter
 
 Closes a writer object and finalizes the CZI-document.
+# Writing document metadata
+
+After adding **all** subblocks, prepare a mutable metadata builder, edit it,
+and write its XML explicitly:
+
+```matlab
+writer = MEXlibCZI('CreateCziWriter', 'output.czi', 'x');
+MEXlibCZI('AddSubBlock', writer, 'C0', [0 0 2 2], ...
+    'gray8', uint8([1 2; 3 4]), struct('M', 0));
+metadata_builder = MEXlibCZI('Writer_GetPreparedMetadata', writer);
+MEXlibCZI('MetadataBuilder_Modify', metadata_builder, 'Scaling', ...
+    struct('X', 0.25e-6, 'Y', 0.25e-6, 'Z', 1e-6));
+xml = MEXlibCZI('MetadataBuilder_GetXml', metadata_builder);
+% Optionally edit xml using MATLAB XML facilities.
+MEXlibCZI('Writer_WriteMetadata', writer, xml);
+MEXlibCZI('CloseCziWriter', writer);
+MEXlibCZI('MetadataBuilder_Release', metadata_builder);
+```
+
+`Writer_GetPreparedMetadata` returns an independent snapshot of libCZI's prepared
+metadata, not a live view of the writer. Prepare again if more subblocks are
+added. The builder remains usable after the writer closes. Release it explicitly
+when finished; remaining builders are released when the extension shuts down.
+
+`MetadataBuilder_Modify(metadata_builder, 'Scaling', values)` invokes
+`MetadataUtils::WriteScalingInfoEx`. `values` is a scalar structure containing
+one or more of `X`, `Y`, `Z`, each a finite positive double or single scalar
+**in metres**. Omitted axes retain their existing values. All supplied axes
+are validated before the builder is changed. Optional character fields
+`DefaultUnitFormatX`, `DefaultUnitFormatY`, and `DefaultUnitFormatZ` specify
+display unit formats (for example, `'um'`); the numeric values remain in metres.
+Other structure fields are ignored
+in this initial implementation. Unsupported operation names are rejected.
+Additional convenience operations can be added under `MetadataBuilder_Modify`.
+
+`MetadataBuilder_GetXml` accepts a metadata builder handle and returns a character
+array. The existing `GetMetadataXml` command continues to accept reader handles.
+`MetadataBuilder_SetXml(metadata_builder, xml)` replaces
+the builder's complete XML document, allowing XML edits to be followed by more
+convenience operations. XML parsing errors leave the existing builder intact.
+
+`Writer_WriteMetadata(writer, xml)` parses and writes the supplied XML without merging
+or adding default display settings. XML parsing does not validate the CZI
+metadata schema or consistency with image data; callers control the final
+document. Once writing succeeds, `CloseCziWriter` skips automatic metadata
+generation. Without a successful explicit write, closing retains the existing
+automatic metadata and display-settings behavior. Merely preparing or editing
+a builder does not change that behavior.
+
+Builder handles are opaque scalar int32 values. Do not construct them manually.
+The new mutation and release commands take no outputs; `Writer_GetPreparedMetadata`
+and `MetadataBuilder_GetXml` each require one output. XML arguments are character arrays.

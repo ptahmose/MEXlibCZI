@@ -1,4 +1,10 @@
 #include "mexFunctions.h"
+#include "functions/func_writer_getpreparedmetadata.h"
+#include "functions/func_metadatabuilder_modify.h"
+#include "functions/func_metadatabuilder_setxml.h"
+#include "functions/func_metadatabuilder_getxml.h"
+#include "functions/func_writer_writemetadata.h"
+#include "functions/func_metadatabuilder_release.h"
 #include <cstring>
 
 #include "functions/func_getversion.h"
@@ -39,6 +45,12 @@
     {u8"AddSubBlock", {MexFunction_AddSubBlock_CheckArguments, MexFunction_AddSubBlock_Execute}},
     {u8"CloseCziWriter", {MexFunction_CloseCziWriter_CheckArguments, MexFunction_CloseCziWriter_Execute}},
     /* */
+    {u8"Writer_GetPreparedMetadata", {MexFunction_Writer_GetPreparedMetadata_CheckArguments, MexFunction_Writer_GetPreparedMetadata_Execute}},
+    {u8"MetadataBuilder_Modify", {MexFunction_MetadataBuilder_Modify_CheckArguments, MexFunction_MetadataBuilder_Modify_Execute}},
+    {u8"MetadataBuilder_SetXml", {MexFunction_MetadataBuilder_SetXml_CheckArguments, MexFunction_MetadataBuilder_SetXml_Execute}},
+    {u8"MetadataBuilder_GetXml", {MexFunction_MetadataBuilder_GetXml_CheckArguments, MexFunction_MetadataBuilder_GetXml_Execute}},
+    {u8"Writer_WriteMetadata", {MexFunction_Writer_WriteMetadata_CheckArguments, MexFunction_Writer_WriteMetadata_Execute}},
+    {u8"MetadataBuilder_Release", {MexFunction_MetadataBuilder_Release_CheckArguments, MexFunction_MetadataBuilder_Release_Execute}},
 };
 
 /*static*/CMexFunctions CMexFunctions::instance;

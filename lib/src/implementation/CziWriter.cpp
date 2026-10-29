@@ -32,39 +32,57 @@ void CziWriter::AddSubBlock(const libCZI::AddSubBlockInfoBase& add_sub_block_inf
 
 void CziWriter::Close()
 {
-    const auto statistics = writer->GetStatistics();
-    int start_c;
-    int size_c;
-    const bool is_valid_c = statistics.dimBounds.TryGetInterval(DimensionIndex::C, &start_c, &size_c);
-
-    PrepareMetadataInfo prepare_metadata_info;
-    auto metadata_builder = writer->GetPreparedMetadata(prepare_metadata_info);
-
-    if (is_valid_c)
+    // Preserve the existing automatic path for callers that never explicitly wrote
+    // metadata. Explicit XML must survive closing without defaults overwriting it.
+    if (!this->metadata_written)
     {
-        // If the C-dimension is valid, we set some rudimentary default display settings here. This works around
-        // problems with some ZEN-versions that do not display the image correctly if the display settings are missing.
-        DisplaySettingsPOD display_settings;
-        for (int i = start_c; i < start_c + size_c; i++)
+        const auto statistics = this->writer->GetStatistics();
+        int start_c;
+        int size_c;
+        const bool is_valid_c = statistics.dimBounds.TryGetInterval(DimensionIndex::C, &start_c, &size_c);
+
+        PrepareMetadataInfo prepare_metadata_info;
+        auto metadata_builder = this->writer->GetPreparedMetadata(prepare_metadata_info);
+
+        if (is_valid_c)
         {
-            ChannelDisplaySettingsPOD channelDisplaySettings;
-            channelDisplaySettings.Clear();
-            channelDisplaySettings.isEnabled = true;
-            channelDisplaySettings.tintingMode = libCZI::IDisplaySettings::TintingMode::None;
-            display_settings.channelDisplaySettings[i] = channelDisplaySettings;
+            // If the C-dimension is valid, we set some rudimentary default display settings here. This works around
+            // problems with some ZEN-versions that do not display the image correctly if the display settings are missing.
+            DisplaySettingsPOD display_settings;
+            for (int i = start_c; i < start_c + size_c; i++)
+            {
+                ChannelDisplaySettingsPOD channelDisplaySettings;
+                channelDisplaySettings.Clear();
+                channelDisplaySettings.isEnabled = true;
+                channelDisplaySettings.tintingMode = libCZI::IDisplaySettings::TintingMode::None;
+                display_settings.channelDisplaySettings[i] = channelDisplaySettings;
+            }
+
+            unique_ptr<libCZI::IDisplaySettings> display_settings_ptr(DisplaySettingsPOD::CreateIDisplaySetting(display_settings));
+            MetadataUtils::WriteDisplaySettings(metadata_builder.get(), display_settings_ptr.get());
         }
 
-        unique_ptr<libCZI::IDisplaySettings> display_settings_ptr(DisplaySettingsPOD::CreateIDisplaySetting(display_settings));
-        MetadataUtils::WriteDisplaySettings(metadata_builder.get(), display_settings_ptr.get());
+        this->WriteMetadata(metadata_builder->GetXml(true));
     }
 
-    auto xml = metadata_builder->GetXml(true);
+    this->writer->Close();
+}
+
+std::shared_ptr<ICziMetadataBuilder> CziWriter::GetPreparedMetadata()
+{
+    PrepareMetadataInfo info;
+    return this->writer->GetPreparedMetadata(info);
+}
+
+void CziWriter::WriteMetadata(const std::string& xml)
+{
     WriteMetadataInfo writerMdInfo;
     writerMdInfo.Clear();
     writerMdInfo.szMetadata = xml.c_str();
     writerMdInfo.szMetadataSize = xml.size();
-    writer->SyncWriteMetadata(writerMdInfo);
-    this->writer->Close();
+    this->writer->SyncWriteMetadata(writerMdInfo);
+    // Commit the state change after I/O succeeds, so failed writes retain the fallback.
+    this->metadata_written = true;
 }
 
 void CziWriter::AddSubBlockUncompressed(
@@ -172,5 +190,5 @@ void CziWriter::AddSubBlockCompressed(
     }
 
     addInfo.SetCompressionMode(compression_mode);
-    writer->SyncAddSubBlock(addInfo);
+    this->writer->SyncAddSubBlock(addInfo);
 }

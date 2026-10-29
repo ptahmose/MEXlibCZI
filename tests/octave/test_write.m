@@ -1,5 +1,23 @@
 % File: test_write.m
 
+%!test
+%! filename = [tempname() '.czi'];
+%! writer = octavelibczi('CreateCziWriter', filename, 'x');
+%! octavelibczi('AddSubBlock', writer, 'C0', [0 0 2 2], 'gray8', uint8([1 2; 3 4]), struct('M', 0));
+%! metadata_builder = octavelibczi('Writer_GetPreparedMetadata', writer);
+%! octavelibczi('MetadataBuilder_Modify', metadata_builder, 'Scaling', struct('X', 0.25e-6, 'Y', 0.5e-6));
+%! octavelibczi('MetadataBuilder_Modify', metadata_builder, 'Scaling', struct('Z', 1e-6));
+%! xml = octavelibczi('MetadataBuilder_GetXml', metadata_builder);
+%! octavelibczi('MetadataBuilder_SetXml', metadata_builder, xml);
+%! octavelibczi('Writer_WriteMetadata', writer, xml);
+%! octavelibczi('CloseCziWriter', writer);
+%! octavelibczi('MetadataBuilder_Release', metadata_builder);
+%! reader = octavelibczi('Open', filename);
+%! scaling = octavelibczi('GetScaling', reader);
+%! assert([scaling.scaleX scaling.scaleY scaling.scaleZ], [0.25e-6 0.5e-6 1e-6], 1e-15);
+%! octavelibczi('Close', reader);
+%! delete(filename);
+
 
 %!test
 %! handle=octavelibczi ('CreateCziWriter','test.czi','x');
