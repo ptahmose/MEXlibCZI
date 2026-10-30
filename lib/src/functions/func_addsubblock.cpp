@@ -22,7 +22,7 @@ void MexFunction_AddSubBlock_CheckArguments(MatlabArgs* args)
         throw invalid_argument("not enough arguments");
     }
 
-    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[1], 1, args->app_functions))
+    if (!CArgsUtils::TryGetInt32(args->prhs[1], nullptr, args->app_functions))
     {
         throw invalid_argument("1st argument must be an integer");
     }
@@ -32,12 +32,12 @@ void MexFunction_AddSubBlock_CheckArguments(MatlabArgs* args)
         throw invalid_argument("2nd argument must be a string");
     }
 
-    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[3], 4, args->app_functions))
+    if (!CArgsUtils::TryGetIntRect(args->prhs[3], nullptr, args->app_functions))
     {
         throw invalid_argument("3nd argument must be a ROI");
     }
 
-    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[4], 1, args->app_functions) && !args->app_functions->pfn_IsChar(args->prhs[4]))
+    if (!CArgsUtils::TryGetPixelType(args->prhs[4], nullptr, args->app_functions))
     {
         throw invalid_argument("4th argument must be an integer or a string");
     }
@@ -46,6 +46,11 @@ void MexFunction_AddSubBlock_CheckArguments(MatlabArgs* args)
     if (!CArgsUtils::TryGetArrayInfo(args->prhs[5], &array_info, args->app_functions))
     {
         throw invalid_argument("5th argument must be an array");
+    }
+
+    if (array_info.dimensions[0] == 0 || array_info.dimensions[1] == 0)
+    {
+        throw invalid_argument("5th argument must be a nonempty bitmap array");
     }
 
     if (array_info.number_of_dimensions != 2 && array_info.number_of_dimensions != 3)
@@ -60,9 +65,16 @@ void MexFunction_AddSubBlock_CheckArguments(MatlabArgs* args)
 
     if (args->nrhs >= 7)
     {
-        if (!CArgsUtils::IsStructure(args->prhs[6], args->app_functions))
+        if (!CArgsUtils::IsStructure(args->prhs[6], args->app_functions) ||
+            args->app_functions->pfn_GetNumberOfElements(args->prhs[6]) != 1)
         {
-            throw invalid_argument("6th argument must be a structure");
+            throw invalid_argument("6th argument must be a scalar structure");
+        }
+
+        const auto m = args->app_functions->pfn_GetField(args->prhs[6], "M");
+        if (m != nullptr && !CArgsUtils::TryGetInt32(m, nullptr, args->app_functions))
+        {
+            throw invalid_argument("The field 'M' must be a real, non-sparse scalar integer in the int32 range");
         }
     }
 }
@@ -113,8 +125,13 @@ void MexFunction_AddSubBlock_Execute(MatlabArgs* args)
     if (args->nrhs >= 7)
     {
         int i;
-        if (CArgsUtils::TryGetIntValueOfField(args->prhs[6], "M", &i, args->app_functions))
+        if (const auto m = args->app_functions->pfn_GetField(args->prhs[6], "M"); m != nullptr)
         {
+            if (!CArgsUtils::TryGetInt32(m, &i, args->app_functions))
+            {
+                throw invalid_argument("Invalid M-index");
+            }
+
             m_index = i;
         }
 

@@ -17,7 +17,7 @@ void MexFunction_CloseCziWriter_CheckArguments(MatlabArgs* args)
         throw invalid_argument("not enough arguments");
     }
 
-    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[1], 1, args->app_functions))
+    if (!CArgsUtils::TryGetInt32(args->prhs[1], nullptr, args->app_functions))
     {
         throw invalid_argument("1st argument must be an integer");
     }

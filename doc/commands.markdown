@@ -33,6 +33,39 @@ Command names and metadata operation names are case-sensitive. Examples use
 text arguments must be character arrays (single quotes), rather than MATLAB
 string objects. Argument numbers in the tables exclude the command name.
 
+## Numeric input rules
+
+Numeric arguments must use real, non-sparse arrays. Complex arrays are rejected
+before their data is accessed, including arrays with complex storage whose
+imaginary components are zero. Logical values are accepted only for flags such
+as `QuerySubBlockDirectory.OnlyLayer0`, not for handles, indices, coordinates,
+pixel-type identifiers, zoom, or bitmap data.
+
+Integer arguments must be finite, integral and within the signed int32 range
+(`-2147483648` through `2147483647`). Fractions are rejected rather than rounded.
+Handles, subblock indices, numeric pixel-type identifiers and optional `M` values
+must contain exactly one element. Existing command-specific restrictions still
+apply: metadata commands require int32 handles, and `GeneralDocumentInfo.Rating`
+requires an int32 scalar from 0 to 5.
+
+The ROI arguments to `AddSubBlock` and the two scaling composite commands accept
+at least four elements. The first four are `[x y width height]`, each an integral
+int32 value, with nonnegative width and height; extra elements are ignored.
+`QuerySubBlockDirectory.Roi` requires exactly four elements. Filter and options
+structures, including nested `Coordinate` structures, must be scalar structures.
+
+Zoom must be a finite numeric scalar with `0 < zoom <= 1`, representable as a
+positive single-precision value. Fractional zoom is allowed. Metadata scaling
+retains double precision and accepts finite positive double or single scalars.
+For `OnlyLayer0`, logical scalars are accepted; numeric scalars follow the integer
+rules above, with zero meaning false and any nonzero value meaning true.
+
+Bitmap data must be nonempty, real and non-sparse, with class and shape matching
+the requested pixel type: uint8 2D for `gray8`, uint16 2D for `gray16`, or uint8
+HxWx3 for `bgr24`. Invalid numeric input raises the catchable
+`MEXlibCZI:InvalidArguments` error. Rejected `AddSubBlock` calls do not add a
+subblock, and rejected metadata modifications leave the builder unchanged.
+
 ## GetVersion
 
 The function returns a struct containing version information. It does not take any arguments.

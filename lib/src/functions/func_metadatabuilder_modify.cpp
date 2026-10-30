@@ -74,13 +74,13 @@ namespace
         auto rating = api->pfn_GetField(values, "Rating");
         if (rating)
         {
+            int rating_value;
             if (api->pfn_GetClassId(rating) != AppExtensionClassId_Int32 ||
-                api->pfn_GetNumberOfElements(rating) != 1 || api->pfn_IsSparse(rating))
+                !CArgsUtils::TryGetInt32(rating, &rating_value, api))
             {
                 throw std::invalid_argument("Rating must be an int32 scalar from 0 to 5");
             }
 
-            const int rating_value = *api->pfn_GetInt32s(rating);
             if (rating_value < 0 || rating_value > 5)
             {
                 throw std::invalid_argument("Rating must be an int32 scalar from 0 to 5");
@@ -102,7 +102,7 @@ namespace
     // conversion helper would unnecessarily reduce precision here.
     double ReadScale(Parameter value, IAppExtensionFunctions* api)
     {
-        if (api->pfn_GetNumberOfElements(value) != 1 || api->pfn_IsSparse(value))
+        if (api->pfn_GetNumberOfElements(value) != 1 || api->pfn_IsSparse(value) || api->pfn_IsComplex(value))
         {
             throw std::invalid_argument("Scaling values must be finite positive double or single scalars in metres");
         }

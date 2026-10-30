@@ -22,9 +22,10 @@ namespace
 
         if (const auto coordinate_field = app_functions->pfn_GetField(filter_argument, "Coordinate"); coordinate_field != nullptr)
         {
-            if (!CArgsUtils::IsStructure(coordinate_field, app_functions))
+            if (!CArgsUtils::IsStructure(coordinate_field, app_functions) ||
+                app_functions->pfn_GetNumberOfElements(coordinate_field) != 1)
             {
-                throw invalid_argument("The field 'Coordinate' must be a struct.");
+                throw invalid_argument("The field 'Coordinate' must be a scalar struct.");
             }
 
             for (int i = static_cast<int>(libCZI::DimensionIndex::MinDim); i <= static_cast<int>(libCZI::DimensionIndex::MaxDim); ++i)
@@ -75,7 +76,8 @@ namespace
         {
             const auto class_id = app_functions->pfn_GetClassId(layer0_field);
             const bool is_numeric_or_logical = class_id == AppExtensionClassId_Logical || CArgsUtils::IsNumericArrayOfMinSize(layer0_field, 1, app_functions);
-            if (!is_numeric_or_logical || app_functions->pfn_IsSparse(layer0_field) || app_functions->pfn_GetNumberOfElements(layer0_field) != 1)
+            if (!is_numeric_or_logical || app_functions->pfn_IsSparse(layer0_field) ||
+                app_functions->pfn_IsComplex(layer0_field) || app_functions->pfn_GetNumberOfElements(layer0_field) != 1)
             {
                 throw invalid_argument("The field 'OnlyLayer0' must be a non-sparse logical or numeric scalar.");
             }
@@ -117,14 +119,15 @@ void MexFunction_QuerySubBlockDirectory_CheckArguments(MatlabArgs* args)
         throw invalid_argument("too many arguments");
     }
 
-    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[1], 1, args->app_functions) || args->app_functions->pfn_IsSparse(args->prhs[1]))
+    if (!CArgsUtils::TryGetInt32(args->prhs[1], nullptr, args->app_functions))
     {
         throw invalid_argument("2nd argument must be a non-sparse integer");
     }
 
-    if (args->nrhs == 3 && !CArgsUtils::IsStructure(args->prhs[2], args->app_functions))
+    if (args->nrhs == 3 && (!CArgsUtils::IsStructure(args->prhs[2], args->app_functions) ||
+        args->app_functions->pfn_GetNumberOfElements(args->prhs[2]) != 1))
     {
-        throw invalid_argument("3rd argument must be a struct");
+        throw invalid_argument("3rd argument must be a scalar struct");
     }
 }
 

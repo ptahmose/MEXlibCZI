@@ -33,9 +33,12 @@ void MexFunction_GetSingleChannelScalingTileComposite_CheckArguments(MatlabArgs*
         throw invalid_argument("3nd argument must be a string (specifying a coordinate)");
     }
 
-    if (!CArgsUtils::TryGetSingle(args->prhs[4], nullptr, args->app_functions))
+    float zoom;
+    if (!CArgsUtils::TryGetSingle(args->prhs[4], &zoom, args->app_functions) || zoom <= 0 || zoom > 1 ||
+        (args->app_functions->pfn_GetClassId(args->prhs[4]) == AppExtensionClassId_Double &&
+            args->app_functions->pfn_GetDoubles(args->prhs[4])[0] > 1))
     {
-        throw invalid_argument("4th argument must be a number");
+        throw invalid_argument("4th argument must be a real, non-sparse finite scalar zoom with 0 < zoom <= 1");
     }
 }
 
