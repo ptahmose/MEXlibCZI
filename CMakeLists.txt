@@ -67,3 +67,9 @@ endif()
 
 # build a dynamic library containing the MEX functions (which is used by the mex-file for Octave)
 add_subdirectory("libmexlibczi")
+
+option(MEXLIBCZI_BUILD_HELPER_TESTS "Build host-independent argument helper tests" OFF)
+if(MEXLIBCZI_BUILD_HELPER_TESTS)
+  enable_testing()
+  add_subdirectory("tests/native")
+endif()

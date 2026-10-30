@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_BUILD_HELPER_TESTS=ON
           cmake --build . --config Release -j
       - name: run build (Windows)
         if: runner.os == 'Windows'
@@ -51,8 +51,11 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release 
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_BUILD_HELPER_TESTS=ON
           cmake --build . --config Release -j
+      - name: Run native unit tests
+        shell: bash
+        run: ctest --test-dir build -C Release --output-on-failure --no-tests=error
       - name: Prepare MATLAB unit tests
         shell: bash
         run: |

@@ -18,12 +18,12 @@ void MexFunction_GetSingleChannelScalingTileComposite_CheckArguments(MatlabArgs*
         throw invalid_argument("not enough arguments");
     }
 
-    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[1], 1, args->app_functions))
+    if (!CArgsUtils::TryGetInt32(args->prhs[1], nullptr, args->app_functions))
     {
         throw invalid_argument("2nd argument must be an integer");
     }
 
-    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[2], 4, args->app_functions))
+    if (!CArgsUtils::TryGetIntRect(args->prhs[2], nullptr, args->app_functions))
     {
         throw invalid_argument("2nd argument must be a ROI");
     }

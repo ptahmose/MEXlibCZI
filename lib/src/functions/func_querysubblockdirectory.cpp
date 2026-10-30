@@ -1,6 +1,4 @@
 #include "func_querysubblockdirectory.h"
-#include <cmath>
-#include <limits>
 #include <stdexcept>
 #include <string>
 #include "../implementation/argsutils.h"
@@ -10,33 +8,6 @@ using namespace std;
 
 namespace
 {
-    // Reads the element at "index" as an int32. In contrast to the shared CArgsUtils::TryGetInt32, floating-point
-    // values are not rounded: fractional values (as well as NaN/Inf and values outside the int32-range) are
-    // rejected. The range is checked in double precision (a float cannot represent INT_MAX exactly).
-    bool TryGetIntegralInt32(const Parameter array, size_t index, int* value, IAppExtensionFunctions* app_functions)
-    {
-        double v;
-        switch (app_functions->pfn_GetClassId(array))
-        {
-        case AppExtensionClassId_Double:
-            v = app_functions->pfn_GetDoubles(array)[index];
-            break;
-        case AppExtensionClassId_Single:
-            v = static_cast<double>(app_functions->pfn_GetSingles(array)[index]);
-            break;
-        default:
-            return CArgsUtils::TryGetInt32(array, index, value, app_functions);
-        }
-
-        if (!std::isfinite(v) || v != std::floor(v) || v < static_cast<double>(numeric_limits<int>::min()) || v > static_cast<double>(numeric_limits<int>::max()))
-        {
-            return false;
-        }
-
-        *value = static_cast<int>(v);
-        return true;
-    }
-
     // Converts the filter struct given by the user into a SubBlockDirectoryFilter. Recognized fields (all optional):
     //   Coordinate  - struct with one field per dimension letter (e.g. 'Z', 'C'), each either a scalar (a single
     //                 value) or [start size] (the interval start..start+size-1), the same representation
@@ -70,8 +41,8 @@ namespace
                 int start = 0, size = 1;
                 if ((count != 1 && count != 2) ||
                     app_functions->pfn_IsSparse(field) ||
-                    !TryGetIntegralInt32(field, 0, &start, app_functions) ||
-                    (count == 2 && !TryGetIntegralInt32(field, 1, &size, app_functions)) ||
+                    !CArgsUtils::TryGetInt32(field, 0, &start, app_functions) ||
+                    (count == 2 && !CArgsUtils::TryGetInt32(field, 1, &size, app_functions)) ||
                     size < 1)
                 {
                     throw invalid_argument(string("The field 'Coordinate.") + field_name + "' must be a non-sparse integral scalar or [start size] with size > 0.");
@@ -89,7 +60,7 @@ namespace
                 !app_functions->pfn_IsSparse(roi_field);
             for (size_t k = 0; valid && k < 4; ++k)
             {
-                valid = TryGetIntegralInt32(roi_field, k, &values[k], app_functions);
+                valid = CArgsUtils::TryGetInt32(roi_field, k, &values[k], app_functions);
             }
 
             if (!valid || values[2] < 0 || values[3] < 0)

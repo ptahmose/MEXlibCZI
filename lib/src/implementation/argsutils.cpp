@@ -2,6 +2,7 @@
 #include <app_api.h>
 #include "utils.h"
 #include <limits>
+#include <cmath>
 
 using namespace std;
 using namespace libCZI;
@@ -21,231 +22,84 @@ using namespace libCZI;
 
 /*static*/bool CArgsUtils::TryGetInt32(const Parameter pArr, std::int32_t* ptr, IAppExtensionFunctions* app_functions)
 {
-    //const mxClassID id = MexApi::GetInstance().MxGetClassID(pArr);
-    const AppExtensionClassId id = app_functions->pfn_GetClassId(pArr);
-    int rv;
-    switch (id)
-    {
-    case AppExtensionClassId_Double:
-        {
-            //auto* const pDbl = MexApi::GetInstance().MxGetDoubles(pArr);
-            auto* const pDbl = app_functions->pfn_GetDoubles(pArr);
-            const double v = *pDbl;
-            if (app_functions->pfn_IsNanOrInfDouble(v) || v > numeric_limits<int>::max() || v < numeric_limits<int>::min())
-            {
-                return false;
-            }
-
-            rv = lrint(v);
-        }
-        break;
-    case AppExtensionClassId_Single:
-        {
-            //auto* const pFlt = MexApi::GetInstance().MxGetSingles(pArr);
-            auto* const pFlt = app_functions->pfn_GetSingles(pArr);
-            const float v = *pFlt;
-            if (app_functions->pfn_IsNanOrInfDouble(v) || v > static_cast<float>(numeric_limits<int>::max()) || v < static_cast<float>(numeric_limits<int>::min()))
-            {
-                return false;
-            }
-
-            rv = lrintf(v);
-        }
-        break;
-    case AppExtensionClassId_Int8:
-        {
-            //auto* const pi8 = MexApi::GetInstance().MxGetInt8s(pArr);
-            auto* const pi8 = app_functions->pfn_GetInt8s(pArr);
-            rv = *pi8;  // NOLINT(bugprone-signed-char-misuse)
-        }
-        break;
-    case AppExtensionClassId_Uint8:
-        {
-            //auto* const pui8 = MexApi::GetInstance().MxGetUint8s(pArr);
-            auto* const pui8 = app_functions->pfn_GetUint8s(pArr);
-            rv = *pui8;
-        }
-        break;
-    case AppExtensionClassId_Int16:
-        {
-            //auto* const pi16 = MexApi::GetInstance().MxGetInt16s(pArr);
-            auto* const pi16 = app_functions->pfn_GetInt16s(pArr);
-            rv = *pi16;
-        }
-        break;
-    case AppExtensionClassId_Uint16:
-        {
-            //auto* const pui16 = MexApi::GetInstance().MxGetUint16s(pArr);
-            auto* const pui16 = app_functions->pfn_GetUint16s(pArr);
-            rv = *pui16;
-        }
-        break;
-    case AppExtensionClassId_Int32:
-        {
-            //const auto pi32 = MexApi::GetInstance().MxGetInt32s(pArr);
-            const auto pi32 = app_functions->pfn_GetInt32s(pArr);
-            rv = *pi32;
-        }
-        break;
-    case AppExtensionClassId_Uint32:
-        {
-            //const auto pui32 = MexApi::GetInstance().MxGetUint32s(pArr);
-            const auto pui32 = app_functions->pfn_GetUint32s(pArr);
-            if (*pui32 > static_cast<std::uint32_t>(numeric_limits<int>::max()))
-            {
-                return false;
-            }
-
-            rv = *pui32;
-        }
-        break;
-    case AppExtensionClassId_Int64:
-        {
-            //auto* pi64 = MexApi::GetInstance().MxGetInt64s(pArr);
-            auto* pi64 = app_functions->pfn_GetInt64s(pArr);
-            if (*pi64 > static_cast<int64_t>(numeric_limits<int>::max()) || *pi64 < static_cast<int64_t>(numeric_limits<int>::min()))
-            {
-                return false;
-            }
-
-            rv = static_cast<int>(*pi64);
-        }
-        break;
-    case AppExtensionClassId_Uint64:
-        {
-            //const auto pui64 = MexApi::GetInstance().MxGetUint64s(pArr);
-            const auto pui64 = app_functions->pfn_GetUint64s(pArr);
-            if (*pui64 > (uint64_t)(numeric_limits<int>::max()))
-            {
-                return false;
-            }
-
-            rv = static_cast<int>(*pui64);
-        }
-        break;
-    default:
-        return false;
-    }
-
-    if (ptr != nullptr)
-    {
-        *ptr = rv;
-    }
-
-    return true;
+    return pArr != nullptr && app_functions->pfn_GetNumberOfElements(pArr) == 1 &&
+        TryGetInt32(pArr, 0, ptr, app_functions);
 }
 
 /*static*/bool CArgsUtils::TryGetInt32(const Parameter pArr, size_t index, std::int32_t* ptr, IAppExtensionFunctions* app_functions)
 {
-    //size_t numOfElements = MexApi::GetInstance().MxGetNumberOfElements(pArr);
-    size_t numOfElements = app_functions->pfn_GetNumberOfElements(pArr);
-    if (numOfElements <= index)
+    if (!IsNumericArrayOfMinSize(pArr, 0, app_functions) ||
+        index >= app_functions->pfn_GetNumberOfElements(pArr))
     {
         return false;
     }
 
-    //const mxClassID id = MexApi::GetInstance().MxGetClassID(pArr);
-    const AppExtensionClassId id = app_functions->pfn_GetClassId(pArr);
-    int rv;
-    switch (id)
+    std::int32_t value;
+    switch (app_functions->pfn_GetClassId(pArr))
     {
     case AppExtensionClassId_Double:
-        {
-            //auto* const pDbl = MexApi::GetInstance().MxGetDoubles(pArr);
-            auto* const pDbl = app_functions->pfn_GetDoubles(pArr);
-            const double v = *(pDbl + index);
-            if (app_functions->pfn_IsNanOrInfDouble(v) || v > numeric_limits<int>::max() || v < numeric_limits<int>::min())
-            {
-                return false;
-            }
-
-            rv = lrint(v);
-        }
-        break;
     case AppExtensionClassId_Single:
         {
-            //auto* const pFlt = MexApi::GetInstance().MxGetSingles(pArr);
-            auto* const pFlt = app_functions->pfn_GetSingles(pArr);
-            const float v = *(pFlt + index);
-            if (app_functions->pfn_IsNanOrInfSingle(v) || v > (float)numeric_limits<int>::max() || v < (float)numeric_limits<int>::min())
+            // Check in double precision: single precision cannot represent INT32_MAX.
+            const double v = app_functions->pfn_GetClassId(pArr) == AppExtensionClassId_Double ?
+                app_functions->pfn_GetDoubles(pArr)[index] :
+                static_cast<double>(app_functions->pfn_GetSingles(pArr)[index]);
+            if (!std::isfinite(v) || v != std::trunc(v) ||
+                v < static_cast<double>(numeric_limits<std::int32_t>::min()) ||
+                v > static_cast<double>(numeric_limits<std::int32_t>::max()))
             {
                 return false;
             }
 
-            rv = lrintf(v);
+            value = static_cast<std::int32_t>(v);
         }
         break;
     case AppExtensionClassId_Int8:
-        {
-            //auto* const pi8 = MexApi::GetInstance().MxGetInt8s(pArr);
-            auto* const pi8 = app_functions->pfn_GetInt8s(pArr);
-            rv = *(pi8 + index);  // NOLINT(bugprone-signed-char-misuse)
-        }
+        value = app_functions->pfn_GetInt8s(pArr)[index];
         break;
     case AppExtensionClassId_Uint8:
-        {
-            //auto* const pui8 = MexApi::GetInstance().MxGetUint8s(pArr);
-            auto* const pui8 = app_functions->pfn_GetUint8s(pArr);
-            rv = *(pui8 + index);
-        }
+        value = app_functions->pfn_GetUint8s(pArr)[index];
         break;
     case AppExtensionClassId_Int16:
-        {
-            //auto* const pi16 = MexApi::GetInstance().MxGetInt16s(pArr);
-            auto* const pi16 = app_functions->pfn_GetInt16s(pArr);
-            rv = *(pi16 + index);
-        }
+        value = app_functions->pfn_GetInt16s(pArr)[index];
         break;
     case AppExtensionClassId_Uint16:
-        {
-            //auto* const pui16 = MexApi::GetInstance().MxGetUint16s(pArr);
-            auto* const pui16 = app_functions->pfn_GetUint16s(pArr);
-            rv = *(pui16 + index);
-        }
+        value = app_functions->pfn_GetUint16s(pArr)[index];
         break;
     case AppExtensionClassId_Int32:
-        {
-            //const auto pi32 = MexApi::GetInstance().MxGetInt32s(pArr);
-            const auto pi32 = app_functions->pfn_GetInt32s(pArr);
-            rv = *(pi32 + index);
-        }
+        value = app_functions->pfn_GetInt32s(pArr)[index];
         break;
     case AppExtensionClassId_Uint32:
         {
-            //const auto pui32 = MexApi::GetInstance().MxGetUint32s(pArr);
-            const auto pui32 = app_functions->pfn_GetUint32s(pArr);
-            if (*(pui32 + index) > static_cast<uint32_t>(numeric_limits<int>::max()))
+            const auto v = app_functions->pfn_GetUint32s(pArr)[index];
+            if (v > static_cast<std::uint32_t>(numeric_limits<std::int32_t>::max()))
             {
                 return false;
             }
 
-            rv = *(pui32 + index);
+            value = static_cast<std::int32_t>(v);
         }
         break;
     case AppExtensionClassId_Int64:
         {
-            //            auto* pi64 = MexApi::GetInstance().MxGetInt64s(pArr);
-            auto* pi64 = app_functions->pfn_GetInt64s(pArr);
-            int64_t v = *(pi64 + index);
-            if (v > static_cast<int64_t>(numeric_limits<int>::max()) || v < static_cast<int64_t>(numeric_limits<int>::min()))
+            const auto v = app_functions->pfn_GetInt64s(pArr)[index];
+            if (v < numeric_limits<std::int32_t>::min() || v > numeric_limits<std::int32_t>::max())
             {
                 return false;
             }
 
-            rv = static_cast<int>(v);
+            value = static_cast<std::int32_t>(v);
         }
         break;
     case AppExtensionClassId_Uint64:
         {
-            //const auto pui64 = MexApi::GetInstance().MxGetUint64s(pArr);
-            const auto pui64 = app_functions->pfn_GetUint64s(pArr);
-            uint64_t v = *(pui64 + index);
-            if (v > (uint64_t)(numeric_limits<int>::max()))
+            const auto v = app_functions->pfn_GetUint64s(pArr)[index];
+            if (v > static_cast<std::uint64_t>(numeric_limits<std::int32_t>::max()))
             {
                 return false;
             }
 
-            rv = static_cast<int>(v);
+            value = static_cast<std::int32_t>(v);
         }
         break;
     default:
@@ -254,7 +108,7 @@ using namespace libCZI;
 
     if (ptr != nullptr)
     {
-        *ptr = rv;
+        *ptr = value;
     }
 
     return true;
@@ -262,119 +116,72 @@ using namespace libCZI;
 
 /*static*/bool CArgsUtils::TryGetSingle(const Parameter pArr, float* ptr, IAppExtensionFunctions* app_functions)
 {
-    return CArgsUtils::TryGetSingle(pArr, 0, ptr, app_functions);
+    return pArr != nullptr && app_functions->pfn_GetNumberOfElements(pArr) == 1 &&
+        TryGetSingle(pArr, 0, ptr, app_functions);
 }
 
 /*static*/bool CArgsUtils::TryGetSingle(const Parameter pArr, size_t index, float* ptr, IAppExtensionFunctions* app_functions)
 {
-    //size_t numOfElements = MexApi::GetInstance().MxGetNumberOfElements(pArr);
-    size_t numOfElements = app_functions->pfn_GetNumberOfElements(pArr);
-    if (numOfElements <= index)
+    if (!IsNumericArrayOfMinSize(pArr, 0, app_functions) ||
+        index >= app_functions->pfn_GetNumberOfElements(pArr))
     {
         return false;
     }
 
-    //const mxClassID id = MexApi::GetInstance().MxGetClassID(pArr);
-    const AppExtensionClassId id = app_functions->pfn_GetClassId(pArr);
-    float rv;
-    switch (id)
+    float value;
+    switch (app_functions->pfn_GetClassId(pArr))
     {
     case AppExtensionClassId_Double:
         {
-            //auto* const pDbl = MexApi::GetInstance().MxGetDoubles(pArr);
-            auto* const pDbl = app_functions->pfn_GetDoubles(pArr);
-            const double v = *(pDbl + index);
-            rv = static_cast<float>(v);
+            const double v = app_functions->pfn_GetDoubles(pArr)[index];
+            if (!std::isfinite(v) || v < -static_cast<double>(numeric_limits<float>::max()) ||
+                v > static_cast<double>(numeric_limits<float>::max()))
+            {
+                return false;
+            }
+
+            value = static_cast<float>(v);
         }
         break;
     case AppExtensionClassId_Single:
-        {
-            //auto* const pFlt = MexApi::GetInstance().MxGetSingles(pArr);
-            auto* const pFlt = app_functions->pfn_GetSingles(pArr);
-            const float v = *(pFlt + index);
-            rv = v;
-        }
+        value = app_functions->pfn_GetSingles(pArr)[index];
         break;
     case AppExtensionClassId_Int8:
-        {
-            //auto* const pi8 = MexApi::GetInstance().MxGetInt8s(pArr);
-            auto* const pi8 = app_functions->pfn_GetInt8s(pArr);
-            rv = *(pi8 + index);  // NOLINT(bugprone-signed-char-misuse)
-        }
+        value = static_cast<float>(app_functions->pfn_GetInt8s(pArr)[index]);
         break;
     case AppExtensionClassId_Uint8:
-        {
-            //            auto* const pui8 = MexApi::GetInstance().MxGetUint8s(pArr);
-            auto* const pui8 = app_functions->pfn_GetUint8s(pArr);
-            rv = *(pui8 + index);
-        }
+        value = static_cast<float>(app_functions->pfn_GetUint8s(pArr)[index]);
         break;
     case AppExtensionClassId_Int16:
-        {
-            //auto* const pi16 = MexApi::GetInstance().MxGetInt16s(pArr);
-            auto* const pi16 = app_functions->pfn_GetInt16s(pArr);
-            rv = *(pi16 + index);
-        }
+        value = static_cast<float>(app_functions->pfn_GetInt16s(pArr)[index]);
         break;
     case AppExtensionClassId_Uint16:
-        {
-            //auto* const pui16 = MexApi::GetInstance().MxGetUint16s(pArr);
-            auto* const pui16 = app_functions->pfn_GetUint16s(pArr);
-            rv = *(pui16 + index);
-        }
+        value = static_cast<float>(app_functions->pfn_GetUint16s(pArr)[index]);
         break;
     case AppExtensionClassId_Int32:
-        {
-            //const auto pi32 = MexApi::GetInstance().MxGetInt32s(pArr);
-            const auto pi32 = app_functions->pfn_GetInt32s(pArr);
-            rv = *(pi32 + index);
-        }
+        value = static_cast<float>(app_functions->pfn_GetInt32s(pArr)[index]);
         break;
     case AppExtensionClassId_Uint32:
-        {
-            //const auto pui32 = MexApi::GetInstance().MxGetUint32s(pArr);
-            const auto pui32 = app_functions->pfn_GetUint32s(pArr);
-            if (*pui32 > static_cast<uint32_t>(numeric_limits<int>::max()))
-            {
-                return false;
-            }
-
-            rv = *pui32;
-        }
+        value = static_cast<float>(app_functions->pfn_GetUint32s(pArr)[index]);
         break;
     case AppExtensionClassId_Int64:
-        {
-            //auto* pi64 = MexApi::GetInstance().MxGetInt64s(pArr);
-            auto* pi64 = app_functions->pfn_GetInt64s(pArr);
-            int64_t v = *(pi64 + index);
-            if (v > static_cast<int64_t>(numeric_limits<int>::max()) || v < static_cast<int64_t>(numeric_limits<int>::min()))
-            {
-                return false;
-            }
-
-            rv = static_cast<float>(v);
-        }
+        value = static_cast<float>(app_functions->pfn_GetInt64s(pArr)[index]);
         break;
     case AppExtensionClassId_Uint64:
-        {
-            //const auto pui64 = MexApi::GetInstance().MxGetUint64s(pArr);
-            const auto pui64 = app_functions->pfn_GetUint64s(pArr);
-            uint64_t v = *(pui64 + index);
-            if (v > (uint64_t)(numeric_limits<int>::max()))
-            {
-                return false;
-            }
-
-            rv = static_cast<float>(v);
-        }
+        value = static_cast<float>(app_functions->pfn_GetUint64s(pArr)[index]);
         break;
     default:
         return false;
     }
 
+    if (!std::isfinite(value))
+    {
+        return false;
+    }
+
     if (ptr != nullptr)
     {
-        *ptr = rv;
+        *ptr = value;
     }
 
     return true;
@@ -382,6 +189,11 @@ using namespace libCZI;
 
 /*static*/bool CArgsUtils::IsNumericArrayOfMinSize(const Parameter pArr, size_t minElementCount, IAppExtensionFunctions* app_functions)
 {
+    if (pArr == nullptr || app_functions->pfn_IsSparse(pArr) || app_functions->pfn_IsComplex(pArr))
+    {
+        return false;
+    }
+
     //auto mexApi = MexApi::GetInstance();
     //const mxClassID id = mexApi.MxGetClassID(pArr);
     const AppExtensionClassId id = app_functions->pfn_GetClassId(pArr);
@@ -488,38 +300,13 @@ using namespace libCZI;
 
 /*static*/bool CArgsUtils::TryGetArrayInfo(const Parameter pArr, ArrayInfo* array_info, IAppExtensionFunctions* app_functions)
 {
-    //auto mexApi = MexApi::GetInstance();
-    //if (!mexApi.MxIsNumeric(pArr))
-    if (!app_functions->pfn_IsNumeric(pArr))
+    if (!IsNumericArrayOfMinSize(pArr, 0, app_functions))
     {
         return false;
     }
 
-    //if (mexApi.MxIsSparse(pArr))
-    if (app_functions->pfn_IsSparse(pArr))
-    {
-        return false;
-    }
-
-    ArrayInfo info;
-
-    //info.class_id = mexApi.MxGetClassID(pArr);
+    ArrayInfo info{};
     info.class_id = app_functions->pfn_GetClassId(pArr);
-    if (!(info.class_id == AppExtensionClassId_Double ||
-        info.class_id == AppExtensionClassId_Single ||
-        info.class_id == AppExtensionClassId_Int8 ||
-        info.class_id == AppExtensionClassId_Uint8 ||
-        info.class_id == AppExtensionClassId_Int16 ||
-        info.class_id == AppExtensionClassId_Uint16 ||
-        info.class_id == AppExtensionClassId_Int32 ||
-        info.class_id == AppExtensionClassId_Uint32 ||
-        info.class_id == AppExtensionClassId_Int64 ||
-        info.class_id == AppExtensionClassId_Uint64))
-    {
-        return false;
-    }
-
-    //auto number_of_dimensions = mexApi.MxGetNumberOfDimensions(pArr);
     auto number_of_dimensions = app_functions->pfn_GetNumberOfDimensions(pArr);
     if (number_of_dimensions > ArrayInfo::kMaxDimensions)
     {
@@ -528,10 +315,8 @@ using namespace libCZI;
 
     info.number_of_dimensions = static_cast<uint8_t>(number_of_dimensions);
 
-    //mexApi.GetSizeOfDimensions(pArr, number_of_dimensions, info.dimensions.data());
     app_functions->pfn_GetSizeOfDimensions(pArr, number_of_dimensions, info.dimensions.data());
 
-    //info.data = mexApi.MxGetData(pArr);
     info.data = app_functions->pfn_GetData(pArr);
 
     if (array_info != nullptr)
@@ -540,23 +325,6 @@ using namespace libCZI;
     }
 
     return true;
-
-    /*ArrayInfo info;
-    info.class_id = mexApi.MxGetClassID(pArr);
-    info.number_of_dimensions = mexApi.MxGetNumberOfDimensions(pArr);
-    for (size_t i = 0; i < info.number_of_dimensions; ++i)
-    {
-        info.dimensions[i] = mexApi.MxGetDimensions(pArr)[i];
-    }
-
-    info.data = mexApi.MxGetData(pArr);
-
-    if (array_info != nullptr)
-    {
-        *array_info = info;
-    }
-
-    return true;*/
 }
 
 /*static*/bool CArgsUtils::TryGetPixelType(const Parameter argument, libCZI::PixelType* pixel_type, IAppExtensionFunctions* app_functions)
@@ -582,8 +350,9 @@ using namespace libCZI;
                 if (pixel_type != nullptr)
                 {
                     *pixel_type = item.pixel_type;
-                    return true;
                 }
+
+                return true;
             }
         }
 
