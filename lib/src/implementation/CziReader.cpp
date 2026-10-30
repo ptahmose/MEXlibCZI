@@ -260,6 +260,11 @@ Parameter CziReader::GetSingleChannelScalingTileComposite(const libCZI::IntRect&
 std::shared_ptr<libCZI::IDisplaySettings> CziReader::GetDisplaySettingsFromCzi()
 {
 	this->InitializeInfoFromCzi();
+	if (!this->displaySettingsFromCzi)
+	{
+		throw invalid_argument("The document does not contain display settings");
+	}
+
 	return this->displaySettingsFromCzi;
 }
 

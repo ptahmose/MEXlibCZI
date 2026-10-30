@@ -160,6 +160,11 @@ static bool octaveMexIsSparse(const Parameter parameter)
     return mxIsSparse((const mxArray*)parameter);
 }
 
+static bool octaveMexIsComplex(const Parameter parameter)
+{
+    return mxIsComplex((const mxArray*)parameter);
+}
+
 static bool octaveMexIsStruct(const Parameter parameter)
 {
     return mxIsStruct((const mxArray*)parameter);
@@ -344,7 +349,8 @@ static struct IAppExtensionFunctions g_appExtensionFunctions =
     .pfn_GetNumberOfDimensions = octaveMexGetNumberOfDimensions,
     .pfn_GetSizeOfDimensions = octaveMexGetSizeOfDimensions,
     .pfn_GetField = octaveMexGetField,
-    .pfn_CreateNumericArrayReal = octaveMexCreateNumericArrayReal
+    .pfn_CreateNumericArrayReal = octaveMexCreateNumericArrayReal,
+    .pfn_IsComplex = octaveMexIsComplex
 };
 
 static bool gIsInitialized = false;

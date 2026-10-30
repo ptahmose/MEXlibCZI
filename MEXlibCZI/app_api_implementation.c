@@ -97,6 +97,11 @@ bool matlabMexIsSparse(const Parameter parameter)
     return mxIsSparse((const mxArray*)parameter);
 }
 
+bool matlabMexIsComplex(const Parameter parameter)
+{
+    return mxIsComplex((const mxArray*)parameter);
+}
+
 bool matlabMexIsStruct(const Parameter parameter)
 {
     return mxIsStruct((const mxArray*)parameter);
@@ -280,5 +285,6 @@ struct IAppExtensionFunctions g_appExtensionFunctions =
     .pfn_GetNumberOfDimensions = matlabGetNumberOfDimensions,
     .pfn_GetSizeOfDimensions = matlabGetSizeOfDimensions,
     .pfn_GetField = matlabGetField,
-    .pfn_CreateNumericArrayReal = matlabCreateNumericArrayReal
+    .pfn_CreateNumericArrayReal = matlabCreateNumericArrayReal,
+    .pfn_IsComplex = matlabMexIsComplex
 };

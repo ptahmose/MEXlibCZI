@@ -25,7 +25,7 @@ void MexFunction_CreateCziWriter_CheckArguments(MatlabArgs* args)
         throw invalid_argument("Expecting a string as 2nd argument");
     }
 
-    if (args->nrhs >= 2)
+    if (args->nrhs >= 3)
     {
         if (!args->app_functions->pfn_IsChar(args->prhs[2]))
         {
@@ -39,7 +39,7 @@ void MexFunction_CreateCziWriter_Execute(MatlabArgs* args)
     const auto filename = CArgsUtils::GetAsUtf8String(args->prhs[1], args->app_functions);
 
     bool overwrite_existing_file = false;
-    if (args->nrhs >= 2)
+    if (args->nrhs >= 3)
     {
         const auto option = CArgsUtils::GetAsUtf8String(args->prhs[2], args->app_functions);
         if (option == "x" || option == "overwrite")

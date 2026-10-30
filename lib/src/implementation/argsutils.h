@@ -23,19 +23,31 @@ public:
 
     static std::string GetAsUtf8String(const Parameter pArr, IAppExtensionFunctions* app_functions);   
 
+    /// Reads a real, dense numeric scalar that is integral, finite and in the int32 range.
+    /// Logical arrays are rejected. A null output pointer validates without storing a result.
+    /// On failure the output is unchanged.
     static bool TryGetInt32(const Parameter pArr, std::int32_t* ptr, IAppExtensionFunctions* app_functions);
+    /// Same conversion for an indexed array element; rejects an out-of-bounds index.
     static bool TryGetInt32(const Parameter pArr, size_t index, std::int32_t* ptr, IAppExtensionFunctions* app_functions);
 
+    /// Reads a real, dense numeric scalar as a finite float. Fractional values are allowed;
+    /// overflow is rejected, ordinary rounding and underflow follow float conversion.
+    /// Logical arrays are rejected. On failure the output is unchanged.
     static bool TryGetSingle(const Parameter pArr, float* ptr, IAppExtensionFunctions* app_functions);
+    /// Same conversion for an indexed array element; rejects an out-of-bounds index.
     static bool TryGetSingle(const Parameter pArr, size_t index, float* ptr, IAppExtensionFunctions* app_functions);
 
+    /// Checks for a real, dense numeric array of at least the specified size; excludes logical.
     static bool IsNumericArrayOfMinSize(const Parameter pArr, size_t minElementCount, IAppExtensionFunctions* app_functions);
     static bool IsStructure(const Parameter pArr, IAppExtensionFunctions* app_functions);
 
+    /// Reads the first four integral int32 elements as [x y width height], requiring nonnegative sizes.
+    /// Extra elements are ignored. On failure the output is unchanged.
     static bool TryGetIntRect(const Parameter pArr, libCZI::IntRect* rect, IAppExtensionFunctions* app_functions);
 
     static bool TryGetDimCoordinate(const Parameter pArr, libCZI::CDimCoordinate* coord, IAppExtensionFunctions* app_functions);
 
+    /// Gets storage information for a real, dense numeric array of at most three dimensions.
     static bool TryGetArrayInfo(const Parameter pArr, ArrayInfo* array_info, IAppExtensionFunctions* app_functions);
 
     static bool TryGetString(const Parameter pArr, std::string* str, IAppExtensionFunctions* app_functions);

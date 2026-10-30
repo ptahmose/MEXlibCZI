@@ -1,6 +1,4 @@
 #include "func_querysubblockdirectory.h"
-#include <cmath>
-#include <limits>
 #include <stdexcept>
 #include <string>
 #include "../implementation/argsutils.h"
@@ -10,33 +8,6 @@ using namespace std;
 
 namespace
 {
-    // Reads the element at "index" as an int32. In contrast to the shared CArgsUtils::TryGetInt32, floating-point
-    // values are not rounded: fractional values (as well as NaN/Inf and values outside the int32-range) are
-    // rejected. The range is checked in double precision (a float cannot represent INT_MAX exactly).
-    bool TryGetIntegralInt32(const Parameter array, size_t index, int* value, IAppExtensionFunctions* app_functions)
-    {
-        double v;
-        switch (app_functions->pfn_GetClassId(array))
-        {
-        case AppExtensionClassId_Double:
-            v = app_functions->pfn_GetDoubles(array)[index];
-            break;
-        case AppExtensionClassId_Single:
-            v = static_cast<double>(app_functions->pfn_GetSingles(array)[index]);
-            break;
-        default:
-            return CArgsUtils::TryGetInt32(array, index, value, app_functions);
-        }
-
-        if (!std::isfinite(v) || v != std::floor(v) || v < static_cast<double>(numeric_limits<int>::min()) || v > static_cast<double>(numeric_limits<int>::max()))
-        {
-            return false;
-        }
-
-        *value = static_cast<int>(v);
-        return true;
-    }
-
     // Converts the filter struct given by the user into a SubBlockDirectoryFilter. Recognized fields (all optional):
     //   Coordinate  - struct with one field per dimension letter (e.g. 'Z', 'C'), each either a scalar (a single
     //                 value) or [start size] (the interval start..start+size-1), the same representation
@@ -51,9 +22,10 @@ namespace
 
         if (const auto coordinate_field = app_functions->pfn_GetField(filter_argument, "Coordinate"); coordinate_field != nullptr)
         {
-            if (!CArgsUtils::IsStructure(coordinate_field, app_functions))
+            if (!CArgsUtils::IsStructure(coordinate_field, app_functions) ||
+                app_functions->pfn_GetNumberOfElements(coordinate_field) != 1)
             {
-                throw invalid_argument("The field 'Coordinate' must be a struct.");
+                throw invalid_argument("The field 'Coordinate' must be a scalar struct.");
             }
 
             for (int i = static_cast<int>(libCZI::DimensionIndex::MinDim); i <= static_cast<int>(libCZI::DimensionIndex::MaxDim); ++i)
@@ -70,8 +42,8 @@ namespace
                 int start = 0, size = 1;
                 if ((count != 1 && count != 2) ||
                     app_functions->pfn_IsSparse(field) ||
-                    !TryGetIntegralInt32(field, 0, &start, app_functions) ||
-                    (count == 2 && !TryGetIntegralInt32(field, 1, &size, app_functions)) ||
+                    !CArgsUtils::TryGetInt32(field, 0, &start, app_functions) ||
+                    (count == 2 && !CArgsUtils::TryGetInt32(field, 1, &size, app_functions)) ||
                     size < 1)
                 {
                     throw invalid_argument(string("The field 'Coordinate.") + field_name + "' must be a non-sparse integral scalar or [start size] with size > 0.");
@@ -89,7 +61,7 @@ namespace
                 !app_functions->pfn_IsSparse(roi_field);
             for (size_t k = 0; valid && k < 4; ++k)
             {
-                valid = TryGetIntegralInt32(roi_field, k, &values[k], app_functions);
+                valid = CArgsUtils::TryGetInt32(roi_field, k, &values[k], app_functions);
             }
 
             if (!valid || values[2] < 0 || values[3] < 0)
@@ -104,7 +76,8 @@ namespace
         {
             const auto class_id = app_functions->pfn_GetClassId(layer0_field);
             const bool is_numeric_or_logical = class_id == AppExtensionClassId_Logical || CArgsUtils::IsNumericArrayOfMinSize(layer0_field, 1, app_functions);
-            if (!is_numeric_or_logical || app_functions->pfn_IsSparse(layer0_field) || app_functions->pfn_GetNumberOfElements(layer0_field) != 1)
+            if (!is_numeric_or_logical || app_functions->pfn_IsSparse(layer0_field) ||
+                app_functions->pfn_IsComplex(layer0_field) || app_functions->pfn_GetNumberOfElements(layer0_field) != 1)
             {
                 throw invalid_argument("The field 'OnlyLayer0' must be a non-sparse logical or numeric scalar.");
             }
@@ -146,14 +119,15 @@ void MexFunction_QuerySubBlockDirectory_CheckArguments(MatlabArgs* args)
         throw invalid_argument("too many arguments");
     }
 
-    if (!CArgsUtils::IsNumericArrayOfMinSize(args->prhs[1], 1, args->app_functions) || args->app_functions->pfn_IsSparse(args->prhs[1]))
+    if (!CArgsUtils::TryGetInt32(args->prhs[1], nullptr, args->app_functions))
     {
         throw invalid_argument("2nd argument must be a non-sparse integer");
     }
 
-    if (args->nrhs == 3 && !CArgsUtils::IsStructure(args->prhs[2], args->app_functions))
+    if (args->nrhs == 3 && (!CArgsUtils::IsStructure(args->prhs[2], args->app_functions) ||
+        args->app_functions->pfn_GetNumberOfElements(args->prhs[2]) != 1))
     {
-        throw invalid_argument("3rd argument must be a struct");
+        throw invalid_argument("3rd argument must be a scalar struct");
     }
 }
 

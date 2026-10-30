@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 3.11)
 
 set(MEXLIBCZI_MAJOR 0)
 set(MEXLIBCZI_MINOR 6)
-set(MEXLIBCZI_PATCH 0)
+set(MEXLIBCZI_PATCH 1)
 set(MEXLIBCZI_EXT "alpha")
 
 if(WIN32)
@@ -67,3 +67,9 @@ endif()
 
 # build a dynamic library containing the MEX functions (which is used by the mex-file for Octave)
 add_subdirectory("libmexlibczi")
+
+option(MEXLIBCZI_BUILD_HELPER_TESTS "Build host-independent argument helper tests" OFF)
+if(MEXLIBCZI_BUILD_HELPER_TESTS)
+  enable_testing()
+  add_subdirectory("tests/native")
+endif()

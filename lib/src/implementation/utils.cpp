@@ -239,7 +239,8 @@ public:
     const bool has_3rd_dimension = array_info.number_of_dimensions == 3;
     for (const auto& conversionInfo : kConversionTable)
     {
-        if (conversionInfo.mx_class == array_info.class_id && conversionInfo.has_3rd_dimension == has_3rd_dimension)
+        if (conversionInfo.mx_class == array_info.class_id && conversionInfo.has_3rd_dimension == has_3rd_dimension &&
+            conversionInfo.pixel_type == pixel_type)
         {
             auto bitmapData = make_shared<Bitmap>(pixel_type, static_cast<std::uint32_t>(array_info.dimensions[1]), static_cast<std::uint32_t>(array_info.dimensions[0]));
             conversionInfo.conversion_function(array_info, bitmapData.get());

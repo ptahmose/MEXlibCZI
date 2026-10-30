@@ -97,6 +97,9 @@ extern "C" {
         Parameter(*pfn_GetField)(const Parameter parameter, const char* field_name);
 
         Parameter(*pfn_CreateNumericArrayReal)(size_t ndim, const size_t* dims, enum AppExtensionClassId class_id);
+
+        /// True if the host array uses complex storage (even if all imaginary parts are zero).
+        bool (*pfn_IsComplex)(const Parameter parameter);
     };
 
 #ifdef __cplusplus
