@@ -9,13 +9,14 @@
 #include "dbgprint.h"
 #if _WIN32
 #include <Windows.h>
-#elif defined(MEXLIBCZI_USE_ICONV)
-#include <cerrno>
-#include <iconv.h>
-#include <system_error>
 #else
 #include <rapidjson/encodings.h>
 #include <rapidjson/memorystream.h>
+#if defined(MEXLIBCZI_USE_ICONV)
+#include <cerrno>
+#include <iconv.h>
+#include <system_error>
+#endif
 #endif
 
 using namespace std;
@@ -96,6 +97,18 @@ using namespace std;
     const size_t length = std::strlen(sz);
 #if defined(MEXLIBCZI_USE_ICONV)
     if (length == 0) return {};
+
+    // System iconv implementations differ in how strictly they validate UTF-8.
+    // Reject malformed input consistently before requesting native conversion.
+    rapidjson::MemoryStream validation_input(sz, length);
+    while (validation_input.Tell() < length)
+    {
+        unsigned codepoint;
+        if (!rapidjson::UTF8<>::Decode(validation_input, &codepoint))
+        {
+            throw std::range_error("Invalid UTF-8 string");
+        }
+    }
 
     const std::uint32_t endian_probe = 1;
     const bool little_endian = *reinterpret_cast<const unsigned char*>(&endian_probe) != 0;

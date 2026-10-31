@@ -60,6 +60,11 @@ if (MEXLIBCZI_BUILD_MATLABMEX)
   message("########################################")
 endif()
 
+# Discover in the parent scope so native tests can also see Iconv_FOUND.
+if(UNIX)
+  find_package(Iconv QUIET)
+endif()
+
 # build the static library containing the MEX functions
 add_subdirectory("lib")
 

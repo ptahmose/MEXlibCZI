@@ -102,7 +102,6 @@ target_link_libraries(lib PRIVATE libCZIStatic JxrDecodeStatic)
 add_dependencies(lib rapidjson)
 
 if(UNIX)
-  find_package(Iconv QUIET)
   if(Iconv_FOUND)
     target_link_libraries(lib PRIVATE Iconv::Iconv)
     target_compile_definitions(lib PRIVATE MEXLIBCZI_USE_ICONV=1)
