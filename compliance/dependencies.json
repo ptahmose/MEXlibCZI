@@ -1,0 +1,132 @@
+{
+  "formatVersion": 1,
+  "reviewStatus": "Engineering inventory; not legal clearance",
+  "sources": [
+    {
+      "id": "libczi",
+      "name": "libCZI",
+      "version": "0.71.0",
+      "repository": "https://github.com/ZEISS/libczi",
+      "commit": "cf8fcaf43001551345bbbc22bb92c0a67e956aba",
+      "buildPath": "_deps/libczi-src",
+      "licenseExpression": "LGPL-3.0-or-later",
+      "notices": [
+        "COPYING",
+        "THIRD_PARTY_LICENSES.txt",
+        "LICENSES/*"
+      ],
+      "relationship": "static"
+    },
+    {
+      "id": "rapidjson",
+      "name": "RapidJSON",
+      "version": "815e6e7e7e14be44a6c15d9aefed232ff064cad0",
+      "repository": "https://github.com/Tencent/rapidjson",
+      "commit": "815e6e7e7e14be44a6c15d9aefed232ff064cad0",
+      "buildPath": "vendor/rapidjson/src/rapidjson",
+      "licenseExpression": "MIT",
+      "notices": [
+        "license.txt"
+      ],
+      "sourcePaths": [
+        "include",
+        "license.txt"
+      ],
+      "relationship": "header-only",
+      "notes": "Only include/ and license.txt are distributed in the source bundle. bin/jsonchecker and thirdparty/gtest are excluded. license.txt also documents components not included in these binaries."
+    },
+    {
+      "id": "eigen",
+      "name": "Eigen",
+      "version": "3.4.0",
+      "repository": "https://gitlab.com/libeigen/eigen",
+      "commit": "3147391d946bb4b6c68edd901f2add6ac1f31f8c",
+      "buildPath": "vendor/eigen3/src/eigen_ext",
+      "licenseName": "Mixed upstream file licenses; see COPYING.README and COPYING.*",
+      "notices": [
+        "COPYING.*"
+      ],
+      "relationship": "header-only",
+      "notes": "MPL-2.0 is the primary upstream license. The complete source tree also includes BSD, LGPL, GPL, Apache and MINPACK material. This inventory makes no blanket per-file license conclusion."
+    },
+    {
+      "id": "zstd",
+      "name": "Zstandard",
+      "version": "1.5.7",
+      "repository": "https://github.com/facebook/zstd",
+      "commit": "f8745da6ff1ad1e7bab384bd1f9d742439278e99",
+      "buildPath": "_deps/zstd-src",
+      "licenseExpression": "BSD-3-Clause OR GPL-2.0-only",
+      "notices": [
+        "LICENSE",
+        "COPYING"
+      ],
+      "relationship": "static",
+      "sourcePaths": [
+        "lib",
+        "build/cmake",
+        "LICENSE",
+        "COPYING",
+        "README.md"
+      ],
+      "notes": "Source bundle includes library sources and CMake build files; unused CLI/test trees are excluded."
+    }
+  ],
+  "embedded": [
+    {
+      "id": "jxrlib",
+      "name": "jxrlib (libCZI-modified)",
+      "version": "libczi-cf8fcaf43001551345bbbc22bb92c0a67e956aba",
+      "source": "libczi",
+      "path": "Src/JxrDecode/jxrlib",
+      "licenseExpression": "BSD-2-Clause",
+      "relationship": "static",
+      "evidence": "Source copyright/license headers and libCZI THIRD_PARTY_LICENSES.txt"
+    },
+    {
+      "id": "pugixml",
+      "name": "pugixml (libCZI-modified)",
+      "version": "1.15",
+      "source": "libczi",
+      "path": "Src/libCZI/pugixml.cpp",
+      "licenseExpression": "MIT",
+      "relationship": "static",
+      "evidence": "pugixml.hpp PUGIXML_VERSION=1150 and copyright/license block at the end of pugixml.cpp. Upstream aggregate notice still says 1.13."
+    },
+    {
+      "id": "md5-derived",
+      "name": "MD5 implementation (libCZI-modified)",
+      "version": "libczi-cf8fcaf43001551345bbbc22bb92c0a67e956aba",
+      "source": "libczi",
+      "path": "Src/libCZI/MD5Sum.h",
+      "licenseExpression": "LGPL-3.0-or-later",
+      "relationship": "static",
+      "evidence": "MD5Sum.h/cpp SPDX declarations. Header identifies derivation from https://github.com/galenguyer/md5 under Unlicense; original revision is not stated."
+    },
+    {
+      "id": "xxhash",
+      "name": "xxHash (Zstandard-adapted)",
+      "version": "0.8.2",
+      "source": "zstd",
+      "path": "lib/common/xxhash.h",
+      "licenseExpression": "BSD-3-Clause OR GPL-2.0-only",
+      "relationship": "static",
+      "evidence": "Embedded version macros and adapted license header refer to Zstandard LICENSE and COPYING."
+    }
+  ],
+  "excludedFeatures": [
+    "LIBCZI_BUILD_CURL_BASED_STREAM",
+    "LIBCZI_BUILD_AZURESDK_BASED_STREAM",
+    "LIBCZI_BUILD_EXPERIMENTAL_CHUNKED_COMPRESSION",
+    "LIBCZI_BUILD_LIBCZIAPI",
+    "LIBCZI_BUILD_PREFER_EXTERNALPACKAGE_EIGEN3",
+    "LIBCZI_BUILD_PREFER_EXTERNALPACKAGE_ZSTD"
+  ],
+  "openReviewItems": [
+    "GPL/MATLAB combined-work licensing and rights to grant any exception",
+    "Repository GPL version-3-only versus version-3-or-later grant policy",
+    "Eigen file-level licensing conclusion for compiled headers",
+    "Static compiler-runtime redistribution terms and corresponding-source treatment",
+    "Historical releases require separate reconstruction; do not infer their inventory from current sources"
+  ]
+}

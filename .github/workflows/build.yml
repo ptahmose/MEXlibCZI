@@ -14,19 +14,29 @@ on:
   push: 
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
     name: Build Binaries
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         # Keep older Ubuntu builds for compatibility alongside the current LTS.
         os: [ubuntu-26.04, ubuntu-24.04, ubuntu-22.04, windows-latest, macos-15]
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
+      - name: Set up Python for release materials
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test release tooling
+        shell: bash
+        run: |
+          python -m pip install -r compliance/requirements-validation.txt
+          python -m unittest discover -s tests/release -v
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v3
       - name: run build (Linux)
@@ -156,6 +166,7 @@ jobs:
           cd OctaveMex
           octave --version
           mkoctfile --mex octavelibczi.c
+          octave --quiet --eval "fid=fopen('../build/octave-version.txt','w'); assert(fid>=0); fprintf(fid,'%s',version); fclose(fid);"
           cp ../build/libmexlibczi/libmexlibczi.dylib .
           file octavelibczi.mex libmexlibczi.dylib
           otool -L octavelibczi.mex libmexlibczi.dylib
@@ -170,6 +181,7 @@ jobs:
           REM echo "cd %GITHUB_WORKSPACE%/OctaveMex ,  mkoctfile --mex octavelibczi.c"
           set GITHUB_WORKSPACE_FORWARD_SLASHES=%GITHUB_WORKSPACE:\=/%
           "%OCTAVECLI_LINK%" --eval "cd %GITHUB_WORKSPACE_FORWARD_SLASHES%/OctaveMex , mkoctfile --mex octavelibczi.c"
+          "%OCTAVECLI_LINK%" --eval "fid=fopen('%GITHUB_WORKSPACE_FORWARD_SLASHES%/build/octave-version.txt','w'); assert(fid>=0); fprintf(fid,'%s',version); fclose(fid);"
           REM now, copy the libmexlibczi.dll to this folder
           copy /B build\libmexlibczi\Release\libmexlibczi.dll %GITHUB_WORKSPACE%\OctaveMex
           echo "*** directory listing of %GITHUB_WORKSPACE%\OctaveMex ***"
@@ -192,6 +204,7 @@ jobs:
               echo "Octave version is greater than $max_version"
               octave --eval "mkoctfile --mex octavelibczi.c"
           fi
+          octave --quiet --eval "fid=fopen('../build/octave-version.txt','w'); assert(fid>=0); fprintf(fid,'%s',version); fclose(fid);"
           cp ../build/libmexlibczi/libmexlibczi.so .  # now, copy the libmexlibczi.so to this folder
       - name: Octave Unit-Tests (Linux and macOS)
         if: runner.os != 'Windows'
@@ -226,6 +239,21 @@ jobs:
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "windowsx64_matlab_build=${name}" >> "$GITHUB_OUTPUT"
+      - name: Prepare licenses and project/dependency source bundle
+        shell: bash
+        run: python scripts/release_materials.py prepare --build build --output build/release-materials --platform "${{ matrix.os }}"
+      - name: Add MATLAB license materials and SBOM
+        shell: bash
+        run: |
+          python scripts/release_materials.py package --materials build/release-materials --package "${artifactPath}" --host matlab
+          python scripts/validate_sbom.py "${artifactPath}/sbom.cdx.json"
+      - name: Verify source bundle configures offline (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          mkdir -p build/source-check
+          tar -xzf build/release-materials/MEXlibCZI-source-*.tar.gz -C build/source-check
+          python build/source-check/MEXlibCZI-source-*/rebuild.py
       - name: Upload MATLAB-mex artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -292,48 +320,79 @@ jobs:
           echo "artifactName=${name}" >> "$GITHUB_ENV"
           echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
           echo "linuxx64_ubuntu22_octave_build=${name}" >> "$GITHUB_OUTPUT"
+      - name: Add Octave license materials and SBOM
+        shell: bash
+        run: |
+          python scripts/release_materials.py package --materials build/release-materials --package "${artifactPath}" --host octave
+          python scripts/validate_sbom.py "${artifactPath}/sbom.cdx.json"
+      - name: Upload project/dependency sources
+        uses: actions/upload-artifact@v7
+        with:
+          name: source-${{ matrix.os }}
+          path: build/release-materials/MEXlibCZI-source-*.tar.gz
+          if-no-files-found: error
       - name: Upload Octave-mex artifacts
         uses: actions/upload-artifact@v7
         with:
           path: ${{ env.artifactPath }}/
           name: ${{ env.artifactName }}
 
-  release:
-    name: Create GitHub Release
+  verify_release:
+    name: Verify release package set
     runs-on: ubuntu-latest
     needs: build
-    if: inputs.create_release == 'true'  # Only run if release is selected
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
-      - name: Download All Artifacts
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts  # download to a specific folder
-      - name: Script to prepare release
+          path: artifacts
+      - name: Validate and assemble release materials
+        shell: bash
+        run: |
+          python -m pip install -r compliance/requirements-validation.txt
+          python scripts/validate_sbom.py artifacts/MATLAB-*/sbom.cdx.json artifacts/Octave-*/sbom.cdx.json
+          python scripts/release_materials.py assemble --artifacts artifacts --output release-dist
+      - name: Record release version
+        id: version
         shell: bash
         run: |
           cd scripts
-          mexlibczi_version="$(bash get_version.sh)"
-          cd ..
-          git_version=$(git describe --always)
-          echo "releaseName=version ${mexlibczi_version} (${git_version})" >> "$GITHUB_ENV"
-          echo "tagName=v${mexlibczi_version}" >> "$GITHUB_ENV"
-          ls -l ./artifacts
-          cd ./artifacts
-          # Loop through all directories in the current directory
-          for dir in */; do
-            # Remove the trailing slash from the directory name
-            folder_name="$(basename "$dir")"
-            # Create a zip archive with the same name as the folder
-            7z a -tzip "${folder_name}.zip" "$folder_name"
-          done
+          echo "version=$(bash get_version.sh)" >> "$GITHUB_OUTPUT"
+      - name: Upload verified release assets
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-assets
+          path: release-dist/*
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: verify_release
+    if: inputs.create_release == 'true' && github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+    steps:
+      - name: Download verified release assets
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: release-dist
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ env.releaseName }}
-          tag_name: ${{ env.tagName }}
+          name: version ${{ needs.verify_release.outputs.version }}
+          tag_name: v${{ needs.verify_release.outputs.version }}
           files: |
-            ./artifacts/*.zip
+            release-dist/*
+          target_commitish: ${{ github.sha }}
+          fail_on_unmatched_files: true
           prerelease: true
-
