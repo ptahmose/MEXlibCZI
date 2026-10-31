@@ -107,6 +107,18 @@ class ReleaseMaterialsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Uninventoried"):
             materials.verify_sources(self.manifest, build)
 
+    def test_visual_studio_compiler_need_not_be_in_cache(self):
+        build = self.root / "build"
+        directory = build / "CMakeFiles/4.4.0"
+        directory.mkdir(parents=True)
+        (directory / "CMakeCXXCompiler.cmake").write_text(
+            'set(CMAKE_CXX_COMPILER "C:/VS/cl.exe")\n'
+            'set(CMAKE_CXX_COMPILER_ID "MSVC")\n'
+            'set(CMAKE_CXX_COMPILER_VERSION "19.51.0")\n')
+        compiler, info = materials.compiler_metadata(build, {})
+        self.assertEqual(compiler, "C:/VS/cl.exe")
+        self.assertEqual(info["CMAKE_CXX_COMPILER_ID"], "MSVC")
+
     def make_release_set(self):
         artifacts = self.root / "artifacts"
         artifacts.mkdir()

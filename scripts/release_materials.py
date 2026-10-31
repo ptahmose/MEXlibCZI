@@ -162,6 +162,20 @@ def runtime_inventory(compiler, platform, output):
     return result
 
 
+def compiler_metadata(build, cache):
+    files = sorted((build / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
+    if not files:
+        raise ValueError("Missing resolved CMake compiler metadata")
+    text = files[-1].read_text(encoding="utf-8")
+    info = {}
+    for key in ("CMAKE_CXX_COMPILER_ID", "CMAKE_CXX_COMPILER_VERSION"):
+        info[key] = re.search(r'set\(' + key + r' "([^\"]*)"\)', text)[1]
+    compiler = cache.get("CMAKE_CXX_COMPILER")
+    if not compiler:
+        compiler = re.search(r'set\(CMAKE_CXX_COMPILER "([^\"]*)"\)', text)[1]
+    return compiler, info
+
+
 def prepare(args):
     manifest = json.loads((ROOT / "compliance/dependencies.json").read_text(encoding="utf-8"))
     build, output = Path(args.build).resolve(), Path(args.output).resolve()
@@ -175,15 +189,7 @@ def prepare(args):
     common = output / "common"
     common.mkdir()
     copy_notices(manifest, sources, common)
-    compiler = cache["CMAKE_CXX_COMPILER"]
-    # CMake's compiler file also records MSVC versions without running cl in bash.
-    compiler_files = sorted((build / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
-    if not compiler_files:
-        raise ValueError("Missing resolved CMake compiler metadata")
-    compiler_text = compiler_files[-1].read_text(encoding="utf-8")
-    compiler_info = {}
-    for key in ("CMAKE_CXX_COMPILER_ID", "CMAKE_CXX_COMPILER_VERSION"):
-        compiler_info[key] = re.search(r'set\(' + key + r' "([^\"]*)"\)', compiler_text)[1]
+    compiler, compiler_info = compiler_metadata(build, cache)
     info = {"projectVersion": version(), "projectCommit": commit, "platform": args.platform,
             "generatedAt": dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z"),
             "workflowRun": os.getenv("GITHUB_SERVER_URL", "https://github.com") + "/" + os.getenv("GITHUB_REPOSITORY", "ptahmose/MEXlibCZI") + "/actions/runs/" + os.getenv("GITHUB_RUN_ID", "local"),
