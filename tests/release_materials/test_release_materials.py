@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+import zipfile
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
@@ -19,10 +20,13 @@ class ReleaseMaterialsTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.manifest = json.loads((materials.ROOT / "compliance/dependencies.json").read_text())
 
-    def make_package(self):
+    def make_package(self, host="matlab"):
         prepared = self.root / "prepared"
-        (prepared / "common").mkdir(parents=True)
-        (prepared / "common/LICENSE").write_text("test license")
+        (prepared / "common/licenses").mkdir(parents=True)
+        (prepared / "common/licenses/LICENSE").write_text("test license")
+        (prepared / "common/licenses/THIRD_PARTY_NOTICES.md").write_text("test notices")
+        # Maintainer-only material must never leak into the archive root.
+        (prepared / "common/LEGAL-REVIEW.md").write_text("maintainer notes")
         info = {"projectVersion": "0.6.4-alpha", "projectCommit": "a" * 40,
                 "platform": "ubuntu-24.04", "generatedAt": "2026-10-31T00:00:00Z",
                 "workflowRun": "https://example.com/run", "reviewStatus": "review pending",
@@ -30,17 +34,40 @@ class ReleaseMaterialsTests(unittest.TestCase):
                 "sources": self.manifest["sources"], "embedded": self.manifest["embedded"],
                 "runtimes": [], "sourceArchive": {"name": "source.tar.gz", "sha256": "0" * 64}}
         materials.write_json(prepared / "inventory.json", info)
+        materials.write_json(prepared / "common/metadata/build-info.json", info)
         package = self.root / "MATLAB-test"
         package.mkdir()
-        (package / "MEXlibCZI.mexa64").write_bytes(b"fixture binary")
+        if host == "matlab":
+            (package / "MEXlibCZI.mexa64").write_bytes(b"fixture binary")
+        else:
+            (package / "octavelibczi.mex").write_bytes(b"fixture wrapper")
+            (package / "libmexlibczi.so").write_bytes(b"fixture companion")
         with patch.object(materials, "linked_libraries", return_value="libc.so.6 => /lib/libc.so.6"):
-            materials.package(argparse.Namespace(materials=prepared, package=package, host="matlab"))
+            materials.package(argparse.Namespace(materials=prepared, package=package, host=host))
         return package
+
+    def test_matlab_package_has_clean_root_and_source_readme(self):
+        package = self.make_package()
+        self.assertEqual({p.name for p in package.iterdir()},
+                         {"MEXlibCZI.mexa64", "README.txt", "licenses", "metadata"})
+        self.assertTrue((package / "licenses/LICENSE").is_file())
+        self.assertTrue((package / "licenses/THIRD_PARTY_NOTICES.md").is_file())
+        readme = (package / "README.txt").read_text()
+        self.assertIn("MEXlibCZI('GetVersion')", readme)
+        self.assertIn("source.tar.gz", readme)
+        self.assertIn("SHA-256: " + "0" * 64, readme)
+
+    def test_octave_binaries_stay_together_at_package_root(self):
+        package = self.make_package("octave")
+        self.assertEqual({p.name for p in package.iterdir()},
+                         {"octavelibczi.mex", "libmexlibczi.so", "README.txt", "licenses", "metadata"})
+        self.assertIn("octavelibczi('GetVersion')", (package / "README.txt").read_text())
+        validate_sbom.validate(package / "metadata/sbom.cdx.json")
 
     def test_sbom_schema_graph_and_binary_hashes(self):
         package = self.make_package()
-        validate_sbom.validate(package / "sbom.cdx.json")
-        bom = json.loads((package / "sbom.cdx.json").read_text())
+        validate_sbom.validate(package / "metadata/sbom.cdx.json")
+        bom = json.loads((package / "metadata/sbom.cdx.json").read_text())
         host = next(item for item in bom["components"] if item["bom-ref"] == "host")
         self.assertEqual(host["version"], "26.2.0")
         self.assertEqual(host["scope"], "excluded")
@@ -49,11 +76,11 @@ class ReleaseMaterialsTests(unittest.TestCase):
         package = self.make_package()
         (package / "MEXlibCZI.mexa64").write_bytes(b"tampered")
         with self.assertRaisesRegex(ValueError, "hash mismatch"):
-            validate_sbom.validate(package / "sbom.cdx.json")
+            validate_sbom.validate(package / "metadata/sbom.cdx.json")
 
     def test_missing_reviewed_component_is_rejected(self):
         package = self.make_package()
-        path = package / "sbom.cdx.json"
+        path = package / "metadata/sbom.cdx.json"
         bom = json.loads(path.read_text())
         bom["components"] = [c for c in bom["components"] if c["bom-ref"] != "pugixml"]
         materials.write_json(path, bom)
@@ -62,7 +89,7 @@ class ReleaseMaterialsTests(unittest.TestCase):
 
     def test_false_complete_claim_is_rejected(self):
         package = self.make_package()
-        path = package / "sbom.cdx.json"
+        path = package / "metadata/sbom.cdx.json"
         bom = json.loads(path.read_text())
         bom["compositions"][0]["aggregate"] = "complete"
         materials.write_json(path, bom)
@@ -130,10 +157,10 @@ class ReleaseMaterialsTests(unittest.TestCase):
             for host in ("matlab", "octave"):
                 package = artifacts / (("MATLAB-" if host == "matlab" else "Octave-") + platform)
                 package.mkdir()
-                materials.write_json(package / "package.json", {
+                materials.write_json(package / "metadata/package.json", {
                     "host": host, "platform": platform, "projectCommit": "a" * 40,
                     "sourceArchive": {"name": archive.name, "sha256": materials.sha256(archive)}})
-                materials.write_json(package / "sbom.cdx.json", {"fixture": True})
+                materials.write_json(package / "metadata/sbom.cdx.json", {"fixture": True})
         return artifacts
 
     def test_release_assembles_checksums_sources_and_sidecars(self):
@@ -145,6 +172,8 @@ class ReleaseMaterialsTests(unittest.TestCase):
         self.assertEqual(len(list(output.glob("*.cdx.json"))), 10)
         self.assertEqual(len(list(output.glob("*.tar.gz"))), 5)
         self.assertEqual(len((output / "SHA256SUMS").read_text().splitlines()), 25)
+        with zipfile.ZipFile(next(output.glob("*.zip"))) as archive:
+            self.assertTrue(any(name.endswith("/metadata/sbom.cdx.json") for name in archive.namelist()))
 
     def test_release_rejects_changed_source_archive(self):
         artifacts = self.make_release_set()

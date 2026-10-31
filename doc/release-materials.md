@@ -10,10 +10,13 @@ dependency commit, dirty dependency checkout or enabled uninventoried optional
 feature fails packaging. Update the inventory and review its license evidence
 when intentionally changing those inputs.
 
-Each binary package contains LICENSE, THIRD_PARTY_NOTICES.md, licenses/, SOURCE.md,
-LEGAL-REVIEW.md, build-info.json, runtime-dependencies.txt, package.json and
-sbom.cdx.json. The SBOM hashes the actual packaged binaries; archive checksums
-are published separately to avoid a self-referential ZIP hash.
+Each binary package keeps its binaries and a short README.txt at the root.
+Project/upstream licenses and THIRD_PARTY_NOTICES.md are under licenses/.
+Technical files (sbom.cdx.json, build-info.json, runtime-dependencies.txt and
+package.json) are under metadata/. README.txt explains installation and identifies
+the matching source archive and hash. Maintainer legal-review notes stay in the
+repository. The SBOM hashes the root-level binaries; archive checksums are
+published separately to avoid a self-referential ZIP hash.
 
 The inventory includes header-only/static components from build inputs. Runtime
 inspection alone cannot reliably identify them. Direct external host/system
@@ -33,7 +36,7 @@ reviewed dependency checkouts present:
 python scripts/release_materials.py prepare --build build --output build/release-materials --platform ubuntu-24.04
 python scripts/release_materials.py package --materials build/release-materials --package artifacts/MATLAB-example --host matlab
 python -m pip install -r compliance/requirements-validation.txt
-python scripts/validate_sbom.py artifacts/MATLAB-example/sbom.cdx.json
+python scripts/validate_sbom.py artifacts/MATLAB-example/metadata/sbom.cdx.json
 ```
 
 Use the actual package directory and platform label. Preparing evidence requires

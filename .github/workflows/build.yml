@@ -246,7 +246,7 @@ jobs:
         shell: bash
         run: |
           python scripts/release_materials.py package --materials build/release-materials --package "${artifactPath}" --host matlab
-          python scripts/validate_sbom.py "${artifactPath}/sbom.cdx.json"
+          python scripts/validate_sbom.py "${artifactPath}/metadata/sbom.cdx.json"
       - name: Verify source bundle configures offline (Linux)
         if: runner.os == 'Linux'
         shell: bash
@@ -324,7 +324,7 @@ jobs:
         shell: bash
         run: |
           python scripts/release_materials.py package --materials build/release-materials --package "${artifactPath}" --host octave
-          python scripts/validate_sbom.py "${artifactPath}/sbom.cdx.json"
+          python scripts/validate_sbom.py "${artifactPath}/metadata/sbom.cdx.json"
       - name: Upload project/dependency sources
         uses: actions/upload-artifact@v7
         with:
@@ -358,7 +358,7 @@ jobs:
         shell: bash
         run: |
           python -m pip install -r compliance/requirements-validation.txt
-          python scripts/validate_sbom.py artifacts/MATLAB-*/sbom.cdx.json artifacts/Octave-*/sbom.cdx.json
+          python scripts/validate_sbom.py artifacts/MATLAB-*/metadata/sbom.cdx.json artifacts/Octave-*/metadata/sbom.cdx.json
           python scripts/release_materials.py assemble --artifacts artifacts --output release-dist
       - name: Record release version
         id: version

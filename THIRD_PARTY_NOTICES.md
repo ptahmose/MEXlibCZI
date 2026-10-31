@@ -7,7 +7,8 @@ permitted. The project's existing GPL version 3 license remains unchanged.
 `compliance/dependencies.json` records the source repositories, exact commits,
 build paths, license evidence, excluded features and unresolved review items.
 Generated binary packages contain the original texts under `licenses/` and the
-project `LICENSE`. See `LEGAL-REVIEW.md` in a package or `doc/legal-review.md` here.
+project license at `licenses/LICENSE`. Maintainer licensing notes remain in the
+repository at `doc/legal-review.md`.
 
 | Component | Release use | Upstream licensing evidence |
 | --- | --- | --- |

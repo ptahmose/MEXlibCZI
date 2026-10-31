@@ -113,8 +113,9 @@ def source_archive(destination, entries):
 
 
 def copy_notices(manifest, sources, output):
-    shutil.copyfile(ROOT / "LICENSE", output / "LICENSE")
-    shutil.copyfile(ROOT / "THIRD_PARTY_NOTICES.md", output / "THIRD_PARTY_NOTICES.md")
+    (output / "licenses").mkdir()
+    shutil.copyfile(ROOT / "LICENSE", output / "licenses/LICENSE")
+    shutil.copyfile(ROOT / "THIRD_PARTY_NOTICES.md", output / "licenses/THIRD_PARTY_NOTICES.md")
     for item in manifest["sources"]:
         target = output / "licenses" / item["id"]
         target.mkdir(parents=True)
@@ -156,7 +157,7 @@ def runtime_inventory(compiler, platform, output):
                            "sha256": sha256(path), "licenseName": "GCC runtime; see packaged copyright and exceptions",
                            "notes": "Statically linked into MATLAB MEX; Octave companion normally uses shared runtime. Source/exception treatment requires review."})
     elif platform.startswith("windows"):
-        result.append({"name": "Microsoft Visual C++ static runtime", "version": "toolchain version in build-info.json",
+        result.append({"name": "Microsoft Visual C++ static runtime", "version": "toolchain version in metadata/build-info.json",
                        "licenseName": "Microsoft Visual Studio runtime redistribution terms (review pending)",
                        "notes": "Project selects /MT. No Microsoft SDK/runtime source or license grant is invented by this inventory."})
     return result
@@ -218,14 +219,7 @@ def prepare(args):
     info["sources"] = manifest["sources"]
     info["embedded"] = manifest["embedded"]
     write_json(output / "inventory.json", info)
-    write_json(common / "build-info.json", info)
-    shutil.copyfile(ROOT / "doc/legal-review.md", common / "LEGAL-REVIEW.md")
-    (common / "SOURCE.md").write_text(
-        f"Source for this build: [{archive_name}](https://github.com/ptahmose/MEXlibCZI/releases/download/v{version()}/{archive_name})\n\n"
-        f"SHA-256: `{info['sourceArchive']['sha256']}`\n\n"
-        "For CI builds, download the matching source artifact from the workflow run in build-info.json. "
-        "The bundle contains project and bundled dependency sources plus offline rebuild instructions. "
-        "It excludes proprietary hosts, SDKs and general-purpose toolchains. See LEGAL-REVIEW.md for unresolved licensing questions.\n", encoding="utf-8")
+    write_json(common / "metadata/build-info.json", info)
 
 
 def component(item):
@@ -268,12 +262,31 @@ def package(args):
     expected = 1 if args.host == "matlab" else 2
     if len(binaries) != expected or any(p.suffix not in (".mexa64", ".mexw64", ".mexmaca64", ".mex", ".so", ".dll", ".dylib") for p in binaries):
         raise ValueError("Unexpected binary package contents")
-    shutil.copytree(materials / "common", package_dir, dirs_exist_ok=True)
+    for directory in ("licenses", "metadata"):
+        shutil.copytree(materials / "common" / directory, package_dir / directory)
+    metadata_dir = package_dir / "metadata"
+    metadata_dir.mkdir(exist_ok=True)
+    source = info["sourceArchive"]
+    if args.host == "matlab":
+        installation = "Add this folder to the MATLAB path.\nCheck installation: info = MEXlibCZI('GetVersion');"
+    else:
+        installation = ("Keep octavelibczi.mex and its companion library together in this folder.\n"
+                        "Add this folder to the Octave path.\nCheck installation: info = octavelibczi('GetVersion');")
+    (package_dir / "README.txt").write_text(
+        f"MEXlibCZI {info['projectVersion']} for {args.host.upper()}\n\n"
+        "INSTALLATION\nExtract the complete archive into a folder.\n" + installation + "\n\n"
+        "LICENSES AND BUILD INFORMATION\n"
+        "Project license: licenses/LICENSE\nThird-party notices: licenses/THIRD_PARTY_NOTICES.md\n"
+        "SBOM, build information and runtime dependencies: metadata/\n\n"
+        f"MATCHING SOURCE\nArchive: {source['name']}\nSHA-256: {source['sha256']}\n"
+        f"Release: https://github.com/ptahmose/MEXlibCZI/releases/tag/v{info['projectVersion']}\n"
+        f"For CI builds, download the matching source artifact from: {info['workflowRun']}\n"
+        "The source bundle includes project/dependency sources and rebuild instructions.\n", encoding="utf-8")
     evidence = "\n\n".join(p.name + "\n" + linked_libraries(p, info) for p in binaries)
-    (package_dir / "runtime-dependencies.txt").write_text(evidence + "\n", encoding="utf-8")
+    (metadata_dir / "runtime-dependencies.txt").write_text(evidence + "\n", encoding="utf-8")
     root_ref = "mexlibczi-package"
     root = {"type": "application", "bom-ref": root_ref, "name": package_dir.name,
-            "version": info["projectVersion"], "licenses": [{"license": {"name": "GPL version 3; see LICENSE and LEGAL-REVIEW.md for grant-policy review"}}],
+            "version": info["projectVersion"], "licenses": [{"license": {"name": "GNU GPL version 3; see licenses/LICENSE"}}],
             "properties": [property_("project-commit", info["projectCommit"]), property_("platform", info["platform"]),
                            property_("host", args.host), property_("inventory-coverage", info["inventoryCoverage"])]}
     components = [component(item) for item in info["sources"] + info["embedded"]]
@@ -282,7 +295,7 @@ def package(args):
                     {"ref": "zstd", "dependsOn": ["xxhash"]}]
     host = {"type": "application", "bom-ref": "host", "name": "MATLAB" if args.host == "matlab" else "GNU Octave",
             "version": info["hostVersions"][args.host],
-            "scope": "excluded", "description": "User-provided host; not distributed in this package. Exact installation evidence is recorded by the CI log and runtime-dependencies.txt."}
+            "scope": "excluded", "description": "User-provided host; not distributed in this package. Exact installation evidence is recorded by the CI log and metadata/runtime-dependencies.txt."}
     components.append(host)
     for index, runtime in enumerate(info["runtimes"] if args.host == "matlab" or info["platform"].startswith("windows") else []):
         ref = f"compiler-runtime-{index}"
@@ -318,8 +331,8 @@ def package(args):
                                        property_("review-status", info["reviewStatus"])]},
            "components": components, "dependencies": dependencies,
            "compositions": [{"aggregate": "incomplete", "assemblies": [root_ref]}]}
-    write_json(package_dir / "sbom.cdx.json", bom)
-    write_json(package_dir / "package.json", {"host": args.host, "platform": info["platform"], "sourceArchive": source,
+    write_json(metadata_dir / "sbom.cdx.json", bom)
+    write_json(metadata_dir / "package.json", {"host": args.host, "platform": info["platform"], "sourceArchive": source,
                "projectCommit": info["projectCommit"], "version": info["projectVersion"]})
 
 
@@ -334,7 +347,7 @@ def assemble(args):
     commits = set()
     output.mkdir(parents=True)
     for package_dir in packages:
-        metadata = json.loads((package_dir / "package.json").read_text(encoding="utf-8"))
+        metadata = json.loads((package_dir / "metadata/package.json").read_text(encoding="utf-8"))
         identity = metadata["host"], metadata["platform"]
         if identity in identities:
             raise ValueError("Duplicate host/platform package")
@@ -353,7 +366,7 @@ def assemble(args):
                     raise ValueError("Unexpected package symlink")
                 if path.is_file():
                     archive.write(path, path.relative_to(package_dir.parent).as_posix())
-        shutil.copyfile(package_dir / "sbom.cdx.json", output / (package_dir.name + ".cdx.json"))
+        shutil.copyfile(package_dir / "metadata/sbom.cdx.json", output / (package_dir.name + ".cdx.json"))
     expected = {(host, platform) for host in ("matlab", "octave") for platform in ("ubuntu-22.04", "ubuntu-24.04", "ubuntu-26.04", "windows-latest", "macos-15")}
     if identities != expected or len(commits) != 1:
         raise ValueError("Release package matrix or commit identity mismatch")

@@ -1,6 +1,6 @@
 # Rebuilding a MEXlibCZI source bundle
 
-The matching binary package's SOURCE.md identifies this archive and its SHA-256.
+The matching binary package's README.txt identifies this archive and its SHA-256.
 `project/` contains the tracked project at the release commit; `deps/` contains
 the pinned libCZI, Eigen, Zstandard and RapidJSON sources used for that build.
 RapidJSON is intentionally limited to its header directory and license text.

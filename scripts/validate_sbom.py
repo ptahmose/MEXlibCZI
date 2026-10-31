@@ -47,7 +47,7 @@ def validate(path):
         if component["type"] == "file" and component.get("scope") != "excluded":
             if Path(component["name"]).name != component["name"]:
                 raise ValueError("Unsafe binary path in SBOM")
-            binary = path.parent / component["name"]
+            binary = path.parent.parent / component["name"]
             digest = hashlib.sha256(binary.read_bytes()).hexdigest()
             if component["hashes"] != [{"alg": "SHA-256", "content": digest}]:
                 raise ValueError("SBOM binary hash mismatch")
