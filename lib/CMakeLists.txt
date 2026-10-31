@@ -99,6 +99,18 @@ set_target_properties(lib PROPERTIES CXX_STANDARD 17)
 target_include_directories(lib PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../AppModel/include")
 target_include_directories(lib PRIVATE ${LIBCZI_INCLUDE_DIR}  ${RAPIDJSON_INCLUDE_DIR})
 target_link_libraries(lib PRIVATE libCZIStatic JxrDecodeStatic)
+add_dependencies(lib rapidjson)
+
+if(UNIX)
+  find_package(Iconv QUIET)
+  if(Iconv_FOUND)
+    target_link_libraries(lib PRIVATE Iconv::Iconv)
+    target_compile_definitions(lib PRIVATE MEXLIBCZI_USE_ICONV=1)
+    message(STATUS "UTF-8 conversion: iconv (built into C library: ${Iconv_IS_BUILT_IN})")
+  else()
+    message(STATUS "UTF-8 conversion: RapidJSON fallback")
+  endif()
+endif()
 target_include_directories(lib PRIVATE  ${CMAKE_CURRENT_BINARY_DIR})  # this is necessary so that we can find "lib_config.h" which we created above
 
 if(WIN32)

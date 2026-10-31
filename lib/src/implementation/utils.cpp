@@ -9,6 +9,10 @@
 #include "dbgprint.h"
 #if _WIN32
 #include <Windows.h>
+#elif defined(MEXLIBCZI_USE_ICONV)
+#include <cerrno>
+#include <iconv.h>
+#include <system_error>
 #else
 #include <rapidjson/encodings.h>
 #include <rapidjson/memorystream.h>
@@ -86,10 +90,53 @@ using namespace std;
     conv.resize(len - 1);
     return conv;
 #else
-    // wchar_t stores UTF-32 on our Unix platforms. Decode independently of the
-    // process locale, validating UTF-8 with the existing RapidJSON dependency.
+    // wchar_t stores UTF-32 on our Unix platforms. Use explicit encodings so
+    // conversion never depends on the process locale.
     static_assert(sizeof(wchar_t) == 4, "Expected UTF-32 wchar_t on Unix");
     const size_t length = std::strlen(sz);
+#if defined(MEXLIBCZI_USE_ICONV)
+    if (length == 0) return {};
+
+    const std::uint32_t endian_probe = 1;
+    const bool little_endian = *reinterpret_cast<const unsigned char*>(&endian_probe) != 0;
+    const auto descriptor = iconv_open(little_endian ? "UTF-32LE" : "UTF-32BE", "UTF-8");
+    if (descriptor == (iconv_t)-1)
+    {
+        throw std::system_error(errno, std::generic_category(), "iconv_open UTF-8 to UTF-32");
+    }
+
+    struct IconvCloser
+    {
+        iconv_t descriptor;
+        ~IconvCloser() { iconv_close(descriptor); }
+    } closer{descriptor};
+
+    // At most one wchar_t is needed per input byte, even for ASCII.
+    std::wstring result(length, L'\0');
+    char* input = const_cast<char*>(sz); // iconv advances this pointer without modifying the input.
+    char* output = reinterpret_cast<char*>(result.data());
+    size_t input_left = length;
+    size_t output_left = result.size() * sizeof(wchar_t);
+    const auto converted = iconv(descriptor, &input, &input_left, &output, &output_left);
+    if (converted == static_cast<size_t>(-1))
+    {
+        const int error = errno;
+        if (error == EILSEQ || error == EINVAL)
+        {
+            throw std::range_error("Invalid UTF-8 string");
+        }
+
+        throw std::system_error(error, std::generic_category(), "iconv UTF-8 to UTF-32");
+    }
+
+    if (converted != 0 || input_left != 0)
+    {
+        throw std::range_error("UTF-8 conversion would lose characters");
+    }
+
+    result.resize(result.size() - output_left / sizeof(wchar_t));
+    return result;
+#else
     rapidjson::MemoryStream input(sz, length);
     std::wstring result;
     while (input.Tell() < length)
@@ -104,6 +151,7 @@ using namespace std;
     }
 
     return result;
+#endif
 #endif
 }
 
