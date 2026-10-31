@@ -43,7 +43,7 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          mkdir build
+          mkdir -p build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_BUILD_HELPER_TESTS=ON
           cmake --build . --config Release -j
@@ -58,7 +58,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          mkdir build
+          mkdir -p build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_BUILD_HELPER_TESTS=ON
           cmake --build . --config Release -j
