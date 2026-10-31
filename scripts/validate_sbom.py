@@ -3,16 +3,29 @@
 import argparse
 import hashlib
 import json
+import urllib.request
 from pathlib import Path
 
 import jsonschema
 from referencing import Registry, Resource
 
 ROOT = Path(__file__).resolve().parents[1]
+SCHEMA_COMMIT = "55343ba19dee1785acf1ce9191540d5fd7b590db"
+SCHEMA_HASHES = {'bom-1.6.schema.json': '3e92dddbc30cf7f6a02b80f0942b1a4cfd4fb1c26f1dfc4310afa9d613cafb93', 'spdx.schema.json': 'baa9d3bd1ed57b6751b0887edead6b5063ff53ff7429cf85d476c6c94af0166e', 'jsf-0.82.schema.json': '8bae002c25e723db7ee1f26afde680ae1a2b1a8f6b4b4b0fd65dc3becb090aae'}
 
 
 def validate(path):
-    directory = ROOT / "compliance/schema"
+    directory = ROOT / "build/release-schema"
+    directory.mkdir(parents=True, exist_ok=True)
+    for name, expected_hash in SCHEMA_HASHES.items():
+        target = directory / name
+        if not target.is_file() or hashlib.sha256(target.read_bytes()).hexdigest() != expected_hash:
+            url = f"https://raw.githubusercontent.com/CycloneDX/specification/{SCHEMA_COMMIT}/schema/{name}"
+            with urllib.request.urlopen(url, timeout=60) as response:
+                data = response.read()
+            if hashlib.sha256(data).hexdigest() != expected_hash:
+                raise ValueError("SBOM validation schema hash mismatch")
+            target.write_bytes(data)
     registry = Registry()
     for name in ("bom-1.6.schema.json", "spdx.schema.json", "jsf-0.82.schema.json"):
         schema = json.loads((directory / name).read_text(encoding="utf-8"))

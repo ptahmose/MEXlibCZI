@@ -37,5 +37,6 @@ Host and OS libraries observed by ldd/otool/dumpbin are external prerequisites,
 not files redistributed by this project. Their full transitive inventories are
 not asserted by the generated SBOM.
 
-The vendored CycloneDX schema is an Apache-2.0 validation tool input, not code
-linked into MEXlibCZI. Its source and license are in `compliance/schema/`.
+CycloneDX schemas are validation-only inputs downloaded to an ignored build
+cache from a fixed upstream commit with verified SHA-256 hashes. They are not
+linked into or redistributed with the binaries.
