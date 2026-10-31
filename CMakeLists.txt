@@ -1,11 +1,11 @@
-﻿# CMakeList.txt : Top-level CMake project file, do global configuration
+# CMakeList.txt : Top-level CMake project file, do global configuration
 # and include sub-projects here.
 #
 cmake_minimum_required (VERSION 3.11)
 
 set(MEXLIBCZI_MAJOR 0)
 set(MEXLIBCZI_MINOR 6)
-set(MEXLIBCZI_PATCH 4)
+set(MEXLIBCZI_PATCH 5)
 set(MEXLIBCZI_EXT "alpha")
 
 if(WIN32)

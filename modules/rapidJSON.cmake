@@ -1,3 +1,14 @@
+# A source bundle supplies the exact reviewed headers without any network access.
+set(MEXLIBCZI_RAPIDJSON_SOURCE_DIR "" CACHE PATH "Existing RapidJSON source directory")
+if(MEXLIBCZI_RAPIDJSON_SOURCE_DIR)
+  if(NOT EXISTS "${MEXLIBCZI_RAPIDJSON_SOURCE_DIR}/include/rapidjson/rapidjson.h")
+    message(FATAL_ERROR "MEXLIBCZI_RAPIDJSON_SOURCE_DIR does not contain RapidJSON headers")
+  endif()
+  add_custom_target(rapidjson)
+  set(RAPIDJSON_INCLUDE_DIR "${MEXLIBCZI_RAPIDJSON_SOURCE_DIR}/include")
+  return()
+endif()
+
 include(ExternalProject)
 
 # Download RapidJSON
