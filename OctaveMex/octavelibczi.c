@@ -414,7 +414,11 @@ static void Initialize()
         mexErrMsgIdAndTxt("MATLAB:mexlibCZI:getProcAddressFailed", "Failed to get the address of the function.");
     }
 #else
+#ifdef __APPLE__
+    static const char DllName[] = "libmexlibczi.dylib";
+#else
     static const char DllName[] = "libmexlibczi.so";
+#endif
 
     Dl_info dl_info;
     if (dladdr((void*)&Initialize, &dl_info) == 0)

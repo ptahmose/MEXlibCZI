@@ -1,4 +1,4 @@
-name: Build for Ubuntu-x64 and Windows-x64
+name: Build for Ubuntu-x64, Windows-x64 and macOS-arm64
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         # Keep older Ubuntu builds for compatibility alongside the current LTS.
-        os: [ubuntu-26.04, ubuntu-24.04, ubuntu-22.04, windows-latest]  # Windows and Linux builds
+        os: [ubuntu-26.04, ubuntu-24.04, ubuntu-22.04, windows-latest, macos-15]
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -37,6 +37,13 @@ jobs:
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_BUILD_HELPER_TESTS=ON
           cmake --build . --config Release -j
+      - name: run build (macOS Apple Silicon)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          test "$(uname -m)" = "arm64"
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DMEXLIBCZI_BUILD_HELPER_TESTS=ON -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0
+          cmake --build build --config Release --parallel 3
       - name: run build (Windows)
         if: runner.os == 'Windows'
         shell: bash
@@ -58,10 +65,24 @@ jobs:
           if [ -f "build/MEXlibCZI/MEXlibCZI.mexa64" ]; then
             cp "build/MEXlibCZI/MEXlibCZI.mexa64" tests/MATLAB/
           fi
+          if [ -f "build/MEXlibCZI/MEXlibCZI.mexmaca64" ]; then
+            cp "build/MEXlibCZI/MEXlibCZI.mexmaca64" tests/MATLAB/
+          fi
       - name: Run MATLAB unit tests
         uses: matlab-actions/run-command@v3
         with:
           command: cd tests/MATLAB; results = runtests, assertSuccess(results);
+      - name: Prepare MATLAB artifact (macOS Apple Silicon)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          name="MATLAB-MEXlibCZI-macos15_arm64-$(git describe --always)"
+          mkdir -p "artifacts/${name}"
+          cp build/MEXlibCZI/MEXlibCZI.mexmaca64 "artifacts/${name}/"
+          file "artifacts/${name}/MEXlibCZI.mexmaca64"
+          otool -L "artifacts/${name}/MEXlibCZI.mexmaca64"
+          echo "artifactName=${name}" >> "$GITHUB_ENV"
+          echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
       - name: Prepare MATLAB artifact (Linux Ubuntu26)
         id: prepare_linux_ubuntu26_matlab_artifact
         if: matrix.os == 'ubuntu-26.04'
@@ -124,6 +145,20 @@ jobs:
             octave_dev_package="liboctave-dev"
           fi
           sudo apt-get install -y -qq -o=Dpkg::Progress-Fancy="0" octave $octave_dev_package
+      - name: install Octave (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: brew install octave
+      - name: build Octave mex-file (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          cd OctaveMex
+          octave --version
+          mkoctfile --mex octavelibczi.c
+          cp ../build/libmexlibczi/libmexlibczi.dylib .
+          file octavelibczi.mex libmexlibczi.dylib
+          otool -L octavelibczi.mex libmexlibczi.dylib
       - name: build Octave mex-file (Windows)
         if: runner.os == 'Windows'
         shell: cmd
@@ -158,8 +193,8 @@ jobs:
               octave --eval "mkoctfile --mex octavelibczi.c"
           fi
           cp ../build/libmexlibczi/libmexlibczi.so .  # now, copy the libmexlibczi.so to this folder
-      - name: Octave Unit-Tests (Linux)
-        if: runner.os == 'Linux'
+      - name: Octave Unit-Tests (Linux and macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           cd tests/octave
@@ -196,6 +231,15 @@ jobs:
         with:
           path: ${{ env.artifactPath }}/
           name: ${{ env.artifactName }}
+      - name: Prepare Octave-mex artifact (macOS Apple Silicon)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          name="Octave-MEXlibCZI-macos15_arm64-$(git describe --always)"
+          mkdir -p "artifacts/${name}"
+          cp OctaveMex/libmexlibczi.dylib OctaveMex/octavelibczi.mex "artifacts/${name}/"
+          echo "artifactName=${name}" >> "$GITHUB_ENV"
+          echo "artifactPath=artifacts/${name}" >> "$GITHUB_ENV"
       - name: Prepare Octave-mex artifact (Windows)
         id: prepare_windows_octave_artifact
         if: runner.os == 'Windows'
