@@ -6,7 +6,8 @@ permitted. The project's existing GPL version 3 license remains unchanged.
 
 `compliance/dependencies.json` records the source repositories, exact commits,
 build paths, license evidence, excluded features and unresolved review items.
-Generated binary packages contain the original texts under `licenses/` and the
+Generated binary packages consolidate third-party texts into
+`licenses/THIRD_PARTY_NOTICES.txt`, alongside the
 project license at `licenses/LICENSE`. Maintainer licensing notes remain in the
 repository at `doc/legal-review.md`.
 
@@ -19,17 +20,17 @@ repository at `doc/legal-review.md`.
 | Eigen 3.4.0 | Header-only dependency of libCZI | Primarily MPL-2.0; mixed source-tree licenses in COPYING.README and COPYING.*; file-level conclusion pending |
 | Zstandard 1.5.7 | Static library | BSD-3-Clause OR GPL-2.0-only; LICENSE and COPYING |
 | xxHash 0.8.2, adapted within Zstandard | Embedded checksum code | Adapted header refers to Zstandard's BSD/GPL dual license |
-| RapidJSON, pinned commit in manifest | Header-only dependency | MIT; original license.txt retained with its third-party disclosures |
+| RapidJSON, pinned commit in manifest | Header-only dependency | MIT; license.txt, with unused JSON_checker disclosures omitted from binary notices |
 
 libCZI's aggregate notice still lists pugixml 1.13. Its actual embedded headers
-identify 1.15. Packages preserve the aggregate notice and also reproduce the
-current embedded source's MIT notice and copyright.
+identify 1.15. Binary notices reproduce the current embedded source's MIT notice and copyright.
 
 The RapidJSON source bundle contains `include/` and `license.txt`. The unused
 `bin/jsonchecker/` directory (JSON license) and test dependencies are excluded.
-Its original license.txt is reproduced intact, including disclosures about
-material not shipped in the binary. This is not an assertion that every license
-mentioned in that file applies to the MEX binary.
+Its original license.txt remains intact in the source bundle. Binary notices
+include RapidJSON MIT and msinttypes BSD terms, without the unused JSON license.
+Zstandard uses its BSD alternative. Eigen texts remain conservatively included
+until a file-level review establishes which can safely be omitted.
 
 Compiler runtimes require separate treatment. MATLAB Linux builds select static
 libgcc/libstdc++; Windows builds select the static MSVC runtime. Packages retain

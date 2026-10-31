@@ -11,7 +11,10 @@ feature fails packaging. Update the inventory and review its license evidence
 when intentionally changing those inputs.
 
 Each binary package keeps its binaries and a short README.txt at the root.
-Project/upstream licenses and THIRD_PARTY_NOTICES.md are under licenses/.
+licenses/ contains just LICENSE and a consolidated THIRD_PARTY_NOTICES.txt.
+Identical upstream texts are included once. Linux static-runtime evidence is
+appended only to MATLAB notices. Original source-bundle notices remain intact.
+Eigen license texts are retained conservatively pending file-level review.
 Technical files (sbom.cdx.json, build-info.json, runtime-dependencies.txt and
 package.json) are under metadata/. README.txt explains installation and identifies
 the matching source archive and hash. Maintainer legal-review notes stay in the

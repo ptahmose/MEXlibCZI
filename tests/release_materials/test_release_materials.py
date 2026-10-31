@@ -20,11 +20,11 @@ class ReleaseMaterialsTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.manifest = json.loads((materials.ROOT / "compliance/dependencies.json").read_text())
 
-    def make_package(self, host="matlab"):
+    def make_package(self, host="matlab", runtime_notices=False):
         prepared = self.root / "prepared"
         (prepared / "common/licenses").mkdir(parents=True)
         (prepared / "common/licenses/LICENSE").write_text("test license")
-        (prepared / "common/licenses/THIRD_PARTY_NOTICES.md").write_text("test notices")
+        (prepared / "common/licenses/THIRD_PARTY_NOTICES.txt").write_text("test notices")
         # Maintainer-only material must never leak into the archive root.
         (prepared / "common/LEGAL-REVIEW.md").write_text("maintainer notes")
         info = {"projectVersion": "0.6.4-alpha", "projectCommit": "a" * 40,
@@ -33,6 +33,13 @@ class ReleaseMaterialsTests(unittest.TestCase):
                 "inventoryCoverage": "incomplete", "hostVersions": {"matlab": "26.2.0", "octave": "11.3.0"},
                 "sources": self.manifest["sources"], "embedded": self.manifest["embedded"],
                 "runtimes": [], "sourceArchive": {"name": "source.tar.gz", "sha256": "0" * 64}}
+        if runtime_notices:
+            (prepared / "runtime-notices").mkdir()
+            for name in ("libgcc.a", "libstdc++.a"):
+                filename = name + ".copyright"
+                (prepared / "runtime-notices" / filename).write_text("Runtime copyright and exception")
+                info["runtimes"].append({"name": name, "version": "test", "noticeFile": filename,
+                                         "licenseName": "runtime exception", "notes": "fixture"})
         materials.write_json(prepared / "inventory.json", info)
         materials.write_json(prepared / "common/metadata/build-info.json", info)
         package = self.root / "MATLAB-test"
@@ -51,11 +58,34 @@ class ReleaseMaterialsTests(unittest.TestCase):
         self.assertEqual({p.name for p in package.iterdir()},
                          {"MEXlibCZI.mexa64", "README.txt", "licenses", "metadata"})
         self.assertTrue((package / "licenses/LICENSE").is_file())
-        self.assertTrue((package / "licenses/THIRD_PARTY_NOTICES.md").is_file())
+        self.assertTrue((package / "licenses/THIRD_PARTY_NOTICES.txt").is_file())
+        self.assertEqual({p.name for p in (package / "licenses").iterdir()},
+                         {"LICENSE", "THIRD_PARTY_NOTICES.txt"})
         readme = (package / "README.txt").read_text()
         self.assertIn("MEXlibCZI('GetVersion')", readme)
         self.assertIn("source.tar.gz", readme)
         self.assertIn("SHA-256: " + "0" * 64, readme)
+
+    def test_static_runtime_notices_are_consolidated_once(self):
+        package = self.make_package(runtime_notices=True)
+        text = (package / "licenses/THIRD_PARTY_NOTICES.txt").read_text()
+        self.assertEqual(text.count("Runtime copyright and exception"), 1)
+        self.assertIn("Same text as:", text)
+        self.assertEqual(len(list((package / "licenses").iterdir())), 2)
+
+    def test_octave_omits_unshipped_static_runtime_notices(self):
+        package = self.make_package("octave", runtime_notices=True)
+        text = (package / "licenses/THIRD_PARTY_NOTICES.txt").read_text()
+        self.assertNotIn("Runtime copyright and exception", text)
+
+    def test_consolidated_notices_preserve_terms_and_deduplicate(self):
+        text = materials.consolidated_notices([
+            ("First", "Copyright Example\nPermission and disclaimer"),
+            ("Second", "Copyright Example\nPermission and disclaimer")])
+        self.assertEqual(text.count("Copyright Example"), 1)
+        self.assertIn("Same text as: First", text)
+        with self.assertRaisesRegex(ValueError, "Empty license evidence"):
+            materials.consolidated_notices([("Missing", " ")])
 
     def test_octave_binaries_stay_together_at_package_root(self):
         package = self.make_package("octave")

@@ -112,29 +112,56 @@ def source_archive(destination, entries):
                     archive.addfile(info, io.BytesIO(data))
 
 
+def consolidated_notices(sections):
+    """Keep complete evidence, but include identical texts only once."""
+    seen, blocks = {}, []
+    for label, text in sections:
+        text = text.strip()
+        if not text:
+            raise ValueError(f"Empty license evidence: {label}")
+        key = " ".join(text.split())
+        if key in seen:
+            blocks.append(f"{label}\nSame text as: {seen[key]}\n")
+        else:
+            seen[key] = label
+            blocks.append(f"{label}\n{'=' * len(label)}\n{text}\n")
+    return "\n".join(blocks)
+
+
 def copy_notices(manifest, sources, output):
-    (output / "licenses").mkdir()
-    shutil.copyfile(ROOT / "LICENSE", output / "licenses/LICENSE")
-    shutil.copyfile(ROOT / "THIRD_PARTY_NOTICES.md", output / "licenses/THIRD_PARTY_NOTICES.md")
-    for item in manifest["sources"]:
-        target = output / "licenses" / item["id"]
-        target.mkdir(parents=True)
-        for pattern in item["notices"]:
-            matches = sorted(sources[item["id"]].glob(pattern))
-            if not matches:
-                raise ValueError(f"Missing license evidence: {item['id']}/{pattern}")
-            for source in matches:
-                if source.is_file():
-                    relative = source.relative_to(sources[item["id"]])
-                    dest = target / relative
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copyfile(source, dest)
-    # Upstream's aggregate pugixml notice is stale; preserve the actual source notice.
-    pugi = (sources["libczi"] / "Src/libCZI/pugixml.cpp").read_text(encoding="utf-8-sig")
+    licenses = output / "licenses"
+    licenses.mkdir()
+    shutil.copyfile(ROOT / "LICENSE", licenses / "LICENSE")
+    sections = [("About these notices",
+                 "Matching source and rebuild instructions are identified in README.txt. "
+                 "Original upstream notices remain in the source bundle. "
+                 "Eigen's mixed source-tree license texts are retained conservatively; "
+                 "their inclusion does not mean every text applies to this binary. "
+                 "Licensing review remains pending; see metadata/build-info.json.")]
+    def read(component, path):
+        return (sources[component] / path).read_text(encoding="utf-8-sig")
+    sections.append(("libCZI and MD5-derived code: Carl Zeiss Microscopy GmbH; LGPL-3.0-or-later",
+                     read("libczi", "LICENSES/LGPL-3.0-or-later.txt")))
+    jxr = read("libczi", "Src/JxrDecode/jxrlib/image/sys/strcodec.c")
+    sections.append(("jxrlib: Microsoft BSD-2-Clause notice", jxr[:jxr.index("//*@@@---")]))
+    pugi = read("libczi", "Src/libCZI/pugixml.cpp")
     notice = pugi[pugi.rfind("/**"):].strip()
     if "2006-2025" not in notice or "Permission is hereby granted" not in notice:
         raise ValueError("pugixml license evidence changed; review it")
-    (output / "licenses/libczi/pugixml-source-notice.txt").write_text(notice + "\n", encoding="utf-8")
+    sections.append(("pugixml 1.15: embedded source notice", notice))
+    rapid = read("rapidjson", "license.txt")
+    # JSON_checker is excluded from the source bundle and release build.
+    # Retain msinttypes' BSD notice conservatively for the shipped headers.
+    bsd = rapid[rapid.index("The msinttypes r29"):rapid.index("Open Source Software Licensed Under the JSON License:")]
+    mit = rapid[rapid.index("Terms of the MIT License:"):]
+    sections.append(("RapidJSON", "Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip. All rights reserved.\n\n" + mit))
+    sections.append(("RapidJSON msinttypes headers", bsd))
+    sections.append(("Zstandard and its adapted xxHash: BSD license alternative", read("zstd", "LICENSE")))
+    for path in sorted(sources["eigen"].glob("COPYING.*")):
+        sections.append(("Eigen: " + path.name, path.read_text(encoding="utf-8-sig")))
+    if not list(sources["eigen"].glob("COPYING.*")):
+        raise ValueError("Missing Eigen license evidence")
+    (licenses / "THIRD_PARTY_NOTICES.txt").write_text(consolidated_notices(sections), encoding="utf-8")
 
 
 def runtime_inventory(compiler, platform, output):
@@ -150,11 +177,11 @@ def runtime_inventory(compiler, platform, output):
             copyright_path = Path("/usr/share/doc") / owner.split(":", 1)[0] / "copyright"
             if not copyright_path.is_file():
                 raise ValueError(f"Missing runtime copyright file: {copyright_path}")
-            target = output / "licenses/toolchain" / (library + ".copyright")
+            target = output / "runtime-notices" / (library + ".copyright")
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(copyright_path, target)
             result.append({"name": library, "version": package_version, "package": owner,
-                           "sha256": sha256(path), "licenseName": "GCC runtime; see packaged copyright and exceptions",
+                           "noticeFile": target.name, "sha256": sha256(path), "licenseName": "GCC runtime; see packaged copyright and exceptions",
                            "notes": "Statically linked into MATLAB MEX; Octave companion normally uses shared runtime. Source/exception treatment requires review."})
     elif platform.startswith("windows"):
         result.append({"name": "Microsoft Visual C++ static runtime", "version": "toolchain version in metadata/build-info.json",
@@ -197,7 +224,7 @@ def prepare(args):
             "compiler": compiler_info, "reviewStatus": manifest["reviewStatus"],
             "openReviewItems": manifest["openReviewItems"],
             "inventoryCoverage": "Reviewed bundled sources, packaged files, compiler-runtime evidence and observed runtime-linker output; transitive host/system inventories are incomplete.",
-            "runtimes": runtime_inventory(compiler, args.platform, common)}
+            "runtimes": runtime_inventory(compiler, args.platform, output)}
     matlab_xml = Path(cache["Matlab_ROOT_DIR"]) / "VersionInfo.xml"
     matlab_version = ET.parse(matlab_xml).findtext(".//version")
     octave_version = (build / "octave-version.txt").read_text(encoding="utf-8").strip()
@@ -264,6 +291,17 @@ def package(args):
         raise ValueError("Unexpected binary package contents")
     for directory in ("licenses", "metadata"):
         shutil.copytree(materials / "common" / directory, package_dir / directory)
+    # Runtime evidence belongs only to packages that include that static runtime.
+    runtime_sections = []
+    if args.host == "matlab":
+        for runtime in info["runtimes"]:
+            if "noticeFile" in runtime:
+                path = materials / "runtime-notices" / runtime["noticeFile"]
+                runtime_sections.append((runtime["name"] + " runtime copyright and exceptions",
+                                         path.read_text(encoding="utf-8")))
+    if runtime_sections:
+        with (package_dir / "licenses/THIRD_PARTY_NOTICES.txt").open("a", encoding="utf-8") as stream:
+            stream.write("\n" + consolidated_notices(runtime_sections))
     metadata_dir = package_dir / "metadata"
     metadata_dir.mkdir(exist_ok=True)
     source = info["sourceArchive"]
@@ -276,7 +314,7 @@ def package(args):
         f"MEXlibCZI {info['projectVersion']} for {args.host.upper()}\n\n"
         "INSTALLATION\nExtract the complete archive into a folder.\n" + installation + "\n\n"
         "LICENSES AND BUILD INFORMATION\n"
-        "Project license: licenses/LICENSE\nThird-party notices: licenses/THIRD_PARTY_NOTICES.md\n"
+        "Project license: licenses/LICENSE\nThird-party notices: licenses/THIRD_PARTY_NOTICES.txt\n"
         "SBOM, build information and runtime dependencies: metadata/\n\n"
         f"MATCHING SOURCE\nArchive: {source['name']}\nSHA-256: {source['sha256']}\n"
         f"Release: https://github.com/ptahmose/MEXlibCZI/releases/tag/v{info['projectVersion']}\n"
