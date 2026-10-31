@@ -100,7 +100,33 @@ class ReleaseMaterialsTests(unittest.TestCase):
         bom = json.loads((package / "metadata/sbom.cdx.json").read_text())
         host = next(item for item in bom["components"] if item["bom-ref"] == "host")
         self.assertEqual(host["version"], "26.2.0")
-        self.assertEqual(host["scope"], "excluded")
+        self.assertEqual(host["scope"], "required")
+
+    def test_excluded_or_missing_binary_inventory_is_rejected(self):
+        package = self.make_package()
+        path = package / "metadata/sbom.cdx.json"
+        original = json.loads(path.read_text())
+        for mode in ("excluded", "removed", "renamed"):
+            with self.subTest(mode=mode):
+                bom = json.loads(json.dumps(original))
+                binary = next(c for c in bom["components"] if c["bom-ref"] == "binary-0")
+                if mode == "excluded":
+                    binary["scope"] = "excluded"
+                elif mode == "renamed":
+                    binary["name"] = "other.mexa64"
+                else:
+                    bom["components"].remove(binary)
+                    bom["dependencies"][0]["dependsOn"].remove("binary-0")
+                materials.write_json(path, bom)
+                with self.assertRaisesRegex(ValueError, "binary inventory"):
+                    validate_sbom.validate(path)
+
+    def test_dynamic_runtime_prerequisites_are_required(self):
+        package = self.make_package()
+        bom = json.loads((package / "metadata/sbom.cdx.json").read_text())
+        dynamic = [c for c in bom["components"] if c["bom-ref"].startswith("runtime-prerequisite-")]
+        self.assertTrue(dynamic)
+        self.assertTrue(all(c["scope"] == "required" for c in dynamic))
 
     def test_tampered_binary_is_rejected(self):
         package = self.make_package()
@@ -204,6 +230,18 @@ class ReleaseMaterialsTests(unittest.TestCase):
         self.assertEqual(len((output / "SHA256SUMS").read_text().splitlines()), 25)
         with zipfile.ZipFile(next(output.glob("*.zip"))) as archive:
             self.assertTrue(any(name.endswith("/metadata/sbom.cdx.json") for name in archive.namelist()))
+
+    def test_release_rejects_shared_archive_across_platforms(self):
+        artifacts = self.make_release_set()
+        metadata_files = list(artifacts.glob("*/metadata/package.json"))
+        source = json.loads(metadata_files[0].read_text())["sourceArchive"]
+        for path in metadata_files:
+            metadata = json.loads(path.read_text())
+            metadata["sourceArchive"] = source
+            materials.write_json(path, metadata)
+        with patch.dict(materials.os.environ, {"GITHUB_SHA": "a" * 40}):
+            with self.assertRaisesRegex(ValueError, "five distinct"):
+                materials.assemble(argparse.Namespace(artifacts=artifacts, output=self.root / "dist"))
 
     def test_release_rejects_changed_source_archive(self):
         artifacts = self.make_release_set()

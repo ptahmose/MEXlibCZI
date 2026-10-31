@@ -43,6 +43,12 @@ def validate(path):
     for dependency in bom["dependencies"]:
         if dependency["ref"] not in refs or not set(dependency.get("dependsOn", [])) <= set(refs):
             raise ValueError("Dangling dependency relationship")
+    package_root = path.parent.parent
+    actual = {p.name for p in package_root.iterdir() if p.is_file() and p.name != "README.txt"}
+    inventoried = [c["name"] for c in components
+                   if c["type"] == "file" and c.get("scope") != "excluded"]
+    if len(inventoried) != len(set(inventoried)) or set(inventoried) != actual:
+        raise ValueError("SBOM binary inventory does not match package files")
     for component in components:
         if component["type"] == "file" and component.get("scope") != "excluded":
             if Path(component["name"]).name != component["name"]:
