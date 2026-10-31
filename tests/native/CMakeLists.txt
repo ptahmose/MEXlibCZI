@@ -13,5 +13,5 @@ target_include_directories(utf8_conversion_test PRIVATE
   "${PROJECT_SOURCE_DIR}/AppModel/include"
   "${PROJECT_SOURCE_DIR}/lib/src/implementation"
   "${LIBCZI_INCLUDE_DIR}")
-target_link_libraries(utf8_conversion_test PRIVATE lib)
+target_link_libraries(utf8_conversion_test PRIVATE lib libCZIStatic)
 add_test(NAME utf8_conversion COMMAND utf8_conversion_test)
