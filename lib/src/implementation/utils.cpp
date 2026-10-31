@@ -1,6 +1,6 @@
 #include "utils.h"
-#include <codecvt>
-#include <locale>
+#include <cstring>
+#include <stdexcept>
 #include <limits>
 #include <cstdarg> 
 #include "CziReaderManager.h"
@@ -9,6 +9,9 @@
 #include "dbgprint.h"
 #if _WIN32
 #include <Windows.h>
+#else
+#include <rapidjson/encodings.h>
+#include <rapidjson/memorystream.h>
 #endif
 
 using namespace std;
@@ -83,9 +86,24 @@ using namespace std;
     conv.resize(len - 1);
     return conv;
 #else
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8conv;
-    std::wstring conv = utf8conv.from_bytes(sz);
-    return conv;
+    // wchar_t stores UTF-32 on our Unix platforms. Decode independently of the
+    // process locale, validating UTF-8 with the existing RapidJSON dependency.
+    static_assert(sizeof(wchar_t) == 4, "Expected UTF-32 wchar_t on Unix");
+    const size_t length = std::strlen(sz);
+    rapidjson::MemoryStream input(sz, length);
+    std::wstring result;
+    while (input.Tell() < length)
+    {
+        unsigned codepoint;
+        if (!rapidjson::UTF8<>::Decode(input, &codepoint))
+        {
+            throw std::range_error("Invalid UTF-8 string");
+        }
+
+        result.push_back(static_cast<wchar_t>(codepoint));
+    }
+
+    return result;
 #endif
 }
 

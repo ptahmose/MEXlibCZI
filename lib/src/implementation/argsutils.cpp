@@ -373,9 +373,9 @@ using namespace libCZI;
             }
 
             return true;
+        default:
+            return false;
         }
-
-        return false;
     }
 
     return false;

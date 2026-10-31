@@ -57,6 +57,7 @@ void MexFunction_CreateCziWriter_Execute(MatlabArgs* args)
     }
     catch (exception& excp)
     {
+        (void)excp; // Logging is compiled out in release builds.
         VDBGPRINT((CDbg::Level::Warn, "MexFunction_CreateCziWriter_Execute: Open failed -> %s.", excp.what()));
         CziReaderManager::GetInstance().RemoveInstance(id);
         throw;
