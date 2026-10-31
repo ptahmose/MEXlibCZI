@@ -157,6 +157,11 @@ def copy_notices(manifest, sources, output):
     sections.append(("RapidJSON", "Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip. All rights reserved.\n\n" + mit))
     sections.append(("RapidJSON msinttypes headers", bsd))
     sections.append(("Zstandard and its adapted xxHash: BSD license alternative", read("zstd", "LICENSE")))
+    xxhash = read("zstd", "lib/common/xxhash.h")
+    notice = xxhash[:xxhash.index("*/") + 2]
+    if "Copyright (c) Yann Collet - Meta Platforms, Inc" not in notice:
+        raise ValueError("xxHash copyright evidence changed; review it")
+    sections.append(("xxHash: embedded source notice (BSD alternative selected)", notice))
     for path in sorted(sources["eigen"].glob("COPYING.*")):
         sections.append(("Eigen: " + path.name, path.read_text(encoding="utf-8-sig")))
     if not list(sources["eigen"].glob("COPYING.*")):
@@ -333,7 +338,7 @@ def package(args):
                     {"ref": "zstd", "dependsOn": ["xxhash"]}]
     host = {"type": "application", "bom-ref": "host", "name": "MATLAB" if args.host == "matlab" else "GNU Octave",
             "version": info["hostVersions"][args.host],
-            "scope": "excluded", "description": "User-provided host; not distributed in this package. Exact installation evidence is recorded by the CI log and metadata/runtime-dependencies.txt."}
+            "scope": "required", "description": "User-provided host; not distributed in this package. Exact installation evidence is recorded by the CI log and metadata/runtime-dependencies.txt."}
     components.append(host)
     for index, runtime in enumerate(info["runtimes"] if args.host == "matlab" or info["platform"].startswith("windows") else []):
         ref = f"compiler-runtime-{index}"
@@ -350,7 +355,7 @@ def package(args):
     dynamic_names = [name for name in dynamic_names if PurePosixPath(name).name.lower() not in {p.name.lower() for p in binaries}]
     for index, name in enumerate(dynamic_names):
         ref = f"runtime-prerequisite-{index}"
-        components.append({"type": "library", "bom-ref": ref, "name": name, "scope": "excluded",
+        components.append({"type": "library", "bom-ref": ref, "name": name, "scope": "required",
                            "description": "Observed runtime prerequisite from linker inspection; not shipped here. Transitive relationships, versions and licenses are not inferred from a filename."})
         dependencies[0]["dependsOn"].append(ref)
     for index, binary in enumerate(binaries):
@@ -382,6 +387,7 @@ def assemble(args):
     if len(packages) != 10:
         raise ValueError(f"Expected ten binary packages, found {len(packages)}")
     identities = set()
+    sources_by_platform = {}
     commits = set()
     output.mkdir(parents=True)
     for package_dir in packages:
@@ -394,6 +400,9 @@ def assemble(args):
         if metadata["projectCommit"] != os.environ.get("GITHUB_SHA", metadata["projectCommit"]):
             raise ValueError("Package does not match release commit")
         source = metadata["sourceArchive"]
+        previous = sources_by_platform.setdefault(metadata["platform"], source)
+        if previous != source:
+            raise ValueError("Hosts on one platform must reference the same source archive")
         matches = list(artifacts.glob("source-*/" + source["name"]))
         if len(matches) != 1 or sha256(matches[0]) != source["sha256"]:
             raise ValueError("Missing or mismatched source archive")
@@ -408,6 +417,8 @@ def assemble(args):
     expected = {(host, platform) for host in ("matlab", "octave") for platform in ("ubuntu-22.04", "ubuntu-24.04", "ubuntu-26.04", "windows-latest", "macos-15")}
     if identities != expected or len(commits) != 1:
         raise ValueError("Release package matrix or commit identity mismatch")
+    if len({source["name"] for source in sources_by_platform.values()}) != 5:
+        raise ValueError("Expected five distinct platform source archives")
     (output / "SHA256SUMS").write_text("".join(f"{sha256(path)}  {path.name}\n" for path in sorted(output.iterdir())), encoding="utf-8")
 
 
