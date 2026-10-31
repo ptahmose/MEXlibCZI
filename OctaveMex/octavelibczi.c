@@ -189,9 +189,37 @@ static char* octaveMexStrDupHostAllocated(const char* string)
     return msz;
 }
 
+// Octave's mwSize need not be the same C type as size_t (notably on macOS).
+static mwSize* octaveMexConvertDimensions(size_t ndim, const size_t* dims)
+{
+    if (ndim > SIZE_MAX / sizeof(mwSize) || ndim > (size_t)PTRDIFF_MAX)
+    {
+        mexErrMsgIdAndTxt("MATLAB:mexlibCZI:invalidDimensions", "Too many dimensions.");
+    }
+
+    for (size_t i = 0; i < ndim; ++i)
+    {
+        if (dims[i] > (size_t)PTRDIFF_MAX)
+        {
+            mexErrMsgIdAndTxt("MATLAB:mexlibCZI:invalidDimensions", "Dimension is too large.");
+        }
+    }
+
+    mwSize* host_dims = (mwSize*)mxMalloc(ndim * sizeof(mwSize));
+    for (size_t i = 0; i < ndim; ++i)
+    {
+        host_dims[i] = (mwSize)dims[i];
+    }
+
+    return host_dims;
+}
+
 static Parameter octaveMexCreateStructArray(size_t ndim, const size_t* dims, int nfields, const char** field_names)
 {
-    return (Parameter)mxCreateStructArray(ndim, dims, nfields, field_names);
+    mwSize* host_dims = octaveMexConvertDimensions(ndim, dims);
+    Parameter result = (Parameter)mxCreateStructArray((mwSize)ndim, host_dims, nfields, field_names);
+    mxFree(host_dims);
+    return result;
 }
 
 static void octaveMexSetFieldByNumber(Parameter pa, size_t i, int fieldnum, Parameter value)
@@ -291,10 +319,10 @@ static size_t octaveMexGetNumberOfDimensions(const Parameter parameter)
 
 static void octaveMexGetSizeOfDimensions(const Parameter parameter, size_t number_of_dimension, size_t* sizes)
 {
-    const size_t* ptr_sizes = mxGetDimensions((const mxArray*)parameter);
+    const mwSize* ptr_sizes = mxGetDimensions((const mxArray*)parameter);
     for (size_t i = 0; i < number_of_dimension; ++i)
     {
-        sizes[i] = ptr_sizes[i];
+        sizes[i] = (size_t)ptr_sizes[i];
     }
 }
 
@@ -311,7 +339,10 @@ static Parameter octaveMexGetField(const Parameter parameter, const char* field_
 static Parameter octaveMexCreateNumericArrayReal(size_t ndim, const size_t* dims, enum AppExtensionClassId class_id)
 {
     mxClassID mx_class_id = AppExtensionClassIdToMxClassId(class_id);
-    return (Parameter)mxCreateNumericArray(ndim, dims, mx_class_id, mxREAL);
+    mwSize* host_dims = octaveMexConvertDimensions(ndim, dims);
+    Parameter result = (Parameter)mxCreateNumericArray((mwSize)ndim, host_dims, mx_class_id, mxREAL);
+    mxFree(host_dims);
+    return result;
 }
 
 static struct IAppExtensionFunctions g_appExtensionFunctions =
