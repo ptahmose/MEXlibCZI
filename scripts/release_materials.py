@@ -243,7 +243,7 @@ def component(item):
 
 def linked_libraries(binary, info):
     if info["platform"].startswith("ubuntu-"):
-        return run("ldd", str(binary))
+        return run("readelf", "-d", str(binary))
     if info["platform"].startswith("macos-"):
         return run("otool", "-L", str(binary))
     # VS tools are not necessarily on PATH in GitHub's bash shell.

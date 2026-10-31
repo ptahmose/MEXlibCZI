@@ -33,7 +33,7 @@ mentioned in that file applies to the MEX binary.
 Compiler runtimes require separate treatment. MATLAB Linux builds select static
 libgcc/libstdc++; Windows builds select the static MSVC runtime. Packages retain
 available runtime license evidence and flag unresolved toolchain licensing.
-Host and OS libraries observed by ldd/otool/dumpbin are external prerequisites,
+Host and OS libraries observed by readelf/otool/dumpbin are external prerequisites,
 not files redistributed by this project. Their full transitive inventories are
 not asserted by the generated SBOM.
 
