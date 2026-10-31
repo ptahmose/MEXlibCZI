@@ -15,5 +15,5 @@ The available commands are documented here: [commands](./doc/commands.markdown)
 
 # Installing
 
-Binaries for Windows-x64 and Linux-x64 are provided on the [release-page](https://github.com/ptahmose/MEXlibCZI/releases) here on GitHub.  
+Binaries for Windows-x64, Linux-x64 and macOS Apple Silicon (macOS 15 or later) are provided on the [release-page](https://github.com/ptahmose/MEXlibCZI/releases) here on GitHub.
 For building from sources run [cmake](https://cmake.org/).

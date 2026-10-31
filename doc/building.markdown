@@ -47,3 +47,30 @@ mkoctfile --mex octavelibczi.c
 This will create the mex-file "octavelibczi.mex" in the current directory. This mex-file is a stub and at runtime loads the dynamic library "libmexlibczi".  
 For the Octave-mex-file to work, the dynamic library "libmexlibczi" must be present in the same directory. This library is built using CMake, and must be copied 
 manually to the directory where the mex-file is located.
+
+## macOS Apple Silicon
+
+Use a native Apple Silicon MATLAB installation and Xcode command-line tools. The CI build targets
+macOS 15 or later and produces `MEXlibCZI.mexmaca64`:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0
+cmake --build build --parallel
+```
+
+If MATLAB is not found automatically, pass `-DMatlab_ROOT_DIR=/Applications/MATLAB_R2026b.app`
+using the path to your installation. For the manual headers/libraries override, macOS uses
+`libmex.dylib` and `libmx.dylib` from MATLAB's `bin/maca64` directory.
+
+For Octave, install native Octave with `brew install octave`, build the CMake targets above
+(or set `-DMEXLIBCZI_BUILD_MATLABMEX=OFF` if MATLAB is unavailable), then run:
+
+```bash
+cd OctaveMex
+mkoctfile --mex octavelibczi.c
+cp ../build/libmexlibczi/libmexlibczi.dylib .
+```
+
+Keep `octavelibczi.mex` and `libmexlibczi.dylib` together. The Octave wrapper is built against
+Homebrew Octave and requires a compatible native Octave installation and its runtime dependencies.
+The MATLAB binary is for native Apple Silicon MATLAB, not Intel MATLAB running under Rosetta.
